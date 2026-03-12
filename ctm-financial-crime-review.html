@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTM Division — Financial Crime Review</title>
+<style>
+:root {
+    --primary: #1a365d;
+    --primary-light: #2d5aa0;
+    --critical: #991b1b;
+    --critical-bg: #fef2f2;
+    --critical-border: #fca5a5;
+    --high: #92400e;
+    --high-bg: #fffbeb;
+    --high-border: #fcd34d;
+    --medium: #854d0e;
+    --medium-bg: #fefce8;
+    --medium-border: #fde68a;
+    --low: #1e40af;
+    --low-bg: #eff6ff;
+    --low-border: #93c5fd;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --bg: #f8fafc;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+.header {
+    background: linear-gradient(135deg, var(--primary) 0%, #0f172a 100%);
+    color: #fff; padding: 32px 40px; margin-bottom: 0;
+}
+.header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+.header .subtitle { color: #94a3b8; margin-top: 4px; font-size: 13px; }
+.classification {
+    background: #dc2626; color: #fff; text-align: center; padding: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+
+/* Risk badge */
+.risk-badge {
+    display: inline-block; background: #dc2626; color: #fff; padding: 4px 16px;
+    border-radius: 4px; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+}
+
+/* Overview grid */
+.overview-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin: 24px 0;
+}
+.overview-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+}
+.overview-card .label { font-size: 11px; text-transform: uppercase; color: var(--text-light); letter-spacing: 0.5px; }
+.overview-card .value { font-size: 20px; font-weight: 700; margin-top: 2px; }
+.overview-card .sub { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+/* Sections */
+h2 { font-size: 18px; font-weight: 600; color: var(--primary); margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+h3 { font-size: 15px; font-weight: 600; margin: 20px 0 10px; }
+
+/* Finding cards */
+.finding {
+    background: #fff; border-radius: 8px; margin-bottom: 20px; overflow: hidden;
+    border: 1px solid var(--border); page-break-inside: avoid;
+}
+.finding-header {
+    padding: 14px 20px; font-weight: 600; font-size: 14px; display: flex;
+    justify-content: space-between; align-items: center;
+}
+.finding-header .id { font-size: 13px; font-weight: 700; margin-right: 12px; }
+.finding-body { padding: 16px 20px; font-size: 13px; line-height: 1.7; }
+.finding-body p { margin-bottom: 10px; }
+.finding-body ul { margin: 8px 0 12px 20px; }
+.finding-body li { margin-bottom: 4px; }
+.finding.critical .finding-header { background: var(--critical-bg); color: var(--critical); border-bottom: 2px solid var(--critical-border); }
+.finding.high .finding-header { background: var(--high-bg); color: var(--high); border-bottom: 2px solid var(--high-border); }
+.finding.medium .finding-header { background: var(--medium-bg); color: var(--medium); border-bottom: 2px solid var(--medium-border); }
+.finding.low .finding-header { background: var(--low-bg); color: var(--low); border-bottom: 2px solid var(--low-border); }
+
+.severity-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 3px;
+}
+.severity-tag.critical { background: #dc2626; color: #fff; }
+.severity-tag.high { background: #f59e0b; color: #78350f; }
+.severity-tag.medium { background: #fde68a; color: #854d0e; }
+.severity-tag.low { background: #bfdbfe; color: #1e40af; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+th { background: var(--primary); color: #fff; padding: 10px 12px; text-align: left; font-weight: 500; font-size: 12px; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+tr:hover { background: #f1f5f9; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Executive summary */
+.exec-summary {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 20px 24px; margin: 20px 0; font-size: 13px; line-height: 1.8;
+}
+.exec-summary ol { margin: 12px 0 0 20px; }
+.exec-summary li { margin-bottom: 6px; }
+
+/* Data table */
+.data-pair { display: grid; grid-template-columns: 180px 1fr; gap: 4px; margin: 4px 0; font-size: 13px; }
+.data-pair .lbl { color: var(--text-light); font-weight: 500; }
+.data-pair .val { font-weight: 600; }
+
+/* Regulatory */
+.reg-box {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 18px; margin: 8px 0; font-size: 12px; color: var(--text-light);
+}
+
+/* Print */
+@media print {
+    body { background: #fff; font-size: 10pt; }
+    .header { background: var(--primary) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .classification { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .finding { page-break-inside: avoid; }
+    .container { max-width: 100%; padding: 20px; }
+    .finding-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .severity-tag { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="classification">CONFIDENTIAL — Financial Crime Review</div>
+<div class="header">
+    <h1>CTM Division XOF Transactions — Financial Crime Review</h1>
+    <div class="subtitle">West Africa Operations: Ivory Coast &amp; Senegal | CAMS / CFE / CFCS Review | March 11, 2026</div>
+</div>
+<div class="container">
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <h2 style="margin:0; border:none; padding:0;">Portfolio Overview</h2>
+    <span class="risk-badge">OVERALL RISK: HIGH</span>
+</div>
+
+<div class="overview-grid">
+    <div class="overview-card">
+        <div class="label">Total Transactions</div>
+        <div class="value">144,811</div>
+        <div class="sub">26 months (Nov 2023 – Dec 2025)</div>
+    </div>
+    <div class="overview-card">
+        <div class="label">Banks Covered</div>
+        <div class="value">15</div>
+        <div class="sub">9 Ivory Coast, 6 Senegal</div>
+    </div>
+    <div class="overview-card">
+        <div class="label">Total Collections</div>
+        <div class="value" style="color:#1a6640">$1.076B</div>
+        <div class="sub">76,009 transactions</div>
+    </div>
+    <div class="overview-card">
+        <div class="label">Total Payments</div>
+        <div class="value" style="color:#c53030">$1.064B</div>
+        <div class="sub">39,236 transactions</div>
+    </div>
+    <div class="overview-card">
+        <div class="label">Opacity Rate</div>
+        <div class="value" style="color:#c53030">30.6%</div>
+        <div class="sub">44,295 unclassified + "Other"</div>
+    </div>
+    <div class="overview-card">
+        <div class="label">IAT Imbalance</div>
+        <div class="value" style="color:#b45309">$951K</div>
+        <div class="sub">576M XOF credit-heavy</div>
+    </div>
+    <div class="overview-card">
+        <div class="label">SWIFT/Telex Avg</div>
+        <div class="value" style="color:#c53030">$497,124</div>
+        <div class="sub">51x portfolio mean</div>
+    </div>
+</div>
+
+<h2>Executive Risk Assessment</h2>
+<div class="exec-summary">
+    <p>This portfolio presents an <strong>elevated financial crime risk profile</strong> driven by five converging factors:</p>
+    <ol>
+        <li>A <strong>30.6% transaction opacity rate</strong> (unclassified + "Other") representing ~$430M+ in combined value — above the ACAMS recommended maximum of 10–15%</li>
+        <li><strong>SWIFT/Telex transactions averaging $497K each</strong> with minimal narrative data, producing a $67.5M net outflow from 137 transactions</li>
+        <li>A <strong>$951K net imbalance in inter-account transfers</strong> that cannot be explained by settlement timing over a 26-month window</li>
+        <li><strong>24,952 cash transactions ($155.6M net cash inflow)</strong> in a GIABA-elevated risk corridor, with MTN Mobile Money as a structuring-risk channel</li>
+        <li><strong>Citibank Senegal: 461 txns, $140.8M debits, 60x portfolio average</strong> per-transaction value with $11.9M net outflow</li>
+    </ol>
+    <p style="margin-top:12px;">While several patterns have plausible legitimate explanations consistent with West African banking norms, the combination warrants <strong>immediate escalation to the MLRO</strong>, SAR review on SWIFT/Telex activity, and GL reconciliation of the IAT imbalance.</p>
+</div>
+
+<h2>Findings Registry</h2>
+<table>
+    <thead><tr>
+        <th>ID</th><th>Finding</th><th>Severity</th><th>Action Required</th>
+    </tr></thead>
+    <tbody>
+        <tr><td><strong>F-01</strong></td><td>SWIFT/Telex concentration — $497K avg, minimal narrative</td><td><span class="severity-tag critical">CRITICAL</span></td><td>SAR Review / 72hrs</td></tr>
+        <tr><td><strong>F-02</strong></td><td>IAT net imbalance — 576M XOF ($951K) unexplained</td><td><span class="severity-tag critical">CRITICAL</span></td><td>GL Reconciliation / 72hrs</td></tr>
+        <tr><td><strong>F-03</strong></td><td>Transaction opacity — 30.6% unclassified or "Other"</td><td><span class="severity-tag high">HIGH</span></td><td>Manual classification / 1 week</td></tr>
+        <tr><td><strong>F-04</strong></td><td>Citibank Senegal — 60x avg value, $11.9M net outflow</td><td><span class="severity-tag high">HIGH</span></td><td>Account review / EDD / 1 week</td></tr>
+        <tr><td><strong>F-05</strong></td><td>Stanbic IC — near-dormant, 198:1 credit/debit ratio</td><td><span class="severity-tag high">HIGH</span></td><td>Account review / 1 week</td></tr>
+        <tr><td><strong>F-06</strong></td><td>Cash volume — 24,952 txns, $155M net inflow in FATF corridor</td><td><span class="severity-tag high">HIGH</span></td><td>Cash monitoring / 30 days</td></tr>
+        <tr><td><strong>F-07</strong></td><td>Fee/commission anomaly — $16.4M credits in cost category</td><td><span class="severity-tag medium">MEDIUM</span></td><td>Fee reconciliation / 30 days</td></tr>
+        <tr><td><strong>F-08</strong></td><td>Cross-border IC/SN transfer classification risk</td><td><span class="severity-tag medium">MEDIUM</span></td><td>Manual review of pairs</td></tr>
+        <tr><td><strong>F-09</strong></td><td>Payroll anomalies — credits in payroll, flow/category mismatch</td><td><span class="severity-tag medium">MEDIUM</span></td><td>Payroll ERP cross-reference</td></tr>
+        <tr><td><strong>F-10</strong></td><td>Bank Costs net credit — 8,755M XOF positive balance</td><td><span class="severity-tag low">LOW</span></td><td>Classification rule fix</td></tr>
+    </tbody>
+</table>
+
+<h2>Detailed Findings</h2>
+
+<!-- F-01 -->
+<div class="finding critical">
+    <div class="finding-header">
+        <span><span class="id">F-01</span> SWIFT/Telex High-Value Concentration</span>
+        <span class="severity-tag critical">CRITICAL</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">Transactions</span><span class="val">137 (0.09% of portfolio)</span></div>
+        <div class="data-pair"><span class="lbl">Total Debits</span><span class="val">$68.1M (41,217M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Total Credits</span><span class="val">$628K (380M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Net Outflow</span><span class="val" style="color:#c53030">~$67.5M</span></div>
+        <div class="data-pair"><span class="lbl">Average Debit</span><span class="val" style="color:#c53030">$497,124 (51x portfolio mean of $9,685)</span></div>
+        <div class="data-pair"><span class="lbl">Deviation</span><span class="val">+5,035% above portfolio average</span></div>
+
+        <p style="margin-top:12px;">137 transactions accounting for $68.1M in debits represents 6.4% of total debit value while generating 0.09% of transaction count. Few transactions carrying enormous individual value with minimal inbound flow is consistent with either legitimate correspondent banking (Scenario A) or layering through correspondent banking — concentrating funds and disbursing via SWIFT to obscure ultimate beneficiaries (Scenario B), a typology documented in GIABA Typologies Report 2022.</p>
+
+        <p>Ivory Coast was on the <strong>FATF Grey List from 2022–2023</strong> and was removed following a strengthened AML/CFT framework commitment. Residual elevated inherent risk remains in the correspondent banking channel.</p>
+
+        <div class="reg-box">
+            <strong>Regulatory:</strong> 31 CFR 1010.610 (EDD for correspondent accounts), FATF R.16 (Wire Transfer Rule), 31 CFR 1020.320 (SAR filing), Wolfsberg Correspondent Banking Due Diligence
+        </div>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Pull all 137 SWIFT/Telex transactions within <strong>72 hours</strong>; extract originator, beneficiary, beneficiary bank, purpose code</li>
+            <li>Screen all beneficiaries against OFAC SDN, EU Consolidated Sanctions, HMT UK, and UN Security Council lists</li>
+            <li>Apply FATF R.16 Travel Rule checks: verify complete ordering party information on all outbound transfers &gt;$3,000</li>
+            <li>Where purpose is unclear or beneficiary unverifiable, file SAR with FinCEN / CENTIF-CI / CENTIF-SN within 30 days</li>
+            <li>Request SWIFT MT103 message copies from correspondent banks for any transaction above $250,000</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-02 -->
+<div class="finding critical">
+    <div class="finding-header">
+        <span><span class="id">F-02</span> IAT Net Imbalance — 576M XOF ($951K) Unexplained</span>
+        <span class="severity-tag critical">CRITICAL</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">IAT Transactions</span><span class="val">1,555 (669 matched pairs)</span></div>
+        <div class="data-pair"><span class="lbl">Debits</span><span class="val">$81.9M (49,571M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Credits</span><span class="val">$82.9M (50,147M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Net Surplus</span><span class="val" style="color:#b45309">+$951K (credit-heavy)</span></div>
+        <div class="data-pair"><span class="lbl">Unmatched Entries</span><span class="val">217 transactions</span></div>
+
+        <p style="margin-top:12px;">Internal account transfers in a closed system must net to approximately zero over 26 months. The $951K credit surplus is not a rounding artifact. Three possible explanations:</p>
+        <ul>
+            <li><strong>Settlement timing (largely benign):</strong> WAEMU settlement can produce posting date mismatches of 1–2 business days. The matching algorithm uses exact same-date matching, which misses cross-day pairs.</li>
+            <li><strong>Algorithm false positives:</strong> Coincidental same-date/same-amount matches between unrelated transactions create false pairs in a 144K-transaction dataset.</li>
+            <li><strong>One-directional flows (requires investigation):</strong> Credit-heavy imbalance is consistent with "credit washing" — receiving funds from outside the monitored universe without a traceable offsetting debit.</li>
+        </ul>
+
+        <div class="reg-box">
+            <strong>Regulatory:</strong> BSA 31 CFR 1010.415 (Funds transfer recordkeeping), FATF R.10 (Ongoing CDD), CBUEMOA Instruction 01-2006 (IAT rules for UEMOA)
+        </div>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Full GL reconciliation of all inter-account movements across 15 banks for the 26-month period</li>
+            <li>Upgrade IAT matching: add ±1 business day tolerance and reference number matching</li>
+            <li>Identify all IAT credits with no matching debit — these are the investigation targets</li>
+            <li>If gap cannot be explained within 30 days, file SAR and notify internal audit</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-03 -->
+<div class="finding high">
+    <div class="finding-header">
+        <span><span class="id">F-03</span> Transaction Opacity — 30.6% Unclassified or "Other"</span>
+        <span class="severity-tag high">HIGH</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">Unclassified</span><span class="val">14,176 txns — $128.2M gross value</span></div>
+        <div class="data-pair"><span class="lbl">"Other"</span><span class="val">30,119 txns — $645M gross value</span></div>
+        <div class="data-pair"><span class="lbl">Combined</span><span class="val" style="color:#c53030">44,295 transactions (30.6%) — $773M+</span></div>
+
+        <p style="margin-top:12px;">The 14-category keyword classifier captures ~70% of transactions accurately. The remaining 30.6% — representing over <strong>$773M in gross value</strong> — cannot be monitored for structuring, round-number concentration, or velocity anomalies. ACAMS standard: combined Unclassified + Other should not exceed 10–15% for a functioning TM system.</p>
+
+        <p>The "Other" category carries $360.8M in debits — the <strong>second-largest debit category</strong> after Wire Transfers. More than one-third of outbound value is currently unclassifiable.</p>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Expand keyword library: add 'garantie', 'caution', 'loyer', 'assurance', 'douane', 'facture', 'domicil', 'op div', etc.</li>
+            <li>Implement mandatory review queue: all transactions &gt;5M XOF ($8,264) in Other/Unclassified reviewed within 10 business days</li>
+            <li>Target maximum 10% combined rate after keyword expansion</li>
+            <li>Manual sampling: 200 transactions from each category to build training set</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-04 -->
+<div class="finding high">
+    <div class="finding-header">
+        <span><span class="id">F-04</span> Citibank Senegal — 60x Average Value, $11.9M Net Outflow</span>
+        <span class="severity-tag high">HIGH</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">Transactions</span><span class="val">461 (0.32% of count)</span></div>
+        <div class="data-pair"><span class="lbl">Total Debits</span><span class="val">$140.8M (85,180M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Net Outflow</span><span class="val" style="color:#c53030">-$11.9M</span></div>
+        <div class="data-pair"><span class="lbl">Avg Transaction</span><span class="val" style="color:#c53030">$584,815 (60x portfolio mean)</span></div>
+
+        <p style="margin-top:12px;">Handles 0.32% of transaction count but ~12% of total debit value. The directional asymmetry — Citi SN (-$11.9M) vs Citi IC (+$1.2M) — suggests funds flowing outbound through the Senegal entity. Classic <strong>pass-through/layering profile</strong>: low volume + very high value + large net outflow. Does not confirm illicit activity but requires it to be actively ruled out.</p>
+
+        <div class="reg-box">
+            <strong>Regulatory:</strong> USA PATRIOT Act Section 312 (EDD for correspondent accounts), 31 CFR 1010.610, FATF R.13 (Correspondent banking)
+        </div>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Pull all 461 Citi SN transactions; classify by counterparty, beneficiary, and purpose</li>
+            <li>Verify account's stated purpose against internal account opening documentation</li>
+            <li>Apply PATRIOT Act Section 312 EDD standards</li>
+            <li>If beneficiaries of $140.8M in debits cannot be identified, file SAR</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-05 -->
+<div class="finding high">
+    <div class="finding-header">
+        <span><span class="id">F-05</span> Stanbic IC — Near-Dormant, 198:1 Credit/Debit Ratio</span>
+        <span class="severity-tag high">HIGH</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">Transactions</span><span class="val">7 over 26 months (avg 1 per 3.7 months)</span></div>
+        <div class="data-pair"><span class="lbl">Credits</span><span class="val">$1,671,074 (1,011M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Debits</span><span class="val">$8,430 (5.1M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Net</span><span class="val" style="color:#b45309">+$1.66M</span></div>
+
+        <p style="margin-top:12px;">FATF typologies specifically flag <strong>dormant account reactivation</strong> — previously inactive accounts used to receive and hold proceeds before eventual extraction. Near-zero debit activity makes it impossible to determine whether funds are being swept to an external account or accumulating without planned disbursement.</p>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Obtain account opening documentation and stated purpose within 1 week</li>
+            <li>Pull all 7 transactions: identify source of each credit</li>
+            <li>If net balance remains, confirm legitimate rather than proceeds held pending extraction</li>
+            <li>Implement dormant account policy: &lt;2 txns/quarter requires MLRO review</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-06 -->
+<div class="finding high">
+    <div class="finding-header">
+        <span><span class="id">F-06</span> Cash Volume — 24,952 Txns, $155M Net Inflow in FATF Corridor</span>
+        <span class="severity-tag high">HIGH</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">Cash Transactions</span><span class="val">24,952 (17.2% of total)</span></div>
+        <div class="data-pair"><span class="lbl">Cash Credits</span><span class="val">$155.6M (94,113M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Cash Debits</span><span class="val">$329K (198.8M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Credit/Debit Ratio</span><span class="val" style="color:#c53030">473:1 by value</span></div>
+
+        <p style="margin-top:12px;">The company is a massive net receiver of physical cash. MTN Mobile Money CI (4,948 txns, avg ~$2,900/txn) is a specific risk point — the sub-$3,000 average is consistent with structuring below informal reporting thresholds. GIABA 2022 documents fan-in structuring via mobile money as a primary ML vehicle in the WAEMU zone.</p>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Implement cash monitoring rules: flag deposits &gt;5M XOF; aggregate same-counterparty &gt;15M XOF within 5 business days</li>
+            <li>Verify all CTR filings with CENTIF-CI and CENTIF-SN for the full 26-month period</li>
+            <li>Review MTN Mobile Money for fan-in patterns: &gt;10 unique crediting phone numbers to one account within 7 days</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-07 -->
+<div class="finding medium">
+    <div class="finding-header">
+        <span><span class="id">F-07</span> Fee/Commission Anomaly — $16.4M Credits in Cost Category</span>
+        <span class="severity-tag medium">MEDIUM</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">Fee Transactions</span><span class="val">26,610 (18.4% of total)</span></div>
+        <div class="data-pair"><span class="lbl">Fee Credits</span><span class="val">$16.4M (9,917M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Fee Debits</span><span class="val">$1.21M (730M XOF)</span></div>
+        <div class="data-pair"><span class="lbl">Credit/Debit Ratio</span><span class="val">13.6:1</span></div>
+
+        <p style="margin-top:12px;">The keyword 'commission' in the classifier is capturing commission <em>income</em> credits and routing them into the Bank Costs bucket. $16.4M in potential revenue is labeled as cost, and the AML profile of these credits — who is paying, for what, from where — is invisible.</p>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Separate commission credits from debits in classification</li>
+            <li>Sample 100 largest Fee/Commission credit transactions to determine true nature</li>
+            <li>Reconcile fee debits against bank tariff schedules</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-08 -->
+<div class="finding medium">
+    <div class="finding-header">
+        <span><span class="id">F-08</span> Cross-Border IC/SN Transfer Classification Risk</span>
+        <span class="severity-tag medium">MEDIUM</span>
+    </div>
+    <div class="finding-body">
+        <p>FATF R.16 applies based on institution geography, not currency. Cross-border IC/SN transfers require beneficiary identification and purpose documentation regardless of UEMOA zone status. The same-date/same-amount matching algorithm presents false positive risk — coincidental matches reclassify genuine third-party payments as internal transfers, reducing AML scrutiny.</p>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Add reference number matching as primary IAT pairing signal</li>
+            <li>Review all cross-border pairs &gt;50M XOF for documentation completeness</li>
+            <li>For pairs involving Citi IC or Citi SN, apply full FATF R.16 enhanced documentation</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-09 -->
+<div class="finding medium">
+    <div class="finding-header">
+        <span><span class="id">F-09</span> Payroll Anomalies — Credits in Payroll, Flow/Category Mismatch</span>
+        <span class="severity-tag medium">MEDIUM</span>
+    </div>
+    <div class="finding-body">
+        <div class="data-pair"><span class="lbl">Payroll Flow</span><span class="val">633 txns — Debits $12.2M / Credits $72,562</span></div>
+        <div class="data-pair"><span class="lbl">Category Count</span><span class="val">650 txns — 17-transaction / 182M XOF discrepancy</span></div>
+
+        <p style="margin-top:12px;">Payroll should be debit-only. Credits could represent salary reversals, overpayment recoveries, or returned ghost employee payments. Returned salary payments not re-issued to verified employees constitute payroll fraud.</p>
+
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Trace all payroll credits to originating cause</li>
+            <li>Cross-reference payroll debits against authorized HR headcount by month</li>
+            <li>Resolve the 17-transaction discrepancy between flow type and category counts</li>
+        </ul>
+    </div>
+</div>
+
+<!-- F-10 -->
+<div class="finding low">
+    <div class="finding-header">
+        <span><span class="id">F-10</span> Bank Costs Net Credit — Classification Pipeline Defect</span>
+        <span class="severity-tag low">LOW</span>
+    </div>
+    <div class="finding-body">
+        <p>Bank Costs flow shows +$14.5M net credit — structurally impossible for a cost category. The <code>classify_flow()</code> function assigns all Fees/Commissions regardless of sign to Bank Costs, sweeping large credit flows into a bucket that analysts would not normally subject to counterparty review.</p>
+        <h3>Recommended Actions</h3>
+        <ul>
+            <li>Fix sign check in <code>classify_flow()</code>: only negative-amount transactions → Bank Costs</li>
+            <li>Add "Interest Income" flow type for credit-signed Interest/Agios transactions</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Enhanced Transaction Monitoring Rules</h2>
+<table>
+    <thead><tr><th>Rule</th><th>Description</th><th>Trigger</th><th>Priority</th></tr></thead>
+    <tbody>
+        <tr><td>TM-01</td><td>Any txn &gt;50M XOF in Unclassified/Other</td><td>Manual AML review within 5 days</td><td><span class="severity-tag critical">CRITICAL</span></td></tr>
+        <tr><td>TM-02</td><td>SWIFT/Telex &gt;100M XOF without confirmed beneficiary</td><td>Immediate analyst review</td><td><span class="severity-tag critical">CRITICAL</span></td></tr>
+        <tr><td>TM-03</td><td>Account &lt;5 txns/quarter with &gt;100M XOF credit balance</td><td>Dormant activation review</td><td><span class="severity-tag high">HIGH</span></td></tr>
+        <tr><td>TM-04</td><td>Account credit/debit ratio &gt;5:1 or &lt;0.2:1 in rolling 90 days</td><td>Rapid flow review</td><td><span class="severity-tag high">HIGH</span></td></tr>
+        <tr><td>TM-05</td><td>Cash credit &gt;5M XOF; or aggregate same-counterparty &gt;15M XOF in 5 days</td><td>Structuring review</td><td><span class="severity-tag high">HIGH</span></td></tr>
+        <tr><td>TM-06</td><td>IAT credit with no matching debit within 3 business days</td><td>Unmatched transfer alert</td><td><span class="severity-tag medium">MEDIUM</span></td></tr>
+        <tr><td>TM-07</td><td>MTN Mobile Money: &gt;10 unique crediting parties to one account in 7 days</td><td>Fan-in structuring review</td><td><span class="severity-tag medium">MEDIUM</span></td></tr>
+        <tr><td>TM-08</td><td>Round-number transactions just below reporting thresholds</td><td>Structuring indicator</td><td><span class="severity-tag medium">MEDIUM</span></td></tr>
+        <tr><td>TM-09</td><td>Monthly cross-border IC/SN transfer report to MLRO</td><td>Routine reporting</td><td><span class="severity-tag low">LOW</span></td></tr>
+    </tbody>
+</table>
+
+<h2>Data Pipeline Remediation Required</h2>
+<table>
+    <thead><tr><th>#</th><th>Remediation</th><th>Impact</th></tr></thead>
+    <tbody>
+        <tr><td>1</td><td>Expand keyword library to reduce Unclassified + Other below 10%</td><td>Reduces opacity from 30.6% to est. ~12%</td></tr>
+        <tr><td>2</td><td>Fix <code>classify_flow()</code> credit/debit sign check</td><td>Corrects $14.5M misclassification in Bank Costs</td></tr>
+        <tr><td>3</td><td>Add ±1 business day tolerance to IAT pair matching</td><td>Reduces unmatched IAT entries and imbalance</td></tr>
+        <tr><td>4</td><td>Add reference number matching as primary IAT pairing signal</td><td>Eliminates false positive pairs</td></tr>
+        <tr><td>5</td><td>Implement date-specific FX rates from BCEAO daily fixing</td><td>Corrects ±8-10% USD valuation error</td></tr>
+        <tr><td>6</td><td>Add BAI type code as classification signal</td><td>Secondary classification for sparse-comment transactions</td></tr>
+        <tr><td>7</td><td>Add MT103/MT202 and international transfer keywords to SWIFT/Telex detection</td><td>Captures full SWIFT exposure (currently understated)</td></tr>
+    </tbody>
+</table>
+
+<h2>Applicable Regulatory Framework</h2>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div class="reg-box">
+        <strong>West Africa (Primary):</strong><br>
+        GIABA — AML standards for ECOWAS member states<br>
+        BCEAO — Central Bank of West African States<br>
+        CENTIF-CI (Ivory Coast FIU) / CENTIF-SN (Senegal FIU)<br>
+        UEMOA Directive 02/2015/CM — Harmonized AML framework<br>
+        Loi 2016-992 (IC AML statute) / Loi 2018-03 (SN AML law)<br>
+        <strong>FATF:</strong> IC removed from Grey List June 2023 (residual elevated risk)
+    </div>
+    <div class="reg-box">
+        <strong>US Nexus (if applicable):</strong><br>
+        BSA / 31 CFR Chapter X — US-nexus institutions<br>
+        OFAC — Sanctions screening obligations<br>
+        FCPA — Government-affiliated payments in IC/SN<br>
+        FinCEN CDD Rule 31 CFR 1010.230<br>
+        USA PATRIOT Act Section 312 — Correspondent accounts
+    </div>
+</div>
+
+<div style="margin-top:40px; padding-top:20px; border-top:2px solid var(--border); font-size:11px; color:var(--text-light); text-align:center;">
+    CTM Division XOF Transaction Analysis — Financial Crime Review | Generated March 11, 2026 | CONFIDENTIAL<br>
+    This report is based on automated analysis of 144,811 transactions across 15 banks. Findings require manual verification before regulatory action.
+</div>
+
+</div>
+</body>
+</html>
