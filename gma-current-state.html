@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMA Current State — Les Grands Moulins d'Abidjan</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+    --primary: #1a365d;
+    --primary-light: #2c5282;
+    --bg: #f7fafc;
+    --card-bg: #ffffff;
+    --text: #2d3748;
+    --text-light: #718096;
+    --border: #e2e8f0;
+    --debit: #c53030;
+    --credit: #1a6640;
+    --amber: #b7791f;
+    --amber-bg: #fffff0;
+    --amber-border: #fefcbf;
+    --red-bg: #fff5f5;
+    --red-border: #fed7d7;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:var(--bg); color:var(--text); font-size:14px; line-height:1.6; }
+.header { background:linear-gradient(135deg, var(--primary), var(--primary-light)); color:#fff; padding:28px 32px; }
+.header h1 { font-size:22px; font-weight:700; }
+.header .sub { font-size:13px; opacity:0.85; margin-top:4px; }
+.container { max-width:1400px; margin:0 auto; padding:20px; }
+.tabs { display:flex; gap:2px; background:var(--border); border-radius:8px 8px 0 0; padding:4px 4px 0; overflow-x:auto; }
+.tab { padding:10px 16px; cursor:pointer; background:#e2e8f0; border-radius:6px 6px 0 0; font-size:12px; font-weight:500; white-space:nowrap; border:none; color:var(--text); }
+.tab:hover { background:#cbd5e0; }
+.tab.active { background:var(--card-bg); color:var(--primary); font-weight:600; }
+.tab-content { display:none; padding:20px 0; }
+.tab-content.active { display:block; }
+.kpi-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
+.kpi { background:var(--card-bg); border-radius:8px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,0.08); text-align:center; }
+.kpi .label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-light); margin-bottom:4px; }
+.kpi .value { font-size:24px; font-weight:700; color:var(--primary); }
+.kpi .sub { font-size:11px; color:var(--text-light); margin-top:2px; }
+.card { background:var(--card-bg); border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:20px; overflow:hidden; }
+.card-header { background:var(--bg); padding:12px 16px; font-weight:600; font-size:14px; border-bottom:1px solid var(--border); }
+.card-body { padding:16px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:var(--primary); color:#fff; padding:8px 12px; text-align:left; font-size:12px; position:sticky; top:0; }
+td { padding:8px 12px; border-bottom:1px solid var(--border); }
+tr:hover { background:#edf2f7; }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+.debit { color:var(--debit); }
+.credit { color:var(--credit); }
+.tbd-box { background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:6px; padding:14px 18px; margin-bottom:14px; }
+.tbd-box h4 { color:var(--amber); font-size:13px; margin-bottom:6px; }
+.tbd-box p, .tbd-box li { font-size:12px; color:#744210; }
+.tbd-box ul { margin-left:16px; margin-top:4px; }
+.gap-box { background:var(--red-bg); border:1px solid var(--red-border); border-radius:6px; padding:14px 18px; margin-bottom:14px; }
+.gap-box h4 { color:var(--debit); font-size:13px; margin-bottom:6px; }
+.gap-box p, .gap-box li { font-size:12px; color:#742a2a; }
+.info-box { background:#ebf8ff; border:1px solid #bee3f8; border-radius:6px; padding:14px 18px; margin-bottom:14px; }
+.info-box h4 { color:#2b6cb0; font-size:13px; margin-bottom:6px; }
+.info-box p, .info-box li { font-size:12px; }
+.section-title { font-size:16px; font-weight:600; color:var(--primary); margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid var(--primary); }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.chart-container { position:relative; height:350px; padding:16px; }
+tfoot td { font-weight:700; background:#f7fafc; border-top:2px solid var(--primary); }
+@media (max-width:900px) { .two-col { grid-template-columns:1fr; } .kpi-row { grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>GMA — Les Grands Moulins d'Abidjan</h1>
+    <div class="sub">Current State | Ivory Coast | Corporate Treasury | March 2026</div>
+</div>
+<div class="container">
+
+<div class="tabs">
+    <button class="tab active" onclick="showTab('overview')">Overview</button>
+    <button class="tab" onclick="showTab('structure')">Business Structure</button>
+    <button class="tab" onclick="showTab('tax')">Tax & Regulatory</button>
+    <button class="tab" onclick="showTab('technology')">Technology</button>
+    <button class="tab" onclick="showTab('accounts')">Accounts & Balances</button>
+    <button class="tab" onclick="showTab('diagrams')">Account Diagrams</button>
+    <button class="tab" onclick="showTab('float')">Float & Clearing</button>
+    <button class="tab" onclick="showTab('funding')">Funding & Repatriation</button>
+    <button class="tab" onclick="showTab('facilities')">Facilities</button>
+    <button class="tab" onclick="showTab('fx')">FX & Currency</button>
+    <button class="tab" onclick="showTab('payments')">Payments (AP)</button>
+    <button class="tab" onclick="showTab('collections')">Collections (AR)</button>
+    <button class="tab" onclick="showTab('signers')">Users & Signers</button>
+    <button class="tab" onclick="showTab('questions')">Open Questions</button>
+</div>
+
+<!-- ===== OVERVIEW ===== -->
+<div id="overview" class="tab-content active">
+    <div class="kpi-row">
+        <div class="kpi">
+            <div class="label">Entity</div>
+            <div class="value" style="font-size:16px;">GMA S.A.</div>
+            <div class="sub">Les Grands Moulins d'Abidjan</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Country</div>
+            <div class="value" style="font-size:16px;">Ivory Coast</div>
+            <div class="sub">WAEMU / CFA Franc Zone</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Currency</div>
+            <div class="value" style="font-size:16px;">XOF</div>
+            <div class="sub">Pegged to EUR at 655.957</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Banks</div>
+            <div class="value">8</div>
+            <div class="sub">10 accounts</div>
+        </div>
+    </div>
+    <div class="kpi-row">
+        <div class="kpi">
+            <div class="label">Total Transactions</div>
+            <div class="value">39,728</div>
+            <div class="sub">Nov 2023 – Dec 2025</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Total Outflows</div>
+            <div class="value debit">-$436.8M</div>
+            <div class="sub">USD equivalent</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Total Inflows</div>
+            <div class="value credit">+$437.9M</div>
+            <div class="sub">USD equivalent</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Combined Balance</div>
+            <div class="value" style="font-size:18px;">XOF 3.69B</div>
+            <div class="sub">~$6.1M USD | As of Dec 31, 2025</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="card">
+            <div class="card-header">Transaction Volume by Bank</div>
+            <div class="chart-container"><canvas id="bankChart"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-header">Cash Flow by Type (USD)</div>
+            <div class="chart-container"><canvas id="flowChart"></canvas></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Banking Footprint Summary</div>
+        <div class="card-body" style="padding:0;">
+            <table>
+                <thead><tr><th>Bank</th><th>Account</th><th>Type</th><th>Ccy</th><th class="num">Txn Count</th><th class="num">Closing Balance (XOF)</th><th class="num">Balance (USD)</th><th>As Of</th></tr></thead>
+                <tbody>
+                    <tr><td>BOA Ivory Coast</td><td>BOAFRICAGMA0149</td><td>CA w/ Overdraft</td><td>XOF</td><td class="num">13,448</td><td class="num">916,211,751</td><td class="num">$1,513,566</td><td>12/31/2025</td></tr>
+                    <tr><td>Societe Generale IC</td><td>SOCGENGMAXOF2797</td><td>CA w/ Overdraft</td><td>XOF</td><td class="num">8,644</td><td class="num">95,320,605</td><td class="num">$157,555</td><td>12/31/2025</td></tr>
+                    <tr><td>Banque Atlantique IC</td><td>BATLGMAXOF9082</td><td>Current Account</td><td>XOF</td><td class="num">6,047</td><td class="num">1,317,648,340</td><td class="num">$2,177,932</td><td>12/31/2025</td></tr>
+                    <tr><td>MTN Mobile Money CI</td><td>MTNGMAXOF6151</td><td>Collections Only</td><td>XOF</td><td class="num">4,948</td><td class="num" style="color:var(--amber);">61,787,451</td><td class="num" style="color:var(--amber);">$102,128</td><td style="color:var(--amber);">11/03/2024</td></tr>
+                    <tr><td>SIB</td><td>SIVGMAXOF0043</td><td>CA w/ Overdraft</td><td>XOF</td><td class="num">3,904</td><td class="num">133,336,420</td><td class="num">$220,390</td><td>12/31/2025</td></tr>
+                    <tr><td>AFG Bank</td><td>AFGGMAXOF0416</td><td>Current Account</td><td>XOF</td><td class="num">1,740</td><td class="num">192,968,800</td><td class="num">$318,957</td><td>12/31/2025</td></tr>
+                    <tr><td>BOA Ivory Coast</td><td>BOAFRICAGMA7551</td><td>Current Account</td><td>XOF</td><td class="num">456</td><td class="num">12,098,678</td><td class="num">$19,998</td><td>12/31/2025</td></tr>
+                    <tr style="color:var(--amber);">
+                        <td>Banque Populaire CI</td><td>CAISSEGMAXOF0455</td><td>Current Account</td><td>XOF</td><td class="num">325</td><td class="num">249,266,878</td><td class="num">$411,846</td><td>08/30/2024</td>
+                    </tr>
+                    <tr><td>Societe Generale IC</td><td>SOCGENGMAXOF3961</td><td>Current Account</td><td>XOF</td><td class="num">166</td><td class="num">2,312,440</td><td class="num">$3,822</td><td>12/31/2025</td></tr>
+                    <tr><td>Citibank IC</td><td>CITIGMAXOF0144</td><td>Current Account</td><td>XOF</td><td class="num">50</td><td class="num">710,159,671</td><td class="num">$1,173,818</td><td>12/31/2025</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr><td colspan="5"><strong>Total (10 accounts)</strong></td><td class="num"><strong>3,691,111,034</strong></td><td class="num"><strong>$6,100,012</strong></td><td></td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <h4>Key Observations</h4>
+        <ul>
+            <li><strong>BOA IC (BOAFRICAGMA0149)</strong> is the primary operating account — 13,448 txns, highest volume</li>
+            <li><strong>Banque Atlantique IC</strong> holds the largest balance (XOF 1.3B / $2.2M) despite lower volume</li>
+            <li><strong>Citibank IC</strong> has only 50 transactions but holds $1.17M — appears to be a holding/sweep account</li>
+            <li><strong>MTN Mobile Money</strong> — last balance 11/2024, last transaction 11/2024 — <span style="color:var(--amber);font-weight:600;">may be inactive</span></li>
+            <li><strong>Banque Populaire</strong> — last balance 08/2024, 325 txns — <span style="color:var(--debit);font-weight:600;">consolidation candidate</span></li>
+            <li>3 accounts have overdraft facilities (BOA 0149, SOCGEN 2797, SIB 0043)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== BUSINESS STRUCTURE ===== -->
+<div id="structure" class="tab-content">
+    <div class="section-title">Business Structure</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Sea Cargo Current State Slides 4–6</h4>
+        <p>Panama documented: SML Line Business (non-registered, 3 Citi accounts) + Sea Cargo S.A. (100% subsidiary, registered agency, 2 accounts). Revenue model, AR management split, legal structure diagram.</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — Discovery Session Needed</h4>
+        <p>The following must be documented for GMA through stakeholder interviews:</p>
+        <ul>
+            <li><strong>Legal entity type:</strong> What is GMA S.A.'s corporate structure? (S.A. = Societe Anonyme under OHADA?)</li>
+            <li><strong>Ownership:</strong> Is GMA 100% owned by SML/Seaboard? Or a joint venture?</li>
+            <li><strong>Relationship to Pativoire:</strong> What is the corporate relationship between GMA and Pativoire (the other Ivory Coast entity)?</li>
+            <li><strong>Business model:</strong> What does GMA do? (Flour milling — "Grands Moulins" = Great Mills). What are the revenue streams?</li>
+            <li><strong>Agency vs. principal:</strong> Does GMA operate as an agent for SML (like Sea Cargo in Panama) or as a principal?</li>
+            <li><strong>Intercompany flows:</strong> What are the IC flows between GMA and SML corporate? Commissions? Cost-plus? Transfer pricing?</li>
+            <li><strong>Legal structure diagram:</strong> Entity hierarchy within the Seaboard group for Ivory Coast</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h4>What We Know from Transaction Data</h4>
+        <ul>
+            <li>GMA operates 10 bank accounts across 8 banks in Ivory Coast</li>
+            <li>Cross-border transfers to/from Senegal banks suggest intercompany activity with Seaboard Senegal entities</li>
+            <li>436 inter-account transfers detected, including IC↔SN routes</li>
+            <li>Annual throughput: ~$437M inflows, ~$437M outflows (roughly balanced)</li>
+            <li>Payroll processed: 556 transactions, $9.1M in payments</li>
+            <li>Tax payments: 331 transactions, $19.0M (indicates significant local tax obligations)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== TAX & REGULATORY ===== -->
+<div id="tax" class="tab-content">
+    <div class="section-title">Tax Structure & Regulatory Framework</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Sea Cargo Current State Slides 7, 33, 39–43</h4>
+        <p>Panama documented: tax rates for Sociedad Anonima, 6 repatriation avenues, SBP banking regulations (ACH settlement windows, check standardization, clearing rules, AML quasi-cash definitions).</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — Tax Structure (needs Tax/Legal input)</h4>
+        <ul>
+            <li>Corporate income tax rate for S.A. in Ivory Coast (currently 25%?)</li>
+            <li>Withholding tax on dividends to foreign parent</li>
+            <li>Withholding tax on intercompany payments (management fees, royalties, interest)</li>
+            <li>Transfer pricing documentation requirements under OHADA / Ivory Coast tax code</li>
+            <li>Tax treaties between Ivory Coast and USA (SML parent)</li>
+            <li>Repatriation avenues and cost comparison (equivalent to Panama's 6 avenues)</li>
+        </ul>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — BCEAO / WAEMU Regulatory Framework</h4>
+        <p>Ivory Coast is regulated by the BCEAO (Banque Centrale des Etats de l'Afrique de l'Ouest) and subject to WAEMU monetary union rules. The following must be documented:</p>
+        <ul>
+            <li><strong>BCEAO Regulation R09/2010:</strong> External financial relations — capital controls for transfers outside WAEMU</li>
+            <li><strong>STAR-UEMOA:</strong> RTGS system — settlement rules, cut-off times, value dating</li>
+            <li><strong>SICA-UEMOA:</strong> ACH system — compensation windows, fund availability rules</li>
+            <li><strong>Check clearing:</strong> BCEAO check clearing rules and timelines for Ivory Coast</li>
+            <li><strong>AML/KYC:</strong> CENTIF (Cellule Nationale de Traitement des Informations Financieres) requirements</li>
+            <li><strong>Mobile money:</strong> BCEAO e-money regulations (applicable to MTN Mobile Money)</li>
+            <li><strong>OHADA Uniform Acts:</strong> Commercial law, company law — relevant for entity structure and IC transactions</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h4>What We Know</h4>
+        <ul>
+            <li><strong>Currency:</strong> XOF (CFA Franc BCEAO) — pegged to EUR at 655.957 XOF = 1 EUR</li>
+            <li><strong>Monetary union:</strong> WAEMU (8 member states including Ivory Coast and Senegal)</li>
+            <li><strong>Capital controls:</strong> BCEAO requires prior authorization for transfers outside WAEMU exceeding certain thresholds</li>
+            <li><strong>Tax evidence from data:</strong> 331 tax payment transactions totaling $19.0M across the period</li>
+            <li><strong>Cross-border:</strong> IC↔SN transfers are intra-WAEMU (same currency zone, fewer restrictions than extra-zone)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== TECHNOLOGY ===== -->
+<div id="technology" class="tab-content">
+    <div class="section-title">Technology: Current State Applications / Systems</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Sea Cargo Current State Slide 8</h4>
+        <p>Panama documented: Banking (CitiDirect, Banistmo portal), Accounting (JDE — 2 ledgers), AR (AS400/IBM Cognos), Payroll (Grupo Mindex → TXT → Banistmo).</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — Technology Discovery Session</h4>
+        <ul>
+            <li><strong>ERP System:</strong> Does GMA use JDE (like Panama)? SAP? Another ERP? Manual accounting?</li>
+            <li><strong>Accounting ledgers:</strong> How many ledgers? How are they structured? (Panama had 2: 571 Line, 581 Agency)</li>
+            <li><strong>Banking portals:</strong> Which of the 8 banks have online portals? What capabilities per portal?</li>
+            <li><strong>Payment file generation:</strong> How are payment files created? Manual entry? ERP export? What format?</li>
+            <li><strong>Payment transmission:</strong> How do files get to banks? Manual upload? SFTP? Host-to-host?</li>
+            <li><strong>AR system:</strong> What system tracks receivables? ERP module? Separate system?</li>
+            <li><strong>Payroll system:</strong> What system processes payroll? How does it connect to banks?</li>
+            <li><strong>Reporting:</strong> What reporting tools are used? Excel? BI platform?</li>
+            <li><strong>Mobile money:</strong> How does MTN Mobile Money integrate? API? Portal? Manual?</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h4>Inferred from Data</h4>
+        <ul>
+            <li><strong>Balance reporting:</strong> BAI Prior Day format used (from balance file "Service" field) — suggests bank connectivity exists for balance reporting at minimum</li>
+            <li><strong>8 bank portals:</strong> Likely 8 separate online banking portals (one per bank relationship)</li>
+            <li><strong>MTN Mobile Money:</strong> Classified as "WA Collections Only" account type — appears to be a receive-only channel</li>
+            <li><strong>Manual bank statements:</strong> Some balance records show "Manual Bank Statement" service — suggests not all banks have automated reporting</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== ACCOUNTS & BALANCES ===== -->
+<div id="accounts" class="tab-content">
+    <div class="section-title">Accounts & Balances</div>
+
+    <div class="card">
+        <div class="card-header">Account Inventory — 10 Accounts Across 8 Banks</div>
+        <div class="card-body" style="padding:0;">
+            <table>
+                <thead><tr>
+                    <th>Account ID</th><th>Bank</th><th>Account Type</th><th>Ccy</th>
+                    <th class="num">Txn Count</th><th class="num">Outflows (USD)</th><th class="num">Inflows (USD)</th><th class="num">Net (USD)</th>
+                    <th class="num">Closing Bal (XOF)</th><th class="num">Bal (USD)</th><th>Bal Date</th><th>First Txn</th><th>Last Txn</th>
+                </tr></thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BOAFRICAGMA0149</strong></td><td>BOA Ivory Coast</td><td>CA w/ Overdraft</td><td>XOF</td>
+                        <td class="num">13,448</td><td class="num debit">-$155.6M</td><td class="num credit">+$153.1M</td><td class="num debit">-$2.5M</td>
+                        <td class="num">916,211,751</td><td class="num">$1,513,566</td><td>12/31/2025</td><td>2023-12-29</td><td>2025-12-30</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOCGENGMAXOF2797</strong></td><td>Societe Generale IC</td><td>CA w/ Overdraft</td><td>XOF</td>
+                        <td class="num">8,644</td><td class="num debit">-$85.0M</td><td class="num credit">+$89.4M</td><td class="num credit">+$4.4M</td>
+                        <td class="num">95,320,605</td><td class="num">$157,555</td><td>12/31/2025</td><td>2023-12-29</td><td>2025-12-30</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BATLGMAXOF9082</strong></td><td>Banque Atlantique IC</td><td>Current Account</td><td>XOF</td>
+                        <td class="num">6,047</td><td class="num debit">-$69.7M</td><td class="num credit">+$70.8M</td><td class="num credit">+$1.0M</td>
+                        <td class="num">1,317,648,340</td><td class="num">$2,177,932</td><td>12/31/2025</td><td>2023-12-28</td><td>2025-12-30</td>
+                    </tr>
+                    <tr style="background:var(--amber-bg);">
+                        <td><strong>MTNGMAXOF6151</strong></td><td>MTN Mobile Money CI</td><td>Collections Only</td><td>XOF</td>
+                        <td class="num">4,948</td><td class="num debit">-$6.5M</td><td class="num credit">+$6.4M</td><td class="num debit">-$73K</td>
+                        <td class="num">61,787,451</td><td class="num">$102,128</td><td style="color:var(--amber);font-weight:600;">11/03/2024</td><td>2023-11-27</td><td style="color:var(--amber);font-weight:600;">2024-11-03</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SIVGMAXOF0043</strong></td><td>SIB</td><td>CA w/ Overdraft</td><td>XOF</td>
+                        <td class="num">3,904</td><td class="num debit">-$79.9M</td><td class="num credit">+$77.3M</td><td class="num debit">-$2.5M</td>
+                        <td class="num">133,336,420</td><td class="num">$220,390</td><td>12/31/2025</td><td>2023-12-29</td><td>2025-12-30</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AFGGMAXOF0416</strong></td><td>AFG Bank</td><td>Current Account</td><td>XOF</td>
+                        <td class="num">1,740</td><td class="num debit">-$9.2M</td><td class="num credit">+$8.8M</td><td class="num debit">-$374K</td>
+                        <td class="num">192,968,800</td><td class="num">$318,957</td><td>12/31/2025</td><td>2025-01-02</td><td>2025-11-20</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BOAFRICAGMA7551</strong></td><td>BOA Ivory Coast</td><td>Current Account</td><td>XOF</td>
+                        <td class="num">456</td><td class="num debit">-$19.8M</td><td class="num credit">+$20.0M</td><td class="num credit">+$215K</td>
+                        <td class="num">12,098,678</td><td class="num">$19,998</td><td>12/31/2025</td><td>2023-12-29</td><td>2025-12-11</td>
+                    </tr>
+                    <tr style="background:var(--red-bg);">
+                        <td><strong>CAISSEGMAXOF0455</strong></td><td>Banque Populaire CI</td><td>Current Account</td><td>XOF</td>
+                        <td class="num">325</td><td class="num debit">-$1.7M</td><td class="num credit">+$1.4M</td><td class="num debit">-$329K</td>
+                        <td class="num">249,266,878</td><td class="num">$411,846</td><td style="color:var(--debit);font-weight:600;">08/30/2024</td><td>2024-01-05</td><td style="color:var(--debit);font-weight:600;">2024-08-30</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOCGENGMAXOF3961</strong></td><td>Societe Generale IC</td><td>Current Account</td><td>XOF</td>
+                        <td class="num">166</td><td class="num debit">-$49K</td><td class="num credit">+$49K</td><td class="num credit">+$165</td>
+                        <td class="num">2,312,440</td><td class="num">$3,822</td><td>12/31/2025</td><td>2024-01-16</td><td>2025-12-11</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CITIGMAXOF0144</strong></td><td>Citibank IC</td><td>Current Account</td><td>XOF</td>
+                        <td class="num">50</td><td class="num debit">-$9.4M</td><td class="num credit">+$10.6M</td><td class="num credit">+$1.2M</td>
+                        <td class="num">710,159,671</td><td class="num">$1,173,818</td><td>12/31/2025</td><td>2024-08-30</td><td>2025-12-23</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr><td colspan="4"><strong>Total</strong></td><td class="num"><strong>39,728</strong></td><td class="num debit"><strong>-$436.8M</strong></td><td class="num credit"><strong>+$437.9M</strong></td><td class="num credit"><strong>+$1.1M</strong></td><td class="num"><strong>3,691,111,034</strong></td><td class="num"><strong>$6,100,012</strong></td><td colspan="3"></td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <h4>Account Observations</h4>
+        <ul>
+            <li><strong>Banque Populaire (0455):</strong> Last activity Aug 2024, but holds XOF 249M ($412K). Account appears dormant with trapped balance. <span style="color:var(--debit);font-weight:600;">Immediate investigation needed.</span></li>
+            <li><strong>MTN Mobile Money (6151):</strong> Last activity Nov 2024. 4,948 txns over 12 months then stopped. <span style="color:var(--amber);font-weight:600;">Status check needed — was this intentionally closed?</span></li>
+            <li><strong>Citibank IC (0144):</strong> Only 50 txns but $1.17M balance and $10.6M inflows. High-value, low-frequency — possibly a sweep/holding account.</li>
+            <li><strong>BOA 7551:</strong> Secondary BOA account, 456 txns with $20M throughput. Purpose unclear — separate from primary BOA 0149.</li>
+            <li><strong>SOCGEN 3961:</strong> Secondary SOCGEN account, 166 txns, minimal volume. Purpose unclear.</li>
+            <li><strong>3 accounts w/ overdraft:</strong> BOA 0149, SOCGEN 2797, SIB 0043 — overdraft terms not documented.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== ACCOUNT DIAGRAMS ===== -->
+<div id="diagrams" class="tab-content">
+    <div class="section-title">Account Flow Diagrams</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Slides 9–15 (5 account diagrams with transaction activity)</h4>
+        <p>Panama had per-account diagrams showing transaction types, volumes, and flow directions for each of the 5 accounts.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Inter-Account Transfer Routes (Top 15 by Value)</div>
+        <div class="card-body" style="padding:0;">
+            <table>
+                <thead><tr><th>Source Bank</th><th>Destination Bank</th><th class="num">Pairs</th><th class="num">Total (USD)</th><th class="num">Avg (USD)</th><th>Direction</th></tr></thead>
+                <tbody>
+                    <tr style="background:#ebf8ff;"><td>Societe Generale IC</td><td>CBAO Senegal</td><td class="num">4</td><td class="num">$2,007,388</td><td class="num">$501,847</td><td style="color:#2b6cb0;font-weight:600;">IC → SN (Cross-border)</td></tr>
+                    <tr style="background:#ebf8ff;"><td>BOA Ivory Coast</td><td>BICIS Senegal</td><td class="num">27</td><td class="num">$487,284</td><td class="num">$18,048</td><td style="color:#2b6cb0;font-weight:600;">IC → SN (Cross-border)</td></tr>
+                    <tr style="background:#ebf8ff;"><td>Banque Atlantique IC</td><td>BICIS Senegal</td><td class="num">8</td><td class="num">$424,900</td><td class="num">$53,113</td><td style="color:#2b6cb0;font-weight:600;">IC → SN (Cross-border)</td></tr>
+                    <tr><td>Banque Atlantique IC</td><td>BOA Ivory Coast</td><td class="num">4</td><td class="num">$296,312</td><td class="num">$74,078</td><td>Intra-IC</td></tr>
+                    <tr style="background:#ebf8ff;"><td>BICIS Senegal</td><td>BOA Ivory Coast</td><td class="num">33</td><td class="num">$294,301</td><td class="num">$8,918</td><td style="color:#2b6cb0;font-weight:600;">SN → IC (Cross-border)</td></tr>
+                    <tr style="background:#ebf8ff;"><td>BOA Ivory Coast</td><td>Banque Atlantique SN</td><td class="num">10</td><td class="num">$240,022</td><td class="num">$24,002</td><td style="color:#2b6cb0;font-weight:600;">IC → SN (Cross-border)</td></tr>
+                    <tr style="background:#ebf8ff;"><td>Societe Generale SN</td><td>SIB</td><td class="num">2</td><td class="num">$97,909</td><td class="num">$48,955</td><td style="color:#2b6cb0;font-weight:600;">SN → IC (Cross-border)</td></tr>
+                    <tr><td>BOA Ivory Coast</td><td>BOA Ivory Coast</td><td class="num">4</td><td class="num">$71,518</td><td class="num">$17,880</td><td>Intra-bank (0149↔7551)</td></tr>
+                    <tr><td>Banque Atlantique IC</td><td>AFG Bank</td><td class="num">1</td><td class="num">$71,405</td><td class="num">$71,405</td><td>Intra-IC</td></tr>
+                    <tr style="background:#ebf8ff;"><td>BICIS Senegal</td><td>Banque Atlantique IC</td><td class="num">12</td><td class="num">$58,722</td><td class="num">$4,894</td><td style="color:#2b6cb0;font-weight:600;">SN → IC (Cross-border)</td></tr>
+                    <tr style="background:#ebf8ff;"><td>Societe Generale SN</td><td>AFG Bank</td><td class="num">1</td><td class="num">$57,865</td><td class="num">$57,865</td><td style="color:#2b6cb0;font-weight:600;">SN → IC (Cross-border)</td></tr>
+                    <tr style="background:#ebf8ff;"><td>BICIS Senegal</td><td>Societe Generale IC</td><td class="num">15</td><td class="num">$55,897</td><td class="num">$3,726</td><td style="color:#2b6cb0;font-weight:600;">SN → IC (Cross-border)</td></tr>
+                    <tr><td>SIB</td><td>BOA Ivory Coast</td><td class="num">2</td><td class="num">$51,732</td><td class="num">$25,866</td><td>Intra-IC</td></tr>
+                    <tr style="background:#ebf8ff;"><td>BOA Ivory Coast</td><td>Bank of Africa SN</td><td class="num">5</td><td class="num">$48,005</td><td class="num">$9,601</td><td style="color:#2b6cb0;font-weight:600;">IC → SN (Cross-border)</td></tr>
+                    <tr><td>Societe Generale IC</td><td>Banque Atlantique IC</td><td class="num">3</td><td class="num">$45,266</td><td class="num">$15,089</td><td>Intra-IC</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <h4>Transfer Pattern Analysis</h4>
+        <ul>
+            <li><strong>436 total transfer pairs</strong> detected across the period</li>
+            <li><strong>Cross-border (IC↔SN):</strong> Dominant pattern — significant fund flows between Ivory Coast and Senegal banks, particularly BICIS Senegal</li>
+            <li><strong>Net imbalance: $5,964,240</strong> — indicates unmatched transfers or misclassified transactions</li>
+            <li><strong>SOCGEN IC → CBAO SN:</strong> Highest single-route value ($2.0M across 4 pairs, avg $502K) — likely large intercompany settlements</li>
+            <li><strong>BOA 0149 ↔ BOA 7551:</strong> Internal transfers between GMA's two BOA accounts — purpose needs documentation</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== FLOAT & CLEARING ===== -->
+<div id="float" class="tab-content">
+    <div class="section-title">Float Analysis & Clearing Times</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Slides 17–18</h4>
+        <p>Panama documented: Citibank float analysis showing transactions with +/- 30 day floats, ledger vs. available balance discrepancies. Banistmo showed zero float (available = ledger).</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — Float Analysis</h4>
+        <p>The following float analysis must be performed for each of GMA's 8 banks:</p>
+        <ul>
+            <li>Transaction volume per day distribution</li>
+            <li>Float analysis per transaction type (value date vs. posted date difference)</li>
+            <li>Ledger balance vs. available balance discrepancies</li>
+            <li>Check clearing times by bank (BCEAO clearing house timelines)</li>
+            <li>ACH settlement windows per bank (SICA-UEMOA compensation times)</li>
+            <li>SWIFT/wire value dating practices per bank</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h4>What Balance Data Shows</h4>
+        <ul>
+            <li>Balance file contains "Difference" column (value date vs. posted date) — can be analyzed for float patterns</li>
+            <li>3,605 GMA balance records available for analysis</li>
+            <li>Both "BAI Prior Day" and "Manual Bank Statement" services observed — suggesting mixed automation levels</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== FUNDING & REPATRIATION ===== -->
+<div id="funding" class="tab-content">
+    <div class="section-title">Funding & Repatriation Process</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Slide 25 + Panama Presentation Slides 8–12</h4>
+        <p>Panama documented: Weekly Excel-based forecast, email approval from Division Office (Miami), Thursday/Friday disbursements, main account → sub-account funding chain, monthly commissions (1044→1079), excess agency funds → dividends.</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — Discovery Session Needed</h4>
+        <ul>
+            <li>How is GMA funded? Weekly? Monthly? Ad hoc?</li>
+            <li>Who approves funding requests? Local management? Division office? Corporate treasury?</li>
+            <li>What is the forecast process? Excel? ERP-based?</li>
+            <li>How are funds distributed across the 10 accounts?</li>
+            <li>How does repatriation work? Dividends? IC loans? Management fees?</li>
+            <li>What is the repatriation path? XOF → EUR → USD? Direct XOF → USD?</li>
+            <li>What BCEAO approvals are required for repatriation?</li>
+            <li>How does funding/repatriation interact with the Senegal cross-border transfers?</li>
+        </ul>
+    </div>
+
+    <div class="info-box">
+        <h4>What Transfer Data Tells Us</h4>
+        <ul>
+            <li><strong>Cross-border outflows (IC→SN):</strong> $3.2M+ across multiple routes — suggests regular funding of Senegal operations from IC</li>
+            <li><strong>Cross-border inflows (SN→IC):</strong> $560K+ flowing back — possibly collections or repatriation from SN</li>
+            <li><strong>Net cross-border direction:</strong> IC is net sender to SN (~$2.6M net outflow)</li>
+            <li><strong>Citibank IC:</strong> 50 txns, $10.6M inflows, $9.4M outflows — may be the repatriation/sweep channel</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== FACILITIES ===== -->
+<div id="facilities" class="tab-content">
+    <div class="section-title">Facilities</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Slides 26–28</h4>
+        <p>Panama documented: $500K overdraft facility (cross-border USD safeguard), $4M permanent shipping guarantee (Panama Canal), 0.25% guarantee fee.</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — Facility Documentation</h4>
+        <ul>
+            <li><strong>Overdraft facilities:</strong> 3 accounts flagged as "CA w/ Overdraft" or "CA OnlyRepw Act w OD" — terms, limits, rates must be documented:
+                <ul>
+                    <li>BOA Ivory Coast (BOAFRICAGMA0149)</li>
+                    <li>Societe Generale IC (SOCGENGMAXOF2797)</li>
+                    <li>SIB (SIVGMAXOF0043)</li>
+                </ul>
+            </li>
+            <li><strong>Credit facilities:</strong> Does GMA have any revolving credit lines, term loans, or trade finance facilities?</li>
+            <li><strong>Guarantees:</strong> Does GMA have bank guarantees for any operational purposes?</li>
+            <li><strong>Trade finance:</strong> Letters of credit, documentary collections for import/export?</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== FX & CURRENCY ===== -->
+<div id="fx" class="tab-content">
+    <div class="section-title">Currency Management: FX</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Slide 24</h4>
+        <p>Panama: "N/A — Panama currency is USD." GMA has a fundamentally different situation.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">FX Environment — XOF / CFA Franc BCEAO</div>
+        <div class="card-body">
+            <table>
+                <thead><tr><th>Parameter</th><th>Detail</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Local Currency</strong></td><td>XOF (CFA Franc BCEAO)</td></tr>
+                    <tr><td><strong>Peg</strong></td><td>Fixed to EUR at 655.957 XOF = 1 EUR (guaranteed by French Treasury)</td></tr>
+                    <tr><td><strong>Conversion to USD</strong></td><td>XOF → EUR (fixed peg) → USD (floating rate) — two-step conversion</td></tr>
+                    <tr><td><strong>Monetary Union</strong></td><td>WAEMU (8 states: Benin, Burkina Faso, Ivory Coast, Guinea-Bissau, Mali, Niger, Senegal, Togo)</td></tr>
+                    <tr><td><strong>Central Bank</strong></td><td>BCEAO (Dakar, Senegal)</td></tr>
+                    <tr><td><strong>Capital Controls</strong></td><td>BCEAO Regulation R09/2010 — prior authorization required for transfers outside WAEMU above thresholds</td></tr>
+                    <tr><td><strong>Intra-WAEMU Transfers</strong></td><td>Free movement within the 8-member zone (IC↔SN transfers are intra-zone)</td></tr>
+                    <tr><td><strong>Repatriation Path</strong></td><td>XOF → EUR (peg) → USD (market) → SML Corporate</td></tr>
+                    <tr><td><strong>FX Risk</strong></td><td>EUR/USD volatility on repatriation. No XOF/USD direct risk due to peg, but peg devaluation risk exists</td></tr>
+                    <tr><td><strong>Analytics Rate Used</strong></td><td>605 XOF/USD (fixed for dashboard analysis)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — FX Analysis</h4>
+        <ul>
+            <li>What is GMA's current FX conversion process for repatriation?</li>
+            <li>Which bank(s) handle FX conversion? At what spread?</li>
+            <li>Are there any FX forward contracts or hedging in place?</li>
+            <li>What are the BCEAO thresholds for prior authorization on extra-zone transfers?</li>
+            <li>How frequently does repatriation occur? Monthly? Quarterly?</li>
+            <li>What documentation does BCEAO require for each repatriation?</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== PAYMENTS (AP) ===== -->
+<div id="payments" class="tab-content">
+    <div class="section-title">Payments Process (AP)</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Panama Presentation Slides 2–4</h4>
+        <p>Panama documented: 9-step AP flow (Invoice → Pre-ERP → JDE → Approved → Payment Prep → Initiate → Authorize → Settle → Reconcile), 16 pain points, payment mix (~85% ACH), CFS vendor blocker.</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — AP Discovery Session</h4>
+        <p>A full AP process discovery session must be conducted with GMA operations. The following must be documented:</p>
+        <ul>
+            <li>End-to-end AP process flow (invoice receipt → payment → reconciliation)</li>
+            <li>Invoice receipt method (e-invoices? physical? email?)</li>
+            <li>Approval workflow (who approves? how many levels?)</li>
+            <li>ERP entry process</li>
+            <li>Payment preparation and authorization</li>
+            <li>Payment methods and mix (wire, ACH, check, mobile money)</li>
+            <li>Bank portal payment process (manual upload? automated?)</li>
+            <li>Reconciliation process (frequency, method)</li>
+            <li>Pain points and bottlenecks</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Payment Data from Transactions (What We Know)</div>
+        <div class="card-body" style="padding:0;">
+            <table>
+                <thead><tr><th>Payment Category</th><th class="num">Txn Count</th><th class="num">Total (USD)</th><th class="num">Avg (USD)</th><th>% of Payments</th></tr></thead>
+                <tbody>
+                    <tr><td>Wire Transfer (outgoing)</td><td class="num">5,940</td><td class="num debit">-$217.4M</td><td class="num">$36,600</td><td>57.6%</td></tr>
+                    <tr><td>Check / Cheque</td><td class="num">5,638</td><td class="num debit">-$19.9M</td><td class="num">$3,522</td><td><span style="color:var(--amber);font-weight:600;">14.2%</span></td></tr>
+                    <tr><td>Tax Payments</td><td class="num">331</td><td class="num debit">-$19.0M</td><td class="num">$57,394</td><td>5.0%</td></tr>
+                    <tr><td>Payroll / Salary</td><td class="num">573</td><td class="num debit">-$9.4M</td><td class="num">$16,335</td><td>2.4%</td></tr>
+                    <tr><td>SWIFT / Telex</td><td class="num">137</td><td class="num debit">-$68.1M</td><td class="num" style="color:var(--debit);font-weight:600;">$497,278</td><td>18.0%</td></tr>
+                    <tr><td>Fees / Commissions</td><td class="num">3,366</td><td class="num debit">-$239K</td><td class="num">$71</td><td>0.1%</td></tr>
+                    <tr><td>Interest / Agios</td><td class="num">203</td><td class="num debit">-$1.1M</td><td class="num">$5,485</td><td>0.3%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <h4>Payment Observations</h4>
+        <ul>
+            <li><strong>Cheque volume at 14.2%</strong> — target should be &lt;5%. 5,638 cheques is a modernization opportunity.</li>
+            <li><strong>SWIFT/Telex avg $497K</strong> — 137 high-value international wires. These need enhanced monitoring.</li>
+            <li><strong>Wire transfers dominate</strong> at 57.6% of payment volume by count and $217M by value.</li>
+            <li><strong>Tax payments</strong> are significant: $19M across 331 transactions — suggests large corporate tax obligations.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== COLLECTIONS (AR) ===== -->
+<div id="collections" class="tab-content">
+    <div class="section-title">Collections Process (AR)</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Panama Presentation Slides 5–7</h4>
+        <p>Panama documented: 9-step AR flow (Obligation → Invoice → Deliver → Revenue → Collection → Payment Received → Cash Application → Settlement → Recon), 16 pain points, release-before-payment controls.</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — AR Discovery Session</h4>
+        <ul>
+            <li>End-to-end AR/collection process flow</li>
+            <li>Invoice generation and delivery method</li>
+            <li>Collection channels: bank deposit, ACH, check, mobile money, wire</li>
+            <li>Cash application process (how are payments matched to invoices?)</li>
+            <li>Credit management (credit limits, aging, release controls)</li>
+            <li>Reconciliation process</li>
+            <li>Pain points and bottlenecks</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Collection Data from Transactions</div>
+        <div class="card-body">
+            <table>
+                <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+                <tbody>
+                    <tr><td>Total Collections</td><td class="num credit" style="font-weight:600;">20,490 transactions | +$385.8M USD</td></tr>
+                    <tr><td>Cash Collections</td><td class="num">6,851 txns | +$77.0M (20.0% of inflows)</td></tr>
+                    <tr><td>Check / Cheque Inflows</td><td class="num">Part of 5,638 cheque txns — includes both outgoing and incoming</td></tr>
+                    <tr><td>Bills / Effets (Trade Paper)</td><td class="num">3,474 txns | +$57.3M (14.9% of inflows)</td></tr>
+                    <tr><td>Wire Inflows</td><td class="num">Part of wire transfer category — $97.8M incoming</td></tr>
+                    <tr><td>Mobile Money</td><td class="num">4,948 txns on MTN account (collections-only channel)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <h4>Collection Observations</h4>
+        <ul>
+            <li><strong>Bills / Effets (trade paper):</strong> $57.3M across 3,474 transactions — this is a significant collection channel unique to francophone West Africa (not present in Panama). Trade paper collection process needs documentation.</li>
+            <li><strong>Cash collections:</strong> $77.0M — large cash collection volume suggests retail or distribution business. Physical cash handling process needs documentation.</li>
+            <li><strong>MTN Mobile Money:</strong> 4,948 transactions on a collections-only account — mobile money was an active collection channel until Nov 2024. Why did it stop?</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== USERS & SIGNERS ===== -->
+<div id="signers" class="tab-content">
+    <div class="section-title">Bank Users & Account Signers</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Slide 22</h4>
+        <p>Panama documented: 9 authorized signers, 2 authorized representatives, full name list.</p>
+    </div>
+
+    <div class="tbd-box">
+        <h4>ACTION REQUIRED — IBAM / Bank Portal Data</h4>
+        <ul>
+            <li>Authorized signers for each of the 10 GMA accounts</li>
+            <li>Authorized representatives</li>
+            <li>Bank portal users per bank (8 portals)</li>
+            <li>User access levels and permissions</li>
+            <li>Signer updates required (if any)</li>
+            <li>KYC documentation status per bank</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== OPEN QUESTIONS ===== -->
+<div id="questions" class="tab-content">
+    <div class="section-title">Open Questions for Discovery</div>
+
+    <div class="gap-box">
+        <h4>Panama Equivalent: Slides 30–32, 34–38</h4>
+        <p>Panama had dedicated slides for Citibank questions (receivables, payables, float, ACH windows) and Colon branch closure action items.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Questions by Category</div>
+        <div class="card-body">
+            <h4 style="color:var(--primary); margin-bottom:8px;">Business Structure & Legal</h4>
+            <ol style="font-size:13px; margin-left:20px; margin-bottom:16px;">
+                <li>What is GMA S.A.'s full legal structure and ownership within Seaboard?</li>
+                <li>What is the relationship between GMA and Pativoire?</li>
+                <li>What intercompany agreements exist between GMA and SML corporate?</li>
+            </ol>
+
+            <h4 style="color:var(--primary); margin-bottom:8px;">Accounts</h4>
+            <ol start="4" style="font-size:13px; margin-left:20px; margin-bottom:16px;">
+                <li><strong>Banque Populaire (0455):</strong> Account shows no activity since Aug 2024 but holds XOF 249M. Is this account being closed? Why is the balance still there?</li>
+                <li><strong>MTN Mobile Money (6151):</strong> Last transaction Nov 2024. Was this channel intentionally discontinued? Why?</li>
+                <li><strong>Citibank IC (0144):</strong> Only 50 transactions but $1.17M balance. What is the purpose of this account?</li>
+                <li><strong>BOA 7551:</strong> What is the purpose of this second BOA account vs. the primary 0149?</li>
+                <li><strong>SOCGEN 3961:</strong> What is the purpose of this second SOCGEN account vs. the primary 2797?</li>
+                <li>Can any accounts be consolidated? Preliminary candidates: Banque Populaire (325 txns), Citibank IC (50 txns)</li>
+            </ol>
+
+            <h4 style="color:var(--primary); margin-bottom:8px;">Operations</h4>
+            <ol start="10" style="font-size:13px; margin-left:20px; margin-bottom:16px;">
+                <li>What is GMA's core business? (Flour milling — but what products, what customers, what distribution?)</li>
+                <li>What is the funding process from SML corporate to GMA?</li>
+                <li>What is the repatriation process from GMA to SML corporate?</li>
+                <li>What ERP system does GMA use?</li>
+                <li>How are payments initiated? (ERP → file → bank portal? Manual entry?)</li>
+                <li>Why is cheque volume at 14.2%? What payments require cheques?</li>
+            </ol>
+
+            <h4 style="color:var(--primary); margin-bottom:8px;">Regulatory</h4>
+            <ol start="16" style="font-size:13px; margin-left:20px; margin-bottom:16px;">
+                <li>What BCEAO approvals are required for extra-WAEMU transfers?</li>
+                <li>What are the ACH settlement windows at each of GMA's banks?</li>
+                <li>What are the check clearing times for each bank?</li>
+                <li>Are there any pending regulatory changes affecting GMA's banking operations?</li>
+            </ol>
+
+            <h4 style="color:var(--primary); margin-bottom:8px;">Bank Questions (per bank — equivalent to Panama's Citibank Q&A)</h4>
+            <ol start="20" style="font-size:13px; margin-left:20px;">
+                <li>What connectivity options does each bank offer? (API, SFTP, H2H, manual portal only)</li>
+                <li>What file formats does each bank accept for payments? (ISO 20022? Proprietary?)</li>
+                <li>What are cut-off times for same-day value per bank?</li>
+                <li>What reporting formats are available? (BAI2, MT940, camt.053?)</li>
+                <li>What FX services does each bank offer for XOF→EUR/USD conversion?</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+</div><!-- /container -->
+
+<div style="background:#2d3748; color:#a0aec0; padding:16px 32px; font-size:11px; margin-top:40px;">
+    GMA Current State | Generated March 15, 2026 | Data sources: ctm-gma-transactions.html, balances 2025 ctm.xlsx, ctm-financial-crime-review.html | Structure modeled on Panama "Sea Cargo Current State.pptx" (43 slides)
+</div>
+
+<script>
+function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.closest('.tab').classList.add('active');
+    window.scrollTo(0, document.querySelector('.tabs').offsetTop - 10);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Bank volume chart
+    new Chart(document.getElementById('bankChart'), {
+        type: 'bar',
+        data: {
+            labels: ['BOA IC', 'SOCGEN IC', 'Banque Atl.', 'MTN Mobile', 'SIB', 'AFG Bank', 'BOA IC (2)', 'Banque Pop.', 'SOCGEN (2)', 'Citi IC'],
+            datasets: [{ label: 'Transactions', data: [13448, 8644, 6047, 4948, 3904, 1740, 456, 325, 166, 50],
+                backgroundColor: ['#1a365d','#2c5282','#2b6cb0','#3182ce','#4299e1','#63b3ed','#90cdf4','#fc8181','#bee3f8','#fed7d7'] }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false}},
+            scales:{ x:{ ticks:{ callback: v => v.toLocaleString() } } } }
+    });
+
+    // Flow chart
+    new Chart(document.getElementById('flowChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Collection', 'Payment', 'Bank Costs', 'Payroll', 'IAT', 'Tax'],
+            datasets: [
+                { label: 'Outflows (USD)', data: [0, 377524854, 1370927, 9058126, 29818143, 19027899], backgroundColor: 'rgba(197,48,48,0.7)' },
+                { label: 'Inflows (USD)', data: [385792002, 0, 16263850, 35783, 35782383, 0], backgroundColor: 'rgba(26,102,64,0.7)' }
+            ]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}},
+            scales:{ y:{ ticks:{ callback: v => '$'+Math.round(v/1e6)+'M' } } } }
+    });
+});
+</script>
+</body>
+</html>

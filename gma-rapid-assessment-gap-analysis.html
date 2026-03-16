@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMA Rapid Assessment — Gap Analysis</title>
+<style>
+:root {
+    --primary: #1a365d;
+    --primary-light: #2c5282;
+    --bg: #f7fafc;
+    --card-bg: #ffffff;
+    --text: #2d3748;
+    --text-light: #718096;
+    --border: #e2e8f0;
+    --green: #276749;
+    --green-bg: #f0fff4;
+    --green-border: #c6f6d5;
+    --red: #c53030;
+    --red-bg: #fff5f5;
+    --red-border: #fed7d7;
+    --amber: #b7791f;
+    --amber-bg: #fffff0;
+    --amber-border: #fefcbf;
+    --blue-bg: #ebf8ff;
+    --blue-border: #bee3f8;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background:var(--bg); color:var(--text); font-size:14px; line-height:1.6; }
+.header { background:linear-gradient(135deg, var(--primary), var(--primary-light)); color:#fff; padding:28px 32px; }
+.header h1 { font-size:22px; font-weight:700; }
+.header .sub { font-size:13px; opacity:0.85; margin-top:4px; }
+.container { max-width:1440px; margin:0 auto; padding:20px; }
+.exec-bar { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:24px; }
+.exec-stat { background:var(--card-bg); border-radius:8px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,0.08); text-align:center; }
+.exec-stat .label { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-light); margin-bottom:4px; }
+.exec-stat .value { font-size:28px; font-weight:700; }
+.exec-stat .sub { font-size:11px; color:var(--text-light); margin-top:2px; }
+.tabs { display:flex; gap:2px; background:var(--border); border-radius:8px 8px 0 0; padding:4px 4px 0; overflow-x:auto; flex-wrap:nowrap; }
+.tab { padding:10px 14px; cursor:pointer; background:#e2e8f0; border-radius:6px 6px 0 0; font-size:12px; font-weight:500; white-space:nowrap; border:none; color:var(--text); position:relative; }
+.tab:hover { background:#cbd5e0; }
+.tab.active { background:var(--card-bg); color:var(--primary); font-weight:600; }
+.tab .badge { position:absolute; top:2px; right:4px; width:8px; height:8px; border-radius:50%; }
+.tab .badge.green { background:#48bb78; }
+.tab .badge.amber { background:#ecc94b; }
+.tab .badge.red { background:#fc8181; }
+.tab-content { display:none; padding:20px 0; }
+.tab-content.active { display:block; }
+.progress-bar { height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden; margin:8px 0; }
+.progress-fill { height:100%; border-radius:3px; transition:width 0.3s; }
+.progress-fill.high { background:#48bb78; }
+.progress-fill.mid { background:#ecc94b; }
+.progress-fill.low { background:#fc8181; }
+.card { background:var(--card-bg); border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:20px; overflow:hidden; }
+.card-header { background:var(--bg); padding:12px 16px; font-weight:600; font-size:14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.card-body { padding:16px; }
+.status { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+.status-complete { background:var(--green-bg); color:var(--green); border:1px solid var(--green-border); }
+.status-partial { background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-border); }
+.status-gap { background:var(--red-bg); color:var(--red); border:1px solid var(--red-border); }
+.evidence-list, .gap-list { list-style:none; padding:0; }
+.evidence-list li, .gap-list li { padding:8px 12px; border-bottom:1px solid var(--border); font-size:13px; display:flex; gap:8px; align-items:flex-start; }
+.evidence-list li:last-child, .gap-list li:last-child { border-bottom:none; }
+.evidence-list li::before { content:"✓"; color:var(--green); font-weight:700; flex-shrink:0; }
+.gap-list li::before { content:"✗"; color:var(--red); font-weight:700; flex-shrink:0; }
+.gap-list li.moderate::before { content:"⚠"; color:var(--amber); }
+.gap-list li.minor::before { content:"○"; color:var(--text-light); }
+.sev { display:inline-block; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:700; margin-right:4px; }
+.sev-critical { background:#c53030; color:#fff; }
+.sev-major { background:#e53e3e; color:#fff; }
+.sev-moderate { background:#d69e2e; color:#fff; }
+.sev-minor { background:#a0aec0; color:#fff; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:var(--primary); color:#fff; padding:8px 12px; text-align:left; font-size:12px; position:sticky; top:0; }
+td { padding:8px 12px; border-bottom:1px solid var(--border); }
+tr:hover { background:#edf2f7; }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.source-tag { font-size:10px; color:var(--text-light); font-style:italic; margin-top:4px; }
+.section-title { font-size:16px; font-weight:600; color:var(--primary); margin:16px 0 10px; padding-bottom:6px; border-bottom:2px solid var(--primary); }
+.info-box { background:var(--blue-bg); border:1px solid var(--blue-border); border-radius:6px; padding:14px 18px; margin-bottom:14px; }
+.info-box h4 { color:#2b6cb0; font-size:13px; margin-bottom:6px; }
+.info-box p, .info-box li { font-size:12px; }
+.tbd-box { background:var(--amber-bg); border:1px solid var(--amber-border); border-radius:6px; padding:14px 18px; margin-bottom:14px; }
+.tbd-box h4 { color:var(--amber); font-size:13px; margin-bottom:6px; }
+.tbd-box p, .tbd-box li { font-size:12px; color:#744210; }
+.tbd-box ul { margin-left:16px; margin-top:4px; }
+@media (max-width:900px) { .two-col { grid-template-columns:1fr; } .exec-bar { grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>GMA — Rapid Assessment Gap Analysis</h1>
+    <div class="sub">Les Grands Moulins d'Abidjan | Ivory Coast | Based on GMA Current State PPT (59 slides) + Transaction Data (39,728 txns) | March 2026</div>
+</div>
+<div class="container">
+
+<div class="exec-bar">
+    <div class="exec-stat">
+        <div class="label">Overall Completion</div>
+        <div class="value" style="color:var(--amber);">54%</div>
+        <div class="sub">Across D.01–D.07</div>
+    </div>
+    <div class="exec-stat">
+        <div class="label">Deliverables Strong</div>
+        <div class="value" style="color:var(--green);">3</div>
+        <div class="sub">D.01, D.02, D.03 ≥ 60%</div>
+    </div>
+    <div class="exec-stat">
+        <div class="label">Remaining Gaps</div>
+        <div class="value" style="color:var(--red);">14</div>
+        <div class="sub">Items needing action</div>
+    </div>
+    <div class="exec-stat">
+        <div class="label">Critical Gaps</div>
+        <div class="value" style="color:var(--red);">4</div>
+        <div class="sub">Block next phase</div>
+    </div>
+</div>
+
+<div class="tabs">
+    <button class="tab active" onclick="showTab('summary')">Summary</button>
+    <button class="tab" onclick="showTab('d01')">D.01 Banking<span class="badge green"></span></button>
+    <button class="tab" onclick="showTab('d02')">D.02 Blockers<span class="badge green"></span></button>
+    <button class="tab" onclick="showTab('d03')">D.03 Process<span class="badge amber"></span></button>
+    <button class="tab" onclick="showTab('d04')">D.04 Technology<span class="badge red"></span></button>
+    <button class="tab" onclick="showTab('d05')">D.05 Target Design<span class="badge red"></span></button>
+    <button class="tab" onclick="showTab('d06')">D.06 Discovery<span class="badge amber"></span></button>
+    <button class="tab" onclick="showTab('d07')">D.07 Strategy<span class="badge red"></span></button>
+</div>
+
+<!-- ===== SUMMARY ===== -->
+<div id="summary" class="tab-content active">
+    <div class="card">
+        <div class="card-header">Rapid Assessment Scorecard — GMA</div>
+        <div class="card-body">
+            <table>
+                <thead>
+                    <tr><th>Deliverable</th><th>Status</th><th>Completion</th><th>PPT Coverage</th><th>Remaining Gaps</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>D.01</strong> Banking Footprint</td>
+                        <td><span class="status status-complete">Strong</span></td>
+                        <td class="num">85%</td>
+                        <td>Slides 27–36: All 10 accounts diagrammed with flows, notes, balances. Slides 47–48: Facilities & LCs.</td>
+                        <td>Fee schedules, formal IBAM format, bank capability matrix</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D.02</strong> Blocker Assessment</td>
+                        <td><span class="status status-complete">Strong</span></td>
+                        <td class="num">80%</td>
+                        <td>Slides 2–10: Full WAEMU regulatory framework. Slides 43–46: FX controls, capital controls, trade framework. Slide 22: Repatriation methods with costs.</td>
+                        <td>Formal blocker register, BCEAO domiciliation implementation details</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D.03</strong> Current Process</td>
+                        <td><span class="status status-partial">Partial</span></td>
+                        <td class="num">65%</td>
+                        <td>Slides 22–25: Wheat payment flows. Slide 40: Payroll. Slide 41: Checks & bills of exchange. Slide 39: Cash depot operations. Slide 53: Funds availability.</td>
+                        <td>AP end-to-end process map, AR/collections formal flow, reconciliation process, month-end close</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D.04</strong> Technology Assessment</td>
+                        <td><span class="status status-partial">Partial</span></td>
+                        <td class="num">45%</td>
+                        <td>Slide 26: Business Central (accounting, no ERP). 100% manual — no file transmissions. Slides 12–14: PI-SPI architecture.</td>
+                        <td>Manual environment confirmed. BC supports connectivity. Bank capabilities assessed after rationalization decision.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D.05</strong> Target Process Design</td>
+                        <td><span class="status status-gap">Gap</span></td>
+                        <td class="num">25%</td>
+                        <td>Slide 52: Pain points identified. Slide 32: CITI CIO product in progress. PI-SPI payroll consolidation concept (Slide 40).</td>
+                        <td>Formal target state design, IT2/IREC integration plan, bank rationalization decision, payment channel selection</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D.06</strong> Discovery Sessions</td>
+                        <td><span class="status status-partial">Partial</span></td>
+                        <td class="num">55%</td>
+                        <td>Slide 59: 16 outstanding questions for GMA team. Slides 57–58: Citibank questions. Bank account notes capture discovery session outputs throughout.</td>
+                        <td>Formal session log, structured findings register, stakeholder sign-off</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D.07</strong> Technology Strategy</td>
+                        <td><span class="status status-gap">Gap</span></td>
+                        <td class="num">20%</td>
+                        <td>PI-SPI integration path documented (Slides 12–14). CIO product mentioned for CITI.</td>
+                        <td>IT2 configuration plan, bank connectivity strategy, file format mapping, implementation sequence</td>
+                    </tr>
+                    <tr style="background:#f7fafc;font-weight:700;">
+                        <td>Weighted Average (D.01–D.07)</td>
+                        <td></td>
+                        <td class="num" style="color:var(--amber);">~54%</td>
+                        <td colspan="2">Strong on current state documentation; weak on forward-looking design & strategy. D.08 Implementation Plan deferred until D.01–D.07 complete.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Top Actions Required</div>
+        <div class="card-body">
+            <table>
+                <thead><tr><th>#</th><th>Action</th><th>Deliverable</th><th>Severity</th><th>Notes</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td><strong>Complete AP & AR process maps</strong> — Wheat payments documented but local vendor payments, depot collections, and reconciliation processes missing</td><td>D.03</td><td><span class="sev sev-critical">CRITICAL</span></td><td>Slides 19 (Collections placeholder) and 52 (pain points) frame the gaps</td></tr>
+                    <tr><td>2</td><td><strong>Build target state design</strong> — IT2/IREC/CIO integration, bank rationalization, payment channel decisions for GMA</td><td>D.05, D.07</td><td><span class="sev sev-critical">CRITICAL</span></td><td>Current state now well-documented; need forward-looking design</td></tr>
+                    <tr><td>3</td><td><strong>Resolve outstanding discovery questions</strong> — 16 items assigned to Cyril + 3 Citibank questions</td><td>D.06</td><td><span class="sev sev-critical">CRITICAL</span></td><td>Slide 59: Bank transfer methods, fee structures, payroll PSI, renumeration, AFG sweep</td></tr>
+                    <tr><td>4</td><td><strong>Document bank fee schedules</strong> — Compare fee structures, identify cost optimization opportunities across 8 banks</td><td>D.01</td><td><span class="sev sev-major">MAJOR</span></td><td>Outstanding question assigned to Cyril (Slide 59)</td></tr>
+                    <tr><td>5</td><td><strong>Formalize blocker register</strong> — BCEAO Reg. 06/2024 domiciliation rules, 50% prepayment cap, FX liquidity constraints</td><td>D.02</td><td><span class="sev sev-moderate">MODERATE</span></td><td>Content exists in slides but not in structured register format</td></tr>
+                    <tr><td>6</td><td><strong>Discover Senegal payment methods</strong> — Payment instruments, bank practices, cutoff times, and clearing norms specific to Senegal</td><td>D.06</td><td><span class="sev sev-major">MAJOR</span></td><td>WAEMU-wide systems shared but local practices may differ from Ivory Coast</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== D.01 BANKING FOOTPRINT ===== -->
+<div id="d01" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="font-size:18px; color:var(--primary);">D.01 — Banking Footprint</h2>
+            <p style="font-size:13px; color:var(--text-light);">Current account banking footprint documentation</p>
+        </div>
+        <div style="text-align:right;">
+            <span class="status status-complete">85% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill high" style="width:85%"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Evidence — What the PPT Covers</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>10 accounts across 8 banks fully diagrammed</strong> (Slides 28–36) — AFG XOF 0416, BOA XOF 0149, BOA XOF 7551 (tax sub-account), Banque Atlantique XOF 9082, Citibank XOF 0144, MTN Mobile XOF 6151, SIB XOF 0043, SocGen XOF 2797, SocGen XOF 3961 (business card)</li>
+                <li><strong>Account purposes documented</strong> — BOA 7551 is tax payment sub-account (mitigates government seizure risk), SocGen 3961 is MD business expense card, CITI 0144 being positioned as excess cash sweep destination</li>
+                <li><strong>Transaction activity per account</strong> — Type and volume breakdown for 2024–2025 shown on each diagram slide</li>
+                <li><strong>Bank relationship context</strong> — AFG acquired Banque Populaire, connected to post offices for remote presence. CITI not primary until end-2025. SocGen has fast-track program. BOA renumerating current accounts at ~2%.</li>
+                <li><strong>Overdraft facilities documented</strong> (Slide 47) — SocGen XOF 3B at 5.5%, SIB XOF 5B at 6.5%, CITI XOF 3B–5B (opening)</li>
+                <li><strong>Letter of credit facilities</strong> (Slide 48) — 3 LCs: BOA/Port of Abidjan land (XOF 78.9M, exp 2030), BOA/Port warehouse lease (XOF 48.25M, exp 2026), SIB/Customs guarantee (XOF 410M, exp 2025)</li>
+                <li><strong>Inter-account fund flows mapped</strong> (Slide 27) — Banks fund each other for wheat payments based on available liquidity; excess being swept to CITI</li>
+                <li><strong>Dormant/inactive accounts identified</strong> — MTN Mobile stopped reporting Nov 2024, considering closure/replacement with Orange or Wave. BOA LG12/795 guarantee expired 2015 but bank can't release.</li>
+                <li><strong>Authorized signers & representatives</strong> (Slide 42) — 7 signers on most accounts, 3 authorized reps. Missing: CITI and MTN Mobile signers. Dave, Emma, Ben pending addition.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
+        <div class="card-body">
+            <ul class="gap-list">
+                <li class="moderate"><span class="sev sev-major">MAJOR</span> <strong>Bank fee schedules not documented</strong> — Assigned to Cyril. Need tranches, charges by payment type, and how fees are grouped. Critical for cost optimization and bank rationalization decisions.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>No formal IBAM-format inventory</strong> — Account data exists across slides but not in standardized ION IBAM format for import into IT2.</li>
+                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>SIB/BOA renumeration terms unconfirmed</strong> — Cyril verifying: threshold amounts, percentages, whether still active.</li>
+                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>AFG sweep frequency/threshold unknown</strong> — Assigned to Cyril (Slide 59).</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== D.02 BLOCKERS ===== -->
+<div id="d02" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="font-size:18px; color:var(--primary);">D.02 — Blocker Assessment</h2>
+            <p style="font-size:13px; color:var(--text-light);">Regulatory, legal, banking, and operational blockers</p>
+        </div>
+        <div style="text-align:right;">
+            <span class="status status-complete">80% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill high" style="width:80%"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Evidence — What the PPT Covers</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>WAEMU/BCEAO regulatory framework comprehensively documented</strong> (Slides 2–10) — Monetary union structure, banking system (160 institutions), 6 institution types, governance hierarchy, legislation hierarchy</li>
+                <li><strong>Key legislation identified</strong> (Slide 8) — Loi Uniforme Bancaire (June 2023), Règlement 15/2002 (payment systems), Instruction 001-01-2024 (payment institutions), EMI Instruction 008-05-2015, AML/CFT law (2015/revised 2023), Règlement 06/2024 (new FX controls)</li>
+                <li><strong>FX controls & capital restrictions</strong> (Slides 43–46) — Convertibility with restrictions (LCY→FCY requires documentation), no speculative hedging, FX derivatives now permitted for hedging under Reg. 06/2024. FCY account opening requires MoF + BCEAO approval.</li>
+                <li><strong>50% prepayment cap documented</strong> (Slide 22) — BCEAO Instruction 02.07.2025 RFE, Art. 6(f): advance payments cannot exceed 50% of goods/services value. Full compliance mandatory since Jan 2026. Maximum 6 months with 3-month grace period.</li>
+                <li><strong>Repatriation methods with cost analysis</strong> (Slide 22) — 4 methods: Commodity prepayments (0.71%), FX capex prepayment (0.71%), Intercompany loan (2–3% friction), Dividend (15% WHT, permanent cost). Prioritization guidance included.</li>
+                <li><strong>Depeg risk analysis</strong> (Slide 4) — Two scenarios analyzed: bilateral mutual agreement (requires WAMU unanimity + EU Council unanimity) and unilateral French withdrawal. Key monitoring indicators provided.</li>
+                <li><strong>Trade transaction framework</strong> (Slides 45–46) — 3 import regimes (Freedom, Approval, Limitation). Grains = Category I (Freedom Arrangement). WAEMU CET: 5% + statistical duty 1% + AU levy 0.2% + community levies 1.3%.</li>
+                <li><strong>Saisie (court-ordered freezes)</strong> (Slide 39) — Courts can order banks to freeze accounts/transactions due to vendor disputes. Happens at most banks except BOA.</li>
+                <li><strong>Payment system architecture</strong> (Slide 9) — STAR-UEMOA (RTGS, ≥XOF 50M, real-time, cutoff 5:00 PM), SICA-UEMOA (domestic funds transfer, <XOF 50M, next-day settlement, one session/day). Settlement timing per instrument type.</li>
+                <li><strong>BCEAO batch rejection risk</strong> (Slide 22) — If any payment in a submitted FX batch is incorrect, the entire batch gets rejected. When liquidity is tight, BCEAO finds more reasons to reject.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
+        <div class="card-body">
+            <ul class="gap-list">
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>No formal blocker register</strong> — Blockers are identified throughout the PPT but not organized into a structured register with severity, owner, mitigation, timeline.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>BCEAO Reg. 06/2024 implementation details needed</strong> — 12 implementing Instructions (July 2025) referenced but not analyzed for GMA-specific impact. Domiciliation requirements above CB threshold need clarification.</li>
+                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>SIB customs guarantee discrepancy</strong> — XOF 410M vs 500M reference needs verification (Slide 59). Guarantee expired Dec 2025; renewal status unclear.</li>
+                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>Investment Code eligibility unconfirmed</strong> — Wheat milling = agro-industrial Category 1. Approval regime (min XOF 200M) could provide 100% tax exemption for 5 years. Application process/timeline unknown.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== D.03 CURRENT PROCESS ===== -->
+<div id="d03" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="font-size:18px; color:var(--primary);">D.03 — Current Process Documentation</h2>
+            <p style="font-size:13px; color:var(--text-light);">End-to-end AP, AR, treasury, and operational process flows</p>
+        </div>
+        <div style="text-align:right;">
+            <span class="status status-partial">65% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill mid" style="width:65%"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Evidence — What the PPT Covers</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>Wheat prepayment process fully mapped</strong> (Slide 22) — 4-step process: GMA requests invoice from Brandy/Eurafrique → prepares documentation with DPI (customs document) → bank reviews & groups with other requests → BCEAO reviews batch & approves FX. 50% limit. Remaining 50% paid on arrival.</li>
+                <li><strong>Wheat payment timing analyzed</strong> (Slides 23–25) — Average days with bank by bank and year for prepayments and remaining payments. Eurafrique receipt times (GMA debit to IOM credit) by bank by year. Source: GMA Daily Cash file.</li>
+                <li><strong>Prefinancing arrangements documented</strong> (Slide 22 notes) — Some banks prefinance FX payments using their own reserves while BCEAO batch processes. SocGen fast-track program (2025). BOA more frequent. CITI started. SIB/Atlantique fast-track BCEAO approval internally.</li>
+                <li><strong>Payroll process documented</strong> (Slide 40) — Currently paid through 4 banks (SIB, Atlantique, SocGen, BOA) to reduce fees and enable same-day for matching banks. Non-matching takes 1–2 days. PI-SPI consolidation opportunity identified.</li>
+                <li><strong>Check & bill of exchange processes detailed</strong> (Slide 41) — Future-dated checks stored in safe, Joelle reviews daily and takes to bank on date. Bills of exchange endorsed same day, bank cashes on date. Affactourage product available but too expensive. Employee cash advance via check (≤XOF 200K). Bank check rejections for fees documented.</li>
+                <li><strong>Cash depot operations</strong> (Slide 39) — 17+ depots with recommended cash limits. Cash deposited at nearest bank when limit reached or end of day. Frequency varies by depot volume. Cyril sending threshold.</li>
+                <li><strong>Funds availability by payment type</strong> (Slide 53) — Full table: Wire/RTGS ≥XOF 50M (minutes–same day), Domestic Funds Transfer <XOF 50M via SICA (next-day D+1–D+2), Cheque (D+2+), Bill of Exchange (D+1, per commercial terms), Promissory Note (D+1), Direct Debit/prélèvement (D+0–D+1), Mobile Money (instant within operator), PI-SPI Instant Payment (instant 24/7), Debit/Credit Card (immediate/D+1), International Wire (D+1–D+5+), Cash (immediate).</li>
+                <li><strong>7-layer payment delay analysis</strong> (Slide 15) — Why payments take 2–3 days: Internal bank processing (0–2d), SICA batch cycle (+0–1d), receiving bank crediting (+0–1d), correspondent banking (+1–2d), weekends/holidays (+1–3d), AML/KYC holds (+1–5d), pre-PI-SPI gap (eliminated for members).</li>
+                <li><strong>Dividend payment process</strong> (Slide 22) — Once per year. Board approval → General Assembly → documentation to bank → WHT payment → bank submits to BCEAO → payment sent to SOL. Must complete by Sept 30.</li>
+                <li><strong>Intercompany loan process</strong> (Slide 22) — 6 steps: prepare agreement, board authorization, MoF declaration, registration fee, send funds, repay with interest. Transfer pricing concerns if outstanding too long.</li>
+                <li><strong>Tax payment process</strong> (Slide 30) — BOA 7551 sub-account registered on tax authority platform. Keep balance near zero, fund only when payment due. Declaration → file → pay. Separate account mitigates risk of government accessing funds.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
+        <div class="card-body">
+            <ul class="gap-list">
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>No formal AP process map for local vendor payments</strong> — Wheat payments to Eurafrique well-documented but local vendor payment process (flowing through SocGen per Slide 35) not mapped end-to-end.</li>
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>Collections/AR process is a placeholder</strong> — Slide 19 says "Placeholder — Collections processes." Depot cash collection described at high level (Slide 39) but no formal AR flow: invoicing → customer payment → bank clearing → reconciliation → posting.</li>
+                <li class="moderate"><span class="sev sev-major">MAJOR</span> <strong>Reconciliation process not documented</strong> — No description of how GMA reconciles bank statements to accounting system. Manual vs automated? Frequency? Tools used?</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Month-end/period-end close process missing</strong> — No documentation of treasury close procedures, FX revaluation, intercompany settlement timing.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Depot-to-bank cash flow not detailed</strong> — Cyril sending thresholds. Unknown: which depots to which banks, frequency, transport/security arrangements.</li>
+                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>Back/forward dated & weekend transactions</strong> — Slide 37 references analysis but content not extracted (likely visual). Need to understand operational reasons.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== D.04 TECHNOLOGY ===== -->
+<div id="d04" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="font-size:18px; color:var(--primary);">D.04 — Technology Assessment</h2>
+            <p style="font-size:13px; color:var(--text-light);">Current systems, integrations, and digital capabilities</p>
+        </div>
+        <div style="text-align:right;">
+            <span class="status status-partial">45% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill mid" style="width:45%"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Evidence — What the PPT Covers</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>Accounting system: Microsoft Business Central</strong> (Slide 26) — GMA uses Business Central as their accounting tool (no ERP). No file transmissions or uploads exist today — all data entry is fully manual (rekeyed from bank portals). BC does support automated bank account reconciliation and bank connectivity. AFG does not have online banking yet (in development).</li>
+                <li><strong>PI-SPI integration architecture fully documented</strong> (Slides 12–14) — REST/JSON API, ISO 20022 messaging, OAuth2+mTLS security, AES-256 encryption. Webhook-based reconciliation. Standard access vs API Business comparison with GMA-specific examples (flour mill scenarios).</li>
+                <li><strong>PI-SPI risk register</strong> (Slide 13) — 6 risk categories analyzed: KYC/identity risk, anonymity/alias risk, fraud/SIM-swap, audit trail & irrevocability, AML/STR obligations (Law 2016-992 CI, 7-year retention), operational/systemic risk (single hub).</li>
+                <li><strong>Payment system technical specs</strong> (Slide 9) — STAR-UEMOA: SWIFT format, cutoff 5:00 PM (CITI 3:30 PM). SICA: 9 sub-systems (8 national + 1 cross-border), single daily session. Settlement times per instrument.</li>
+                <li><strong>EMI ecosystem mapped</strong> (Slides 11–12) — Orange Money (market leader), MTN Mobile Money, Moov Money (Maroc Telecom), Wave (US fintech). Regulatory framework: BCEAO Instruction 008-05-2015. Must segregate funds, no credit/interest.</li>
+                <li><strong>PI-SPI sandbox available</strong> (Slide 12) — developer.pispi.bceao.int for integration testing. 45 institutions at launch. SIB and BOA already on platform; SocGen working to join.</li>
+                <li><strong>STAR-UEMOA routing</strong> — All banks route payments ≥XOF 50M to STAR (RTGS). This is a system-wide BCEAO capability, not bank-specific.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
+        <div class="card-body">
+            <ul class="gap-list">
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Fully manual environment — no integrations exist</strong> — All banking data is manually rekeyed from bank portals into Business Central. No file transmissions, no uploads, no automated bank statement imports, no payment file generation. BC supports automated bank reconciliation and connectivity. Bank file transmission capabilities will be assessed as part of implementation once bank rationalization decisions are made.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== D.05 TARGET DESIGN ===== -->
+<div id="d05" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="font-size:18px; color:var(--primary);">D.05 — Target Process Design</h2>
+            <p style="font-size:13px; color:var(--text-light);">Future state process architecture for GMA</p>
+        </div>
+        <div style="text-align:right;">
+            <span class="status status-gap">25% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill low" style="width:25%"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Evidence — What the PPT Covers</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>Pain points clearly identified</strong> (Slide 52) — 4 priorities: (1) Collection in remote areas — avoid cash and paper-based instruments, (2) Payment efficiency and counterparty risk reduction, (3) Resolve trapped liquidity, (4) Bank processing times.</li>
+                <li><strong>CITI CIO product initiative</strong> (Slides 27, 32) — Working on establishing Citibank Intelligent Optimization product for the CITI account. Excess funds currently being swept to CITI.</li>
+                <li><strong>PI-SPI payroll consolidation concept</strong> (Slide 40) — With PI-SPI, opportunity to consolidate payroll to same-day funding from one bank. Cost assessment still needed. SIB and BOA already on PI-SPI.</li>
+                <li><strong>Mobile money replacement</strong> (Slide 33) — MTN closing, replace with Orange or Wave. Wave has ~50% market share (American company). Cyril conducting audit.</li>
+                <li><strong>Bank prefinancing leverage</strong> (Slide 22) — SocGen fast-track 2025, CITI started prefinancing, SIB/Atlantique fast internal BCEAO processing. Opportunity to optimize payment channel selection.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
+        <div class="card-body">
+            <ul class="gap-list">
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>No formal target state design document</strong> — Pain points and some initiatives exist but no structured future-state process architecture. Need: target account structure, payment routing logic, collection modernization plan, reconciliation automation design.</li>
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>IT2 / IREC integration plan not started</strong> — No documentation of how ION IT2 TMS or BofA IREC will integrate with GMA's Business Central. Currently fully manual — every integration will be net-new. Configuration requirements undefined.</li>
+                <li><span class="sev sev-major">MAJOR</span> <strong>Bank rationalization decision pending</strong> — Currently 8 banks. CITI being elevated but cost is highest. Need formal recommendation: which banks to keep, which to close, transition plan.</li>
+                <li><span class="sev sev-major">MAJOR</span> <strong>Collection modernization not designed</strong> — Pain point #1 (remote collection) identified but no solution designed. PI-SPI API Business (Slide 13) is a candidate but integration path not mapped.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Payment channel selection matrix not built</strong> — Which payment types go through which channels in future state? STAR vs SICA vs PI-SPI vs mobile money? Need decision framework.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== D.06 DISCOVERY SESSIONS ===== -->
+<div id="d06" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="font-size:18px; color:var(--primary);">D.06 — Discovery Sessions</h2>
+            <p style="font-size:13px; color:var(--text-light);">Structured discovery with local team and banking partners</p>
+        </div>
+        <div style="text-align:right;">
+            <span class="status status-partial">55% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill mid" style="width:55%"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Evidence — Discovery Already Conducted</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>Extensive operational knowledge captured in slide notes</strong> — Throughout slides 27–41, detailed operational notes from conversations with Cyril Edorh (GMA local treasury) document how each account is used, why decisions were made, and operational context.</li>
+                <li><strong>Citibank discovery questions drafted</strong> (Slides 57–58) — Cutoff time verification per bank, cash vs mobile money breakdown request, PI-SPI enrollment timeline question.</li>
+                <li><strong>Outstanding questions register</strong> (Slide 59) — 16 questions assigned to GMA team:
+                    <ul style="margin-top:6px; margin-left:16px; font-size:12px;">
+                        <li>Bank transfer method verification (domestic funds transfer vs wire selection per platform)</li>
+                        <li>Business structure documentation (depots, bakeries, mills)</li>
+                        <li>Collection flow diagram (cash/checks/BOE from depots)</li>
+                        <li>Customer location data (remote vs urban)</li>
+                        <li>Bank fee structure details</li>
+                        <li>Payroll PI-SPI consolidation feasibility & cost</li>
+                        <li>SIB small positive transaction clarification</li>
+                        <li>Additional pain points from Cyril</li>
+                        <li>Renumeration amounts, thresholds, % per bank</li>
+                        <li>PI-SPI rollout timeline & fee comparison</li>
+                        <li>Customs guarantee 410M vs 500M discrepancy</li>
+                        <li>Bran sales billing (EUR vs XOF for Eurafrique/GMD)</li>
+                        <li>AFG sweep frequency/threshold</li>
+                        <li>Payroll dispute history / account freeze impact</li>
+                        <li>Saisie transaction scope (disputed amount vs full account)</li>
+                    </ul>
+                </li>
+                <li><strong>Wheat prepayment data analyzed</strong> (Slides 23–25) — Source: "GMA Daily Cash file" showing processing times by bank and year.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
+        <div class="card-body">
+            <ul class="gap-list">
+                <li><span class="sev sev-major">MAJOR</span> <strong>16 outstanding questions unresolved</strong> — All items on Slide 59 assigned to Cyril/Joelle but no documented responses yet. These feed into D.01 (fees, sweeps), D.03 (collection flows, payroll), and D.04 (transfer methods).</li>
+                <li><span class="sev sev-major">MAJOR</span> <strong>Senegal payment methods not discovered</strong> — Current state PPT documents Ivory Coast payment instruments and WAEMU-wide systems (STAR, SICA, PI-SPI). However, payment methods available and used in Senegal need to be separately discovered — different banks, different local practices, potentially different instrument mix (wire/RTGS, domestic funds transfer, cheques, bills of exchange, mobile money, PI-SPI, direct debits, cards, cash). Senegal-specific cutoff times, clearing practices, and bank processing norms may differ from Ivory Coast.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>No formal session log / minutes</strong> — Discovery insights are captured in slide notes but not in a structured session log with date, attendees, topics, decisions, action items.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Citibank questions not yet answered</strong> — Cutoff times and PI-SPI enrollment status unconfirmed.</li>
+                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>No stakeholder sign-off on findings</strong> — Discovery outputs not formally validated by GMA management (Francois, Cyril).</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- ===== D.07 TECHNOLOGY STRATEGY ===== -->
+<div id="d07" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2 style="font-size:18px; color:var(--primary);">D.07 — Technology Strategy</h2>
+            <p style="font-size:13px; color:var(--text-light);">IT2, IREC, bank connectivity, and integration strategy</p>
+        </div>
+        <div style="text-align:right;">
+            <span class="status status-gap">20% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill low" style="width:20%"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Evidence — What the PPT Covers</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>PI-SPI API Business integration path identified</strong> (Slides 12–14) — Full architecture documented: REST/JSON, ISO 20022, OAuth2+mTLS, webhooks, sandbox available at developer.pispi.bceao.int. Standard access vs API integration comparison with use cases.</li>
+                <li><strong>CIO product direction for CITI</strong> (Slides 27, 32) — Working on establishing Citibank Intelligent Optimization. Would provide automated cash concentration/sweep.</li>
+                <li><strong>BCEAO ISO 20022 migration in progress</strong> (Slide 2) — STAR-UEMOA currently migrating to ISO 20022. This aligns with IT2/IREC standards.</li>
+                <li><strong>PI-SPI platform adoption status per bank</strong> (Slide 40, 54) — SIB and BOA already on PI-SPI. SocGen working to join. 15 Ivorian participants as of Feb 2026.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
+        <div class="card-body">
+            <ul class="gap-list">
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>IT2 configuration plan not started</strong> — No documentation of IT2 TMS setup: entity structure, account mapping, deal types, payment workflows, accounting integration, reporting requirements.</li>
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>BofA IREC connectivity plan missing</strong> — No assessment of whether IREC is needed or available in Ivory Coast. Bank connectivity strategy (SWIFT, H2H, API) not defined per bank.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Bank connectivity approach per retained bank</strong> — Currently zero file-based connectivity. File transmission capabilities (formats, API, H2H) will be assessed for retained banks after rationalization decision. Implementation task, not a current gap.</li>
+                <li><span class="sev sev-major">MAJOR</span> <strong>IT2 → Business Central integration design needed</strong> — BC supports automated bank reconciliation and connectivity. Need to define: data flows, journal entry format, real-time vs batch. This is an implementation task, not a capability gap.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>No technology implementation sequence</strong> — Which systems first? PI-SPI, CIO, IT2, IREC? Dependencies between them?</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+</div><!-- /container -->
+
+<script>
+function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.closest('.tab').classList.add('active');
+}
+</script>
+</body>
+</html>
