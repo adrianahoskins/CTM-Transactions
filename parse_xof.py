@@ -8,7 +8,7 @@ from datetime import datetime
 # Using approximate rate: 1 USD ~ 605 XOF (as of early 2025)
 XOF_PER_USD = 605.0
 
-HEADERS = ['InputDate','PostedDate','AccountNumber','Account','Bank','AccountType','Date','TransRef','Currency','Amount','BAIType','Comment']
+HEADERS = ['InputDate','PostedDate','AccountNumber','Account','Bank','AccountType','ValueDate','TransRef','Currency','Amount','BAIType','Comment']
 
 # Country mapping by bank name and account prefix
 BANK_COUNTRY = {
@@ -49,6 +49,118 @@ def parse_row(row):
             d[h] = None
     return d
 
+def _strip_company_suffix(text):
+    """Remove trailing company name suffixes that aren't useful as beneficiary."""
+    import re
+    # Strip common company suffixes at end
+    text = re.sub(r'(?:GRANDS MOULINS D[E\']? (?:ABIDJAN|DAKAR|DKR)|GRANDS MOULINS DE DAKAR|'
+                  r'LES GRANDS MOULINS D[E\']? (?:ABIDJAN|DAKAR)|GMA|GMD)\s*$', '', text, flags=re.IGNORECASE).strip()
+    return text
+
+def _extract_beneficiary(fr, py, comment):
+    """Extract counterparty/beneficiary from comment fields."""
+    import re
+    text = py if py else fr
+    text_lower = text.lower()
+    comment_lower = comment.lower()
+
+    # VE EFFECTUE PAR: <person> — cash deposit by named person
+    m = re.search(r've effectue par:\s*(.+)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # VERSEMENT <name>Motif: or VERSEMENT <name>REMETTANT: — depositor name
+    m = re.search(r'versement\s+(.+?)(?:motif:|remettant:|$)', text, re.IGNORECASE)
+    if m:
+        name = m.group(1).strip()
+        # Only if it looks like a name (not a keyword like "especes", "deplace")
+        if name and not any(x in name.lower() for x in ['espece', 'deplace', 'cfi', 'sur ', 'par ']):
+            return _strip_company_suffix(name)[:60]
+
+    # VIB FAV. <beneficiary> or VIB FAV <beneficiary>
+    m = re.search(r'vib fav\.?\s+(.+?)(?:cion|$)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # VIRMENT/VIREMENT RTGS FAVEUR <beneficiary>
+    m = re.search(r'vir(?:e?ment)?\s+rtgs\s+faveur\s+(.+)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # VIR FAVEUR / VIR BOAWEB FAV — beneficiary after keyword
+    m = re.search(r'(?:vir(?:ement)?\s+(?:boaweb\s+)?faveur?|vir faveur)\s*(?:beneficiaire\s+)?(.+)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # TRF EMIS <beneficiary> — outgoing transfer
+    m = re.search(r'trf\s+emis\s+(.+?)(?:transfert|motif:|$)', text, re.IGNORECASE)
+    if m:
+        name = m.group(1).strip()
+        if name and name.lower() not in ['eurafrique', '']:
+            return _strip_company_suffix(name)[:60]
+
+    # Transfert mis faveur: <beneficiary>
+    m = re.search(r'(?:transfert|trf)\s+.{0,10}faveur[:\s]+(.+?)(?:motif:|montant:|$)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # VT ETRANGER FAVEUR — foreign transfer, beneficiary is in FR:
+    if 'vt etranger' in text_lower:
+        fr_clean = _strip_company_suffix(fr)
+        if fr_clean and fr_clean.lower() not in ['', 'nonref']:
+            return fr_clean[:60]
+
+    # VIR MASSE / VIR MULTI — mass payment, beneficiary in FR:
+    if any(x in text_lower for x in ['vir masse', 'vir multi', 'virt multiple']):
+        fr_clean = _strip_company_suffix(fr)
+        if fr_clean and fr_clean.lower() not in ['', 'nonref']:
+            return fr_clean[:60]
+
+    # 05VIR.RECU: <sender> — incoming wire
+    m = re.search(r'(?:05)?vir\.recu:\s*(.+)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # EFFET AU <date> TIRE: <drawer>
+    m = re.search(r'tire:\s*(.+)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # /PT/FT/PY<description> — BICIS fee format, sometimes has person name
+    m = re.search(r'/pt/ft/py(.+)', text, re.IGNORECASE)
+    if m:
+        name = m.group(1).strip()
+        # Only treat as beneficiary if it looks like a name (not a fee/rejection description)
+        if not any(x in name.lower() for x in ['frais', 'commission', 'timbre', 'telecompens',
+                                                  'abonnement', 'facturation', 'bicis', 'agios',
+                                                  'imp chq', 'miscellaneous', 'absence de',
+                                                  'insuffisance', 'donnees faciales']):
+            return _strip_company_suffix(name)[:60]
+
+    # ESPECES VERSEES PAR <person> — name might be after PAR in text, or in FR: field
+    m = re.search(r'especes?\s+vers[eé]e?s?\s+par\s+(.+)', text, re.IGNORECASE)
+    if m:
+        name = m.group(1).strip()
+        if name and name.lower() not in ['par', '']:
+            return _strip_company_suffix(name)[:60]
+    # If PY: ends with "PAR" (name is cut off), use FR: field as the depositor name
+    if 'especes versees par' in text_lower and text_lower.rstrip().endswith('par'):
+        fr_clean = _strip_company_suffix(fr)
+        if fr_clean and fr_clean.lower() not in ['', 'nonref']:
+            return fr_clean[:60]
+
+    # VERSEMENT ESPECES DE <person>
+    m = re.search(r'versement\s+especes?\s+de\s+(.+)', text, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    # REMETTANT: <person> — depositor in structured comments
+    m = re.search(r'remettant:\s*(.+)', comment, re.IGNORECASE)
+    if m:
+        return _strip_company_suffix(m.group(1).strip())[:60]
+
+    return ''
+
 def classify_comment(comment):
     if not comment:
         return 'Unclassified', '', ''
@@ -57,12 +169,19 @@ def classify_comment(comment):
     fr = ''
     trid = ''
     py = ''
-    bnf = ''
 
+    import re as _re
+
+    def _clean_py(raw):
+        """Clean PY: field — strip company suffixes, Motif:, Remettant:, Montant: suffixes."""
+        raw = _re.split(r'(?:Motif:|REMETTANT:|Montant:|Au cours de:)', raw, flags=_re.IGNORECASE)[0]
+        return _strip_company_suffix(raw).strip()
+
+    # --- Parse structured tags ---
     if 'FR:' in comment:
         parts = comment.split('FR:')
         rest = parts[1] if len(parts) > 1 else ''
-        for tag in ['ENDT:', 'TRID:', 'PY:', 'BNF:', 'GMA']:
+        for tag in ['ENDT:', 'TRID:', 'PY:']:
             if tag in rest:
                 idx = rest.index(tag)
                 if not fr:
@@ -71,49 +190,154 @@ def classify_comment(comment):
         if not fr:
             fr = rest.strip()
         if 'TRID:' in comment:
-            trid = comment.split('TRID:')[1].split('PY:')[0].split('BNF:')[0].split('GMA')[0].strip()
+            trid = comment.split('TRID:')[1].split('PY:')[0].strip()
         if 'PY:' in comment:
-            py = comment.split('PY:')[1].split('BNF:')[0].split('GMA')[0].strip()
-        if 'BNF:' in comment:
-            bnf = comment.split('BNF:')[1].split('GMA')[0].strip()
+            py = _clean_py(comment.split('PY:')[1])
+    elif 'PY:' in comment:
+        py = _clean_py(comment.split('PY:')[1])
+        fr = comment.split('PY:')[0].strip()
+    elif 'ENDT:' in comment or 'TRID:' in comment:
+        # Has tags but no FR:/PY: — extract what we can
+        fr = _re.split(r'(?:ENDT:|TRID:)', comment)[0].strip()
+        if 'PY:' in comment:
+            py = _clean_py(comment.split('PY:')[1])
     else:
         fr = comment.strip()
 
     description = py if py else fr
-    fr_lower = fr.lower()
+    # Extract beneficiary
+    bnf = _extract_beneficiary(fr, py, comment)
+    # Clean up bad beneficiaries
+    if bnf:
+        bnf_lower = bnf.lower()
+        # Filter out non-name artifacts
+        if any(x in bnf_lower for x in ['miscellaneous swf', 'imp chq', 'absence de',
+                                          'insuffisance', 'donnees faciales']):
+            bnf = ''
 
-    if any(x in fr_lower for x in ['virement', 'vir.compense', 'vir int', 'vir emis', 'vir recu', 'virt ', 'transfer']):
-        cat = 'Wire Transfer'
-    elif any(x in fr_lower for x in ['cheque', 'chq', 'remise cheque']):
-        cat = 'Check / Cheque'
-    elif any(x in fr_lower for x in ['agios', 'interest', 'interet']):
-        cat = 'Interest / Agios'
-    elif any(x in fr_lower for x in ['commission', 'frais', 'fees', 'charges', 'com ']):
-        cat = 'Fees / Commissions'
-    elif any(x in fr_lower for x in ['tax amount', 'tva', 'impot', 'taxe']):
+    # --- Classify using BOTH fr and py fields ---
+    fr_lower = fr.lower()
+    py_lower = py.lower()
+    # Combined text for broader matching
+    combined = (fr_lower + ' ' + py_lower).strip()
+
+    # --- CATEGORY RULES (ordered by specificity) ---
+
+    # Tax / Stamp Duty — check before fees since "timbre" is tax, not a fee
+    if any(x in combined for x in ['tax amount', 'tva ', 'impot', 'taxe ', 'droit timbre', 'timbre/vers',
+                                     'timbre fiscal', 'timbre etat', 'timbre', 'vat']):
         cat = 'Tax'
-    elif any(x in fr_lower for x in ['salary', 'salaire', 'paie', 'paye']):
+
+    # Payroll / Salary
+    elif any(x in combined for x in ['salary', 'salaire', 'paie ', 'paye ', 'cnps', 'paiement cnps']):
         cat = 'Payroll / Salary'
-    elif any(x in fr_lower for x in ['telex', 'swift']):
-        cat = 'SWIFT / Telex'
-    elif any(x in fr_lower for x in ['effet', 'traite', 'bill of exchange']):
-        cat = 'Bills / Effets'
-    elif any(x in fr_lower for x in ['balance requirement', 'debit chgs', 'number of debit', 'number of credit']):
-        cat = 'Bank Charges'
-    elif any(x in fr_lower for x in ['espece', 'retrait', 'versement', 'cash', 'caisse']):
-        cat = 'Cash'
-    elif any(x in fr_lower for x in ['prelevement', 'debit direct']):
-        cat = 'Direct Debit'
-    elif any(x in fr_lower for x in ['outward', 'inward']):
+
+    # Foreign / Cross-border Transfers
+    elif any(x in combined for x in ['vt etranger', 'trf emis eurafrique', 'frais trf eurafrique',
+                                       'outward', 'inward', 'transfert international',
+                                       'vor swft fav', 'vt interb']):
         cat = 'Cross-border'
-    elif any(x in fr_lower for x in ['domiciliation', 'domic']):
+
+    # Interbank Wire Transfers (VIB = Virement Interbancaire)
+    elif any(x in combined for x in ['vib fav', 'cion / vi', 'virement interbancaire',
+                                       'cion / virement']):
+        cat = 'Wire Transfer'
+
+    # Wire Transfer (general)
+    elif any(x in combined for x in ['virement', 'vir.compense', 'vir int', 'vir emis', 'vir recu',
+                                       'virt ', 'vir faveur', 'vir boaweb', 'vir masse',
+                                       'vir multi', 'transfer', '05vir.recu:', '13vir boaweb',
+                                       'virment rtgs', 'trf emis']):
+        cat = 'Wire Transfer'
+
+    # Check / Cheque
+    elif any(x in combined for x in ['cheque', 'chq ', 'chq.', 'chq/', 'remise chq', 'rem chq',
+                                       'remise cheque', 'votre remose', 'chq comp', 'chq imp',
+                                       'v/rem chq', 'remose chq', 'rejet sequence']):
+        cat = 'Check / Cheque'
+
+    # Bills / Effets (commercial paper)
+    elif any(x in combined for x in ['effet au', 'effet ', 'traite', 'bill of exchange',
+                                       'encaissement effet', 'paiem.effets']):
+        cat = 'Bills / Effets'
+
+    # Cash Deposits/Withdrawals
+    elif any(x in combined for x in ['espece', 'especes', 'retrait esp', 'versement esp',
+                                       've effectue par', 'vers.esp', 'depot especes',
+                                       'versement deplace', 'versement cfi', '/versement cfi',
+                                       'borne ', 'cash', 'caisse', 'especes versees',
+                                       'sort de caisse', 'retrait chq depl',
+                                       'versement par to', 'versement sur',
+                                       'ver dplace', 'ver deplace']):
+        cat = 'Cash'
+
+    # Interest / Agios
+    elif any(x in combined for x in ['agios', 'interest', 'interet']):
+        cat = 'Interest / Agios'
+
+    # Bank Fees / Commissions (broad — catches /PT/FT, telecompense fees, etc.)
+    elif any(x in combined for x in ['commission', 'frais ', 'frais/', 'fees', 'charges',
+                                       'com encais', 'com/', '+commissions',
+                                       'frais sur', 'fraos', 'frais telecompense',
+                                       'frais de t', 'frais de f', 'frais virement',
+                                       'frais/virt', 'frais annuel', 'frais imp',
+                                       'facturation', 'abonnement', 'pack anet',
+                                       'pack ibe', 'sibnet', 'balance requirement',
+                                       'debit chgs', 'number of debit', 'number of credit',
+                                       '/pt/ft', 'minimum balance', 'taf sur loc',
+                                       'bp online', 'pack anet', 't.p.s']):
+        cat = 'Fees / Commissions'
+
+    # SWIFT / Telex
+    elif any(x in combined for x in ['telex', 'swift', 'infoswift']):
+        cat = 'SWIFT / Telex'
+
+    # Reversals / Corrections
+    elif any(x in combined for x in ['annulation operation', 'annulation', 'extourne', 'contre-passation']):
+        cat = 'Reversal / Correction'
+
+    # Direct Debit
+    elif any(x in combined for x in ['prelevement', 'debit direct']):
+        cat = 'Direct Debit'
+
+    # Domiciliation
+    elif any(x in combined for x in ['domiciliation', 'domic', 'fdom ']):
         cat = 'Domiciliation'
-    elif any(x in fr_lower for x in ['remise', 'encaissement']):
+
+    # Collection / Remise
+    elif any(x in combined for x in ['remise', 'encaissement']):
         cat = 'Collection / Remise'
-    elif any(x in fr_lower for x in ['ordre de paiement', 'payment order']):
+
+    # Payment Order
+    elif any(x in combined for x in ['ordre de paiement', 'payment order']):
         cat = 'Payment Order'
-    elif fr.strip() == '' or fr_lower in ['nonref', '']:
+
+    # Miscellaneous bank entries (catch-all for MISCELLANEOUS SWF codes)
+    elif any(x in combined for x in ['miscellaneous']):
+        # Try to reclassify based on PY: content
+        if any(x in py_lower for x in ['virement', 'vir ']):
+            cat = 'Wire Transfer'
+        elif any(x in py_lower for x in ['depot especes', 'versement']):
+            cat = 'Cash'
+        elif any(x in py_lower for x in ['facturation', 'frais', 'commission']):
+            cat = 'Fees / Commissions'
+        elif 'miscellaneous debit' in combined:
+            cat = 'Fees / Commissions'
+        else:
+            cat = 'Other'
+
+    # Credit divers — general credit entries
+    elif 'credit divers' in combined:
+        cat = 'Other'
+
+    # Unclassified — empty or NONREF with no PY:
+    elif (fr.strip() == '' or fr_lower in ['nonref', '']) and not py:
         cat = 'Unclassified'
+
+    # If PY has versement + name pattern (Motif: comments), classify as Cash
+    elif 'versement' in py_lower and 'motif:' in comment.lower():
+        cat = 'Cash'
+
     else:
         cat = 'Other'
 
@@ -183,24 +407,33 @@ for fname, has_header in files:
         cat, desc, bnf = classify_comment(d['Comment'])
         country = get_country(str(d['Bank'] or ''), str(d['AccountNumber'] or ''))
 
+        def fmt_date(val):
+            if isinstance(val, datetime):
+                return val.strftime('%Y-%m-%d')
+            elif isinstance(val, str):
+                try:
+                    return datetime.strptime(val, '%m/%d/%Y').strftime('%Y-%m-%d')
+                except:
+                    return str(val)
+            return str(val) if val else ''
+
         posted = d['PostedDate']
+        date_str = fmt_date(posted)
         if isinstance(posted, datetime):
-            date_str = posted.strftime('%Y-%m-%d')
             month_key = posted.strftime('%Y-%m')
         elif isinstance(posted, str):
             try:
-                dt = datetime.strptime(posted, '%m/%d/%Y')
-                date_str = dt.strftime('%Y-%m-%d')
-                month_key = dt.strftime('%Y-%m')
+                month_key = datetime.strptime(posted, '%m/%d/%Y').strftime('%Y-%m')
             except:
-                date_str = str(posted)
                 month_key = 'Unknown'
         else:
-            date_str = str(posted)
             month_key = 'Unknown'
+
+        value_date_str = fmt_date(d['ValueDate'])
 
         all_rows.append({
             'date': date_str,
+            'value_date': value_date_str,
             'month': month_key,
             'account': str(d['Account'] or ''),
             'bank': str(d['Bank'] or ''),
@@ -239,7 +472,8 @@ for key, indices in by_date_amount.items():
         for ci, ct in credits:
             if ci in used_credits:
                 continue
-            if dt['account'] != ct['account']:
+            # Must be different accounts AND amounts must match (debit = -credit)
+            if dt['account'] != ct['account'] and abs(abs(dt['amount_xof']) - abs(ct['amount_xof'])) < 1:
                 transfer_indices.add(di)
                 transfer_indices.add(ci)
                 transfer_pairs.append((di, ci))
@@ -272,9 +506,7 @@ for r in all_rows:
     else:
         country_stats[r['country']]['credit_xof'] += r['amount_xof']
 
-all_rows.sort(key=lambda x: x['date'])
-
-# Build transfer pairs data for Transfers tab
+# Build transfer pairs data for Transfers tab (BEFORE sorting all_rows, since indices are pre-sort)
 transfers_list = []
 for di, ci in transfer_pairs:
     dt = all_rows[di]
@@ -294,6 +526,9 @@ for di, ci in transfer_pairs:
         'credit_ref': ct['ref'],
     })
 transfers_list.sort(key=lambda x: x['date'])
+
+# Now safe to sort all_rows
+all_rows.sort(key=lambda x: x['date'])
 
 print(f'Transfer pairs found: {len(transfers_list):,}')
 

@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMA Transactions Dashboard — UX Review</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --primary: #1e3a5f;
+  --primary-light: #2d5aa0;
+  --accent: #4f46e5;
+  --red: #dc2626;
+  --orange: #d97706;
+  --green: #16a34a;
+  --slate: #475569;
+  --grade-bg: #1e3a5f;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+
+/* ── STICKY NAV ── */
+.sticky-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--primary); color: #fff;
+  padding: 0 32px; display: flex; gap: 0; overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.sticky-nav a {
+  color: rgba(255,255,255,0.75); text-decoration: none;
+  font-size: 12px; font-weight: 500; padding: 12px 16px;
+  white-space: nowrap; border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.sticky-nav a:hover { color: #fff; border-bottom-color: #93c5fd; }
+
+/* ── HEADER ── */
+.report-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff; padding: 40px 48px;
+}
+.report-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.report-header .meta { color: #bfdbfe; font-size: 13px; }
+
+/* ── CONTAINER ── */
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 32px; }
+
+/* ── GRADE BLOCK ── */
+.grade-block {
+  display: flex; align-items: center; gap: 32px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px 32px; margin-bottom: 32px;
+}
+.grade-badge {
+  width: 96px; height: 96px; border-radius: 50%;
+  background: var(--grade-bg); color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.grade-badge .letter { font-size: 38px; font-weight: 800; line-height: 1; }
+.grade-badge .plus { font-size: 18px; font-weight: 600; color: #93c5fd; }
+.grade-summary h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; color: var(--primary); }
+.grade-summary p { font-size: 14px; color: var(--text-muted); max-width: 680px; line-height: 1.65; }
+
+/* ── SCORECARD ── */
+.scorecard {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+  margin-bottom: 32px;
+}
+.score-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; text-align: center;
+}
+.score-card .dim { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 6px; }
+.score-card .val { font-size: 22px; font-weight: 700; }
+.score-card .bar { height: 4px; border-radius: 2px; margin-top: 8px; background: #e2e8f0; }
+.score-card .bar-fill { height: 100%; border-radius: 2px; }
+.val-a  { color: #16a34a; }
+.val-b  { color: #2563eb; }
+.val-c  { color: #d97706; }
+.val-d  { color: #dc2626; }
+.fill-a { background: #16a34a; }
+.fill-b { background: #2563eb; }
+.fill-c { background: #d97706; }
+.fill-d { background: #dc2626; }
+
+/* ── SEVERITY PILLS ── */
+.pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.pill-critical { background: #fee2e2; color: #991b1b; }
+.pill-high     { background: #fef3c7; color: #92400e; }
+.pill-medium   { background: #e0e7ff; color: #3730a3; }
+.pill-low      { background: #f1f5f9; color: #475569; }
+
+/* ── FINDING CARDS ── */
+.finding {
+  background: var(--card); border-radius: 8px;
+  border: 1px solid var(--border);
+  border-left: 4px solid;
+  margin-bottom: 18px; overflow: hidden;
+}
+.finding-critical { border-left-color: var(--red); }
+.finding-high     { border-left-color: var(--orange); }
+.finding-medium   { border-left-color: #4f46e5; }
+.finding-low      { border-left-color: var(--slate); }
+
+.finding-header {
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.finding-critical .finding-header { background: #fff5f5; }
+.finding-high     .finding-header { background: #fffbeb; }
+.finding-medium   .finding-header { background: #eef2ff; }
+.finding-low      .finding-header { background: #f8fafc; }
+
+.finding-id { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
+.finding-title { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+.finding-body { padding: 16px 20px; }
+.finding-body p { margin-bottom: 10px; font-size: 13px; line-height: 1.65; }
+.finding-body p:last-child { margin-bottom: 0; }
+.finding-body strong { color: var(--text); }
+
+code {
+  background: #f1f5f9; color: #0f172a; padding: 1px 6px;
+  border-radius: 4px; font-family: 'Cascadia Code', 'SF Mono', 'Consolas', monospace;
+  font-size: 12px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; border-radius: 8px;
+  padding: 16px 20px; overflow-x: auto; font-size: 12px;
+  font-family: 'Cascadia Code', 'SF Mono', 'Consolas', monospace;
+  line-height: 1.6; margin: 12px 0;
+}
+pre .c  { color: #94a3b8; }
+pre .k  { color: #93c5fd; }
+pre .s  { color: #86efac; }
+pre .fn { color: #fbbf24; }
+pre .cm { color: #6b7280; font-style: italic; }
+
+/* ── COLOR PALETTE ── */
+.palette-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.swatch-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.swatch { width: 56px; height: 40px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.08); }
+.swatch-hex { font-size: 10px; font-family: monospace; color: var(--text-muted); }
+.swatch-name { font-size: 10px; color: var(--text-muted); text-align: center; }
+
+.contrast-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+.contrast-table th { background: #f1f5f9; padding: 8px 12px; text-align: left; font-weight: 600; }
+.contrast-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.pass-cell { color: #15803d; font-weight: 600; }
+.fail-cell { color: #dc2626; font-weight: 600; }
+.warn-cell { color: #d97706; font-weight: 600; }
+
+/* ── SECTION HEADERS ── */
+.section { margin-bottom: 48px; }
+.section-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--accent);
+  padding-bottom: 10px; border-bottom: 2px solid #e0e7ff;
+  margin-bottom: 20px;
+}
+
+/* ── STRENGTHS GRID ── */
+.strengths-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.strength-item {
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  border-radius: 8px; padding: 14px 16px;
+}
+.strength-item .s-title { font-weight: 700; font-size: 13px; color: #166534; margin-bottom: 4px; }
+.strength-item .s-desc { font-size: 12px; color: #15803d; line-height: 1.5; }
+
+/* ── ROADMAP TABLE ── */
+.roadmap-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.roadmap-table th { background: var(--primary); color: #fff; padding: 10px 14px; text-align: left; font-weight: 500; }
+.roadmap-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.roadmap-table tr:nth-child(even) td { background: #f8fafc; }
+.wave-1 { color: var(--red); font-weight: 700; }
+.wave-2 { color: var(--orange); font-weight: 700; }
+.wave-3 { color: var(--green); font-weight: 700; }
+
+/* ── DATA TABLE (for consistency audit) ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+.data-table th { background: #f1f5f9; padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+.data-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+
+/* ── BEFORE/AFTER ── */
+.ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+.ba-card { border-radius: 8px; padding: 16px; border: 1px solid var(--border); }
+.ba-card.before { background: #fff5f5; border-color: #fecaca; }
+.ba-card.after  { background: #f0fdf4; border-color: #bbf7d0; }
+.ba-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.ba-card.before .ba-label { color: #991b1b; }
+.ba-card.after  .ba-label { color: #166534; }
+.ba-card code { background: transparent; padding: 0; }
+
+/* ── DESIGNER'S NOTE ── */
+.designer-note {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5aa0 100%);
+  color: #fff; border-radius: 12px; padding: 28px 32px; margin-top: 48px;
+}
+.designer-note h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: #bfdbfe; }
+.designer-note p { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.85); }
+.designer-note p + p { margin-top: 10px; }
+
+@media (max-width: 900px) {
+  .scorecard { grid-template-columns: repeat(2, 1fr); }
+  .strengths-grid { grid-template-columns: 1fr; }
+  .ba-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .container { padding: 24px 16px; }
+  .grade-block { flex-direction: column; text-align: center; }
+  .scorecard { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <a href="#grade">Grade</a>
+  <a href="#scorecard">Scorecard</a>
+  <a href="#colors">Color System</a>
+  <a href="#critical">Critical</a>
+  <a href="#high">High</a>
+  <a href="#medium">Medium</a>
+  <a href="#low">Low</a>
+  <a href="#strengths">Strengths</a>
+  <a href="#roadmap">Roadmap</a>
+</nav>
+
+<!-- HEADER -->
+<div class="report-header">
+  <h1>GMA Transactions Dashboard — UX/UI Design Review</h1>
+  <div class="meta">Reviewed by Aria Chen, Principal UX Designer &nbsp;|&nbsp; March 2026 &nbsp;|&nbsp; Source: <code style="background:rgba(255,255,255,0.15);color:#fff">build_html.py (--gma flag)</code></div>
+</div>
+
+<div class="container">
+
+<!-- GRADE -->
+<a id="grade"></a>
+<div class="grade-block">
+  <div class="grade-badge">
+    <div class="letter">B</div>
+    <div class="plus">+</div>
+  </div>
+  <div class="grade-summary">
+    <h2>Solid analytical foundation — refinements needed on density and table ergonomics</h2>
+    <p>The GMA dashboard handles a genuinely complex data model well. The core design decisions are sound: a light theme works for this analyst context, the color semantic system (debit/credit with directional arrows) is correct, drill-through navigation is a meaningful productivity feature, and the exchange-rate disclosure shows regulatory awareness. The issues holding this back from an A are concentrated in three areas: the Transfers tab table is too wide to read comfortably at any practical screen size; the tab strip has a navigation ordering problem that buries the most-used tab (Transactions); and the filter bar on the Transactions tab lacks an active-state indicator, making it impossible to know at a glance what filters are applied. These are all fixable without a design overhaul.</p>
+  </div>
+</div>
+
+<!-- SCORECARD -->
+<a id="scorecard"></a>
+<div class="section">
+  <div class="section-title">Dimension Scorecard</div>
+  <div class="scorecard">
+
+    <div class="score-card">
+      <div class="dim">Info Architecture</div>
+      <div class="val val-b">B</div>
+      <div class="bar"><div class="bar-fill fill-b" style="width:78%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Visual Design</div>
+      <div class="val val-b">B+</div>
+      <div class="bar"><div class="bar-fill fill-b" style="width:83%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Table Usability</div>
+      <div class="val val-c">C+</div>
+      <div class="bar"><div class="bar-fill fill-c" style="width:62%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Filter / Search UX</div>
+      <div class="val val-b">B</div>
+      <div class="bar"><div class="bar-fill fill-b" style="width:76%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Data Visualization</div>
+      <div class="val val-b">B+</div>
+      <div class="bar"><div class="bar-fill fill-b" style="width:82%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Mobile Responsive</div>
+      <div class="val val-c">C</div>
+      <div class="bar"><div class="bar-fill fill-c" style="width:58%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Accessibility</div>
+      <div class="val val-c">C+</div>
+      <div class="bar"><div class="bar-fill fill-c" style="width:64%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Typography</div>
+      <div class="val val-b">B</div>
+      <div class="bar"><div class="bar-fill fill-b" style="width:77%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Color System</div>
+      <div class="val val-a">A-</div>
+      <div class="bar"><div class="bar-fill fill-a" style="width:88%"></div></div>
+    </div>
+
+    <div class="score-card">
+      <div class="dim">Compliance / Trust</div>
+      <div class="val val-a">A</div>
+      <div class="bar"><div class="bar-fill fill-a" style="width:93%"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- COLOR SYSTEM -->
+<a id="colors"></a>
+<div class="section">
+  <div class="section-title">Color System Audit</div>
+
+  <div class="finding finding-medium">
+    <div class="finding-header">
+      <span class="finding-id">COLOR SYSTEM</span>
+      <span class="finding-title">Palette — Current vs. Contrast Analysis</span>
+    </div>
+    <div class="finding-body">
+      <p>The light-theme color system is well-reasoned. Navy primary anchors authority. Red/green semantic pair uses directional arrows as a non-color redundant cue — correctly handles WCAG 1.4.1 (Use of Color). The main issues are with secondary text and the hardcoded inline status colors that escape the token system.</p>
+
+      <p><strong>Current Tokens:</strong></p>
+      <div class="palette-grid">
+        <div class="swatch-item"><div class="swatch" style="background:#1a365d"></div><div class="swatch-hex">#1a365d</div><div class="swatch-name">--primary</div></div>
+        <div class="swatch-item"><div class="swatch" style="background:#2d5aa0"></div><div class="swatch-hex">#2d5aa0</div><div class="swatch-name">--primary-light</div></div>
+        <div class="swatch-item"><div class="swatch" style="background:#c53030"></div><div class="swatch-hex">#c53030</div><div class="swatch-name">--accent (debit)</div></div>
+        <div class="swatch-item"><div class="swatch" style="background:#1a6640"></div><div class="swatch-hex">#1a6640</div><div class="swatch-name">--green (credit)</div></div>
+        <div class="swatch-item"><div class="swatch" style="background:#f7fafc"></div><div class="swatch-hex">#f7fafc</div><div class="swatch-name">--bg</div></div>
+        <div class="swatch-item"><div class="swatch" style="background:#2d3748"></div><div class="swatch-hex">#2d3748</div><div class="swatch-name">--text</div></div>
+        <div class="swatch-item"><div class="swatch" style="background:#718096"></div><div class="swatch-hex">#718096</div><div class="swatch-name">--text-light</div></div>
+        <div class="swatch-item"><div class="swatch" style="background:#e2e8f0"></div><div class="swatch-hex">#e2e8f0</div><div class="swatch-name">--border</div></div>
+      </div>
+
+      <p><strong>Contrast ratios against white (#ffffff) background:</strong></p>
+      <table class="contrast-table">
+        <thead><tr><th>Token / Color</th><th>Hex</th><th>Ratio</th><th>AA Normal</th><th>AA Large</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>--text</td><td><code>#2d3748</code></td><td>10.6:1</td><td class="pass-cell">PASS</td><td class="pass-cell">PASS</td><td>Body text — excellent</td></tr>
+          <tr><td>--primary</td><td><code>#1a365d</code></td><td>12.1:1</td><td class="pass-cell">PASS</td><td class="pass-cell">PASS</td><td>Header — excellent</td></tr>
+          <tr><td>--accent (debit)</td><td><code>#c53030</code></td><td>5.5:1</td><td class="pass-cell">PASS</td><td class="pass-cell">PASS</td><td>Debit values — good</td></tr>
+          <tr><td>--green (credit)</td><td><code>#1a6640</code></td><td>6.9:1</td><td class="pass-cell">PASS</td><td class="pass-cell">PASS</td><td>Credit values — good</td></tr>
+          <tr><td>--text-light</td><td><code>#718096</code></td><td>4.5:1</td><td class="warn-cell">BORDERLINE</td><td class="pass-cell">PASS</td><td>Labels at 12px — marginal. On card bg (#f8fafc) ratio drops to 4.2:1 — fails AA at small sizes.</td></tr>
+          <tr><td>Inline warning #b7791f</td><td><code>#b7791f</code></td><td>3.9:1</td><td class="fail-cell">FAIL</td><td class="pass-cell">PASS</td><td>Used at 11px for float badges, priority labels — fails AA</td></tr>
+          <tr><td>Inline low-priority #718096</td><td><code>#718096</code></td><td>4.5:1</td><td class="warn-cell">BORDERLINE</td><td class="pass-cell">PASS</td><td>Used at 11px in Priority column — borderline</td></tr>
+          <tr><td>Value date color #6b46c1</td><td><code>#6b46c1</code></td><td>5.7:1</td><td class="pass-cell">PASS</td><td class="pass-cell">PASS</td><td>Transfer table value dates — passes but not in token system</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Recommended token additions:</strong> Add <code>--warning: #92400e</code> (ratio 7.2:1) to replace the current inline <code>#b7791f</code> (3.9:1 — fails AA at small text sizes). Add <code>--value-date: #5b21b6</code> as a named token for the value date column color distinction, so it can be modified consistently.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CRITICAL FINDINGS -->
+<a id="critical"></a>
+<div class="section">
+  <div class="section-title">Critical Findings — Fix Before Release</div>
+
+  <div class="finding finding-critical">
+    <div class="finding-header">
+      <span class="finding-id">C-01</span>
+      <span class="pill pill-critical">Critical</span>
+      <span class="finding-title">Transfers Tab: 13–15 Column Table Is Illegible at Any Practical Viewport</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> The Intra-Entity table has 13 columns and the Intercompany table has 15 columns. At 1400px (the container max-width), the 13-column version has roughly 107px per column on average — but several columns compete: two bank name columns need at least 180px each, two date-pair columns each need 80px, account number badges want 45px each, and the description column wants 200px+. The math does not work. In practice the table overflows horizontally, requires scrolling, and the four date columns (<code>Posted Out</code>, <code>Posted In</code>, <code>Value Out</code>, <code>Value In</code>) read as an undifferentiated wall of dates because they have no visual grouping to show which pair belongs to the same side of the transfer.</p>
+      <p><strong>Root cause:</strong> Four date columns were added to show float calculation transparency, which is a good analytical decision — but the column design was not reconsidered when they were added. The account number columns (<code>Acct</code> at 45px) also show only the last 4 digits with no label indicating this is truncated, which is a separate data trust issue.</p>
+      <p><strong>Recommendation — Grouped Column Headers:</strong> Use a two-row header structure. Group the four date/float columns under two parent headers: "Posted Date" (spanning Out, In, Float) and "Value Date" (spanning Out, In, Float). This adds visual parsing structure and allows the parent header to carry the explanatory label so the child headers can be abbreviated to "Out", "In", "Float". Also merge the two bank + account columns into a single compound cell showing bank name with the 4-digit account suffix below it in smaller monospace text. This reduces 4 columns to 2, cutting the total from 13 to 11 for intra-entity and from 15 to 12 for intercompany.</p>
+<pre>
+<span class="c">/* Two-row thead structure for Transfers table */</span>
+<span class="k">&lt;thead&gt;</span>
+  <span class="k">&lt;tr&gt;</span>  <span class="cm">&lt;!-- Row 1: column group labels --&gt;</span>
+    <span class="k">&lt;th</span> rowspan="2"<span class="k">&gt;</span>From<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> rowspan="2"<span class="k">&gt;</span>To<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> rowspan="2" class="num"<span class="k">&gt;</span>USD<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> rowspan="2" class="num"<span class="k">&gt;</span>XOF<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> colspan="3" class="col-group-posted"<span class="k">&gt;</span>Posted Date<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> colspan="3" class="col-group-value"<span class="k">&gt;</span>Value Date<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> rowspan="2"<span class="k">&gt;</span>Description<span class="k">&lt;/th&gt;</span>
+  <span class="k">&lt;/tr&gt;</span>
+  <span class="k">&lt;tr&gt;</span>  <span class="cm">&lt;!-- Row 2: individual column headers --&gt;</span>
+    <span class="k">&lt;th</span> class="col-group-posted"<span class="k">&gt;</span>Out<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> class="col-group-posted"<span class="k">&gt;</span>In<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> class="col-group-posted"<span class="k">&gt;</span>Float<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> class="col-group-value"<span class="k">&gt;</span>Out<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> class="col-group-value"<span class="k">&gt;</span>In<span class="k">&lt;/th&gt;</span>
+    <span class="k">&lt;th</span> class="col-group-value"<span class="k">&gt;</span>Float<span class="k">&lt;/th&gt;</span>
+  <span class="k">&lt;/tr&gt;</span>
+<span class="k">&lt;/thead&gt;</span>
+
+<span class="c">/* CSS for column group backgrounds */</span>
+<span class="k">.col-group-posted</span> { background: <span class="s">#1a365d</span>; }          <span class="cm">/* primary navy */</span>
+<span class="k">.col-group-value</span>  { background: <span class="s">#3730a3</span>; }          <span class="cm">/* indigo — visually distinct */</span>
+</pre>
+      <p><strong>Compound bank+account cell approach:</strong> Instead of two separate columns for bank name and last-4 account, render a single cell:</p>
+<pre>
+html += '<span class="k">&lt;td&gt;</span>'
+     + '<span class="k">&lt;div</span> class="<span class="s">bank-name</span>"<span class="k">&gt;</span>' + bankDisplay + '<span class="k">&lt;/div&gt;</span>'
+     + '<span class="k">&lt;div</span> class="<span class="s">acct-suffix</span>"<span class="k">&gt;</span>•••• ' + srcAcct + '<span class="k">&lt;/div&gt;</span>'
+     + '<span class="k">&lt;/td&gt;</span>';
+
+<span class="c">/* CSS */</span>
+<span class="k">.bank-name</span>   { font-size: 13px; font-weight: 500; }
+<span class="k">.acct-suffix</span> { font-size: 10px; color: <span class="s">#718096</span>; font-family: monospace; }
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-critical">
+    <div class="finding-header">
+      <span class="finding-id">C-02</span>
+      <span class="pill pill-critical">Critical</span>
+      <span class="finding-title">No Active Filter Indicator — Users Cannot Tell What Is Filtered</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> The Transactions tab has 7 active filter controls. When a user drills through from a summary table (e.g., clicking a bank row in the Banks tab), the dashboard jumps to the Transactions tab with that filter pre-applied. But the filter bar looks identical whether 0 or 5 filters are active — every dropdown stays the same visual weight. A user who returns to the Transactions tab from another tab has no indication that the view is showing a subset of data, not the full dataset. This is a data trust problem: the user may draw incorrect conclusions from a filtered subset they've forgotten is filtered.</p>
+      <p><strong>Recommendation:</strong> Add an active-filter banner that appears below the filter bar whenever any filter is non-default. It should list what is active and include a "Clear All" link. Additionally, update the Transactions tab button label dynamically to show the filtered count (e.g., "Transactions (342)" vs "Transactions").</p>
+<pre>
+<span class="cm">/* Add after the filter bar, before the table-wrap */</span>
+<span class="k">&lt;div</span> id="filterBanner" style="display:none; background:#eff6ff; border-bottom:1px solid #bfdbfe;
+  padding:8px 20px; font-size:12px; color:#1e40af; display:flex;
+  justify-content:space-between; align-items:center;"<span class="k">&gt;</span>
+  <span class="k">&lt;span</span> id="filterBannerText"<span class="k">&gt;&lt;/span&gt;</span>
+  <span class="k">&lt;button</span> onclick="clearFilters()" style="font-size:12px; color:#1e40af;
+    background:none; border:none; cursor:pointer; text-decoration:underline;"<span class="k">&gt;</span>
+    Clear all filters
+  <span class="k">&lt;/button&gt;</span>
+<span class="k">&lt;/div&gt;</span>
+
+<span class="cm">/* In renderTxns(), update the banner */</span>
+<span class="fn">function</span> updateFilterBanner() {
+  const parts = [];
+  if (countrySel.value) parts.push('Country: ' + countrySel.value);
+  if (bankSel.value)    parts.push('Bank: ' + (BANK_DISPLAY[bankSel.value]||bankSel.value));
+  if (catSel.value)     parts.push('Type: ' + catSel.value);
+  if (flowSel.value)    parts.push('Flow: ' + flowSel.value);
+  const banner = document.getElementById('filterBanner');
+  if (parts.length) {
+    document.getElementById('filterBannerText').textContent
+      = 'Active filters: ' + parts.join(' | ');
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-critical">
+    <div class="finding-header">
+      <span class="finding-id">C-03</span>
+      <span class="pill pill-critical">Critical</span>
+      <span class="finding-title">Tab Navigation Order Buries the Most-Used Tab at Position 10</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> The current tab order is: Overview, Cash Flow, Country, Transaction Types, Banks, Monthly Trends, Country Review, Transfers, Insights, Transactions. The Transactions tab — the primary data explorer where analysts spend the most time — is the last item in a 10-tab strip. Hick's Law applies directly here: more choices + wrong ordering = slower time-to-action for the primary task. Country Review is also positioned before Transfers despite being a secondary analytical layer. The "Country" and "Country Review" tabs having similar names 3 positions apart also creates confusion about what each does.</p>
+      <p><strong>Recommendation — Revised tab order based on task frequency:</strong></p>
+      <table class="data-table">
+        <thead><tr><th>Position</th><th>Tab Label</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Overview</td><td>Landing — KPI summary, entry charts</td></tr>
+          <tr><td>2</td><td>Transactions</td><td>Move to second — primary exploration tab</td></tr>
+          <tr><td>3</td><td>Transfers</td><td>High-value analyst task — float analysis</td></tr>
+          <tr><td>4</td><td>Banks</td><td>Drill-down anchor — used frequently</td></tr>
+          <tr><td>5</td><td>Cash Flow</td><td>Flow type analysis</td></tr>
+          <tr><td>6</td><td>Transaction Types</td><td>Category breakdown</td></tr>
+          <tr><td>7</td><td>Monthly Trends</td><td>Temporal analysis</td></tr>
+          <tr><td>8</td><td>Country</td><td>Merge "Country" + "Country Review" into one tab with sub-sections</td></tr>
+          <tr><td>9</td><td>Insights</td><td>Findings + recommendations — natural endpoint</td></tr>
+        </tbody>
+      </table>
+      <p>Merging "Country" and "Country Review" into a single "Country" tab eliminates the duplicate-name confusion. The tab can open showing the summary cards/charts at the top, with the detailed per-country breakdowns below — already the natural scroll order since <code>country_review_html</code> generates the detail sections.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- HIGH FINDINGS -->
+<a id="high"></a>
+<div class="section">
+  <div class="section-title">High Priority Findings</div>
+
+  <div class="finding finding-high">
+    <div class="finding-header">
+      <span class="finding-id">H-01</span>
+      <span class="pill pill-high">High</span>
+      <span class="finding-title">Transfer Table Row Height and Font Size Are Below Minimum Legibility Threshold</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> The four date columns in the Transfers table use inline <code>font-size:11px</code> and the <code>PF</code>/<code>VF</code> float badge columns use <code>font-size:11px</code> with no minimum row padding. At 11px, WCAG 1.4.4 (Resize Text) requires the user be able to scale to 200% without loss of function, but beyond that, 11px at normal zoom on a standard 96 DPI screen is genuinely uncomfortable for sustained reading — especially for date strings which are already dense character sequences. The <code>PF</code>/<code>VF</code> column headers are also cryptic abbreviations with only a <code>title</code> attribute tooltip for explanation, which is inaccessible to keyboard and touch users.</p>
+      <p><strong>Recommendation:</strong> Set a minimum font size of 12px for all table data cells. Replace <code>PF</code>/<code>VF</code> header abbreviations with "Float (d)" label — short enough to fit but self-explanatory. If the grouped header approach from C-01 is implemented, the parent header "Posted Date" provides enough context that the child can say "Float" without needing expansion.</p>
+      <p>Current row padding is <code>padding: 8px 12px</code> on <code>td</code> globally. The Transfers table should add a specific override: <code>#tfTable td { padding: 9px 12px; }</code> — adding 1px vertical padding reduces the cramped feeling without meaningfully increasing table height.</p>
+    </div>
+  </div>
+
+  <div class="finding finding-high">
+    <div class="finding-header">
+      <span class="finding-id">H-02</span>
+      <span class="pill pill-high">High</span>
+      <span class="finding-title">Inline Hardcoded Status Colors Bypass the Token System and Fail AA at Small Sizes</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> Several components use hardcoded hex values for status colors rather than CSS custom properties. The Priority Action Matrix in the Insights tab uses inline <code>style="color:#c53030"</code>, <code>color:#b7791f</code>, and <code>color:#718096</code> directly on <code>&lt;td&gt;</code> elements at 13px body size — but more problematically, <code>#b7791f</code> at 13px on white achieves only 3.9:1 contrast ratio, which fails WCAG AA (requires 4.5:1 for normal text). The Bank Consolidation Candidates table uses the same three-color coding with the same failure on the warning amber.</p>
+      <p>The KPI float value coloring at lines 1085–1086 also uses hardcoded hex triples inline on style attributes: <code>'#276749' if avg_float &lt; 1 else '#b7791f' if avg_float &lt; 3 else '#c53030'</code>. This pattern appears four times in the Transfers KPI row. Any future color system change requires hunting through Python f-strings rather than updating one CSS token.</p>
+      <p><strong>Recommendation:</strong> Add three semantic tokens to <code>:root</code>:</p>
+<pre>
+:root {
+  <span class="cm">/* existing tokens ... */</span>
+  <span class="k">--status-ok</span>:   <span class="s">#1a6640</span>;   <span class="cm">/* reuse --green — 6.9:1 */</span>
+  <span class="k">--status-warn</span>: <span class="s">#92400e</span>;   <span class="cm">/* darker amber — 7.2:1 — replaces #b7791f */</span>
+  <span class="k">--status-crit</span>: <span class="s">#c53030</span>;   <span class="cm">/* reuse --accent — 5.5:1 */</span>
+}
+</pre>
+      <p>Then in Python, replace the f-string color ternary with CSS class names:</p>
+<pre>
+<span class="cm"># Before (hardcoded hex in f-string):</span>
+f"color:{'#276749' if avg_float < 1 else '#b7791f' if avg_float < 3 else '#c53030'}"
+
+<span class="cm"># After (class-based):</span>
+float_cls = <span class="s">'status-ok'</span> if avg_float < 1 else <span class="s">'status-warn'</span> if avg_float < 3 else <span class="s">'status-crit'</span>
+<span class="cm"># in template:</span>
+f'class="val {float_cls}"'
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-high">
+    <div class="finding-header">
+      <span class="finding-id">H-03</span>
+      <span class="pill pill-high">High</span>
+      <span class="finding-title">Transactions Table Pagination: Count Indicator Position and "Rows" Selector Ordering</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> The pagination bar layout is: <code>[Showing X-Y of Z] [Rows: select] [Previous] [Next]</code>. There are two problems. First, the rows-per-page selector sits between the count display and the navigation buttons — visually it breaks the reading flow from "here is where you are" to "here is how to navigate". Standard treasury table pagination (Bloomberg, Mercury, Stripe) positions the count on the left and navigation controls on the right as a unit. Second, the count reads "Showing 1-200 of 39,856" but does not update the label to reflect that the 200-row page size is currently active — if a user changes the page size, the count updates numerically but there is no summary like "200 rows per page".</p>
+      <p><strong>Recommendation:</strong> Reorder the pagination bar to: <code>[left: count + rows-per-page label] [right: Previous / Next buttons]</code>. This is a CSS flex change:</p>
+<pre>
+<span class="c">/* Updated pagination layout */</span>
+<span class="k">.pagination</span> {
+  display: flex;
+  justify-content: space-between;  <span class="cm">/* left group vs right group */</span>
+  align-items: center;
+  padding: 10px 20px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+}
+<span class="c">/* Left group: count + page size */</span>
+<span class="k">.pagination-left</span>  { display: flex; align-items: center; gap: 16px; }
+<span class="c">/* Right group: prev/next */</span>
+<span class="k">.pagination-right</span> { display: flex; align-items: center; gap: 8px; }
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-high">
+    <div class="finding-header">
+      <span class="finding-id">H-04</span>
+      <span class="pill pill-high">High</span>
+      <span class="finding-title">Tab Strip Wraps Onto Two Lines at 1024px — Creates Visual Confusion</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> The tab strip uses <code>flex-wrap: wrap</code> which means at narrower viewports — specifically around 1024–1200px where many analyst laptops operate — the 10 tabs wrap onto a second line. The active tab underline indicator (<code>border-bottom: 2px solid var(--primary); margin-bottom: -2px</code>) is designed to sit on the container border, but when tabs wrap, the second-line tabs are no longer aligned to that border, creating a visual disconnect where the active indicator floats mid-container.</p>
+      <p><strong>Recommendation:</strong> Two viable approaches depending on whether C-03 tab consolidation is implemented. If reducing to 9 tabs as recommended in C-03, add <code>overflow-x: auto</code> instead of <code>flex-wrap: wrap</code>. This keeps tabs on a single row and adds horizontal scrolling at narrow viewports — much cleaner than wrapping. If keeping 10 tabs, reduce tab padding from <code>10px 20px</code> to <code>9px 14px</code> and use <code>font-size: 13px</code> — the 10 tabs fit on a single row down to 1024px.</p>
+<pre>
+<span class="k">.tabs</span> {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+  overflow-x: auto;          <span class="cm">/* replaces flex-wrap: wrap */</span>
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+<span class="k">.tab</span> {
+  padding: 9px 14px;          <span class="cm">/* reduced from 10px 20px */</span>
+  font-size: 13px;             <span class="cm">/* reduced from 14px */</span>
+  white-space: nowrap;         <span class="cm">/* prevent individual tab text wrapping */</span>
+  flex-shrink: 0;              <span class="cm">/* prevent tabs from shrinking below their text width */</span>
+}
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-high">
+    <div class="finding-header">
+      <span class="finding-id">H-05</span>
+      <span class="pill pill-high">High</span>
+      <span class="finding-title">Transfer Table Pagination Does Not Reset on Filter Change</span>
+    </div>
+    <div class="finding-body">
+      <p><strong>What is broken:</strong> The <code>renderIntra()</code> function is called from the filter <code>oninput</code> and <code>onchange</code> handlers, but <code>intraPage</code> is not reset to 0 inside those handlers. It is only reset inside <code>renderIntra()</code> itself when the "Clear" button is pressed. This means if a user is on page 3 of 200 transfers and then types a search term that matches only 15 transfers (fewer than one page), the pagination can report "Showing 201–200 of 15" — an impossible range — before rendering the empty state. The same bug exists in <code>renderIC()</code>.</p>
+      <p><strong>Recommendation:</strong> Add page reset at the start of the filter change event:</p>
+<pre>
+<span class="cm">// Intra date inputs and search — add intraPage = 0 reset</span>
+&lt;input ... onchange="<span class="fn">intraPage=0</span>; renderIntra()"&gt;
+&lt;input ... oninput="clearTimeout(intraTimer); intraTimer=setTimeout(() => { <span class="fn">intraPage=0</span>; renderIntra(); }, 300)"&gt;
+
+<span class="cm">// Same fix for IC table</span>
+&lt;input ... onchange="<span class="fn">icPage=0</span>; renderIC()"&gt;
+</pre>
+    </div>
+  </div>
+
+</div>
+
+<!-- MEDIUM FINDINGS -->
+<a id="medium"></a>
+<div class="section">
+  <div class="section-title">Medium Priority Findings</div>
+
+  <div class="finding finding-medium">
+    <div class="finding-header">
+      <span class="finding-id">M-01</span>
+      <span class="pill pill-medium">Medium</span>
+      <span class="finding-title">Overview Tab: Chart Pair Sizing Imbalance — Monthly Chart Visually Dominates</span>
+    </div>
+    <div class="finding-body">
+      <p>The Overview tab renders a 2-column chart row (category bar + bank bar) then a full-width monthly chart. The monthly chart with 3 datasets (debit bars, credit bars, net line) at <code>max-height: 350px</code> full-width feels proportionally heavy against the two shorter charts above. The visual hierarchy implies monthly trends are the primary insight, which may not always be true.</p>
+      <p><strong>Recommendation:</strong> Cap the monthly chart at 280px max-height (reducing from 350px) and add a summary stat bar above it with the largest month by net flow and the month-over-month trend direction. This gives the chart more context without requiring users to hover to see what the biggest month was. Alternatively, restructure the Overview to show three full-width sections: (1) KPI cards (already present, moved above tabs), (2) the two-column chart pair, (3) an insight summary strip that auto-generates from Python rather than a large chart.</p>
+    </div>
+  </div>
+
+  <div class="finding finding-medium">
+    <div class="finding-header">
+      <span class="finding-id">M-02</span>
+      <span class="pill pill-medium">Medium</span>
+      <span class="finding-title">Cash Flow Tab KPI Cards Use Raw USD Without M/K Abbreviation — Numbers Overflow</span>
+    </div>
+    <div class="finding-body">
+      <p>The Cash Flow tab KPI cards display values like <code>+$12,450,832</code> using the format <code>${collection_credits_usd:,.0f}</code>. At a KPI card width of ~220px with font-size clamp at 16–24px, a 13-character dollar string will overflow the <code>white-space: nowrap</code> container at smaller card sizes. The top-level KPI cards on the page correctly use <code>/1e6:,.1f</code> M-suffix formatting — but the Cash Flow tab KPIs do not. This inconsistency also creates a cognitive mismatch: the header says "$12.5M" but the Cash Flow tab says "$12,450,832" for the same number.</p>
+      <p><strong>Recommendation:</strong> Apply the same M-suffix format used in the top-level KPIs throughout all KPI cards. Specifically update the Cash Flow tab KPI values to use the <code>/1e6:,.1f}M</code> Python format string, and add a <code>title</code> attribute or secondary <code>.sub</code> line with the full precision value for users who need it.</p>
+    </div>
+  </div>
+
+  <div class="finding finding-medium">
+    <div class="finding-header">
+      <span class="finding-id">M-03</span>
+      <span class="pill pill-medium">Medium</span>
+      <span class="finding-title">Drill-Through Navigation Does Not Provide a "Back" Affordance</span>
+    </div>
+    <div class="finding-body">
+      <p>Clicking a row in any summary table (Banks, Categories, Country, Flow) jumps the user to the Transactions tab with a pre-applied filter. This is a useful feature, but it has no "back" affordance. After landing on the filtered Transactions view, the user has no indication that they navigated from another tab, and no quick way to return to the source table to pick a different row. This forces users to manually click back to the source tab and re-orient in a potentially long table.</p>
+      <p><strong>Recommendation:</strong> After a drill-through navigation, show a breadcrumb banner at the top of the Transactions tab content (above the filter bar): "Viewing transactions for: <strong>Citibank Ivory Coast</strong> &nbsp;|&nbsp; <a href="#">Back to Banks</a>". This can be implemented by storing the source tab ID in a variable during the drill-through click handler and rendering it as part of the filter banner from C-02.</p>
+    </div>
+  </div>
+
+  <div class="finding finding-medium">
+    <div class="finding-header">
+      <span class="finding-id">M-04</span>
+      <span class="pill pill-medium">Medium</span>
+      <span class="finding-title">Category Bar Chart: X-Axis Labels Rotate 45° and Still Truncate</span>
+    </div>
+    <div class="finding-body">
+      <p>The category chart (<code>catChart</code>) uses <code>maxRotation: 45</code> and <code>font: { size: 10 }</code> on the x-axis ticks. Category names like "SWIFT / Telex", "Check / Cheque", and "Fees / Commissions" are 15–20 characters — at 10px with 45° rotation they are still truncated in Chart.js with an ellipsis. Analysts cannot read which category a bar represents without hovering, which defeats the chart's purpose as a quick comparison view.</p>
+      <p><strong>Recommendation:</strong> Convert the category chart from vertical bars to a horizontal bar chart. Set <code>indexAxis: 'y'</code>, keep <code>font: { size: 11 }</code> on y-axis labels, and set a fixed height of 320px. The bank chart already correctly uses horizontal orientation — apply the same logic to category. This is a one-word change in the Chart.js config.</p>
+<pre>
+new Chart(document.getElementById('<span class="s">catChart</span>'), {
+  type: '<span class="s">bar</span>',
+  data: { ... },
+  options: {
+    <span class="k">indexAxis: 'y'</span>,      <span class="cm">/* flip to horizontal */</span>
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { callback: v => v.toLocaleString() } },
+      y: { ticks: { font: { size: <span class="s">11</span> } } }  <span class="cm">/* labels readable at 11px horizontal */</span>
+    }
+  }
+});
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-medium">
+    <div class="finding-header">
+      <span class="finding-id">M-05</span>
+      <span class="pill pill-medium">Medium</span>
+      <span class="finding-title">Country Pie Chart Uses Semantically Charged Colors for Non-Semantic Data</span>
+    </div>
+    <div class="finding-body">
+      <p>The country pie chart uses the color array <code>['#3182ce','#c53030','#276749','#b7791f']</code>. The second color is <code>#c53030</code> — the same red used throughout the dashboard to mean "debit/outflow". In the pie chart context, it is assigned to whichever country sorts second alphabetically. If an analyst's eye lands on the red slice and associates it with "negative/debit", they will misread the chart — this is a direct application of the established Stroop-effect interference between learned semantic colors and new non-semantic uses of the same hue.</p>
+      <p><strong>Recommendation:</strong> Use a neutral categorical palette for the country pie. Blue family only, or blue+teal with no red/green:</p>
+<pre>
+<span class="cm">// Country pie — neutral categorical palette (no red/green)</span>
+backgroundColor: ['<span class="s">#3182ce</span>', '<span class="s">#0891b2</span>', '<span class="s">#7c3aed</span>', '<span class="s">#0f766e</span>']
+<span class="cm">// Blues/teals/violet — clearly non-semantic, still readable</span>
+</pre>
+      <p>Apply the same logic to the country bar chart, which currently uses <code>rgba(197,48,48,0.7)</code> for debits and <code>rgba(39,103,73,0.7)</code> for credits — which is actually correct and semantically appropriate for a debit/credit comparison chart. Only the pie chart (which is not a debit/credit chart) needs the fix.</p>
+    </div>
+  </div>
+
+  <div class="finding finding-medium">
+    <div class="finding-header">
+      <span class="finding-id">M-06</span>
+      <span class="pill pill-medium">Medium</span>
+      <span class="finding-title">Accounts Tab Is Missing — Referenced in Brief but Not in Dashboard</span>
+    </div>
+    <div class="finding-body">
+      <p>The review brief lists 10 tabs including an "Accounts" tab for account-level detail. This tab does not appear in the <code>build_html.py</code> source — the tab strip generates 10 tabs (Overview, Cash Flow, Country, Transaction Types, Banks, Monthly Trends, Country Review, Transfers, Insights, Transactions), none of which is "Accounts". The Banks tab shows bank-level aggregates, not individual account-level data. If the dataset contains account-level identifiers (the Transfers table shows <code>source_account</code> and <code>dest_account</code> fields with last-4 masking), an account-level view would be analytically valuable — showing per-account transaction count, balance direction, and float behaviour.</p>
+      <p><strong>Recommendation:</strong> If account-level data is available in <code>ctm_data.json</code>, build an Accounts tab similar in structure to the Banks tab but grouped by account number (masked to last-4 for display). This is particularly useful for treasury teams managing multiple accounts per bank. If account data is not present in the dataset, this is a data gap to note in the Insights tab rather than a dashboard gap.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- LOW FINDINGS -->
+<a id="low"></a>
+<div class="section">
+  <div class="section-title">Low Priority / Polish Findings</div>
+
+  <div class="finding finding-low">
+    <div class="finding-header">
+      <span class="finding-id">L-01</span>
+      <span class="pill pill-low">Low</span>
+      <span class="finding-title">Keyboard Navigation: Tab Buttons Lack aria-controls Association</span>
+    </div>
+    <div class="finding-body">
+      <p>The tab buttons have <code>role="tab"</code> and <code>aria-selected</code> toggling (correctly implemented in <code>showTab()</code>), but are missing <code>aria-controls="[panel-id]"</code> and the corresponding <code>aria-labelledby</code> on each panel. The <code>role="tabpanel"</code> is present on panels. Without <code>aria-controls</code>, screen reader users navigating by ARIA landmarks cannot directly jump from the tab to its panel. This is a partial ARIA pattern implementation — the skeleton is correct but the association attributes are missing.</p>
+<pre>
+<span class="cm">&lt;!-- Tab button --&gt;</span>
+&lt;button class="tab" role="tab"
+  <span class="k">id="tab-overview"</span>
+  <span class="k">aria-controls="overview"</span>
+  aria-selected="true"
+  onclick="showTab('overview')"&gt;Overview&lt;/button&gt;
+
+<span class="cm">&lt;!-- Tab panel --&gt;</span>
+&lt;div id="overview" class="tab-content active" role="tabpanel"
+  <span class="k">aria-labelledby="tab-overview"</span>&gt;...&lt;/div&gt;
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-low">
+    <div class="finding-header">
+      <span class="finding-id">L-02</span>
+      <span class="pill pill-low">Low</span>
+      <span class="finding-title">Insights Tab: Priority Action Matrix Number Column Uses Color-Only Differentiation</span>
+    </div>
+    <div class="finding-body">
+      <p>The Priority Action Matrix uses <code>color:#c53030</code> for priorities 1–2, <code>color:#b7791f</code> for 3–5, and default text for 6–8. There is no other visual differentiator — no icon, no badge, no label. A user who cannot distinguish red from orange (deuteranopia affects ~5% of male users) will see all priorities in the same visual weight. Additionally, the priority numbers are shown without any label — "1" in red doesn't communicate "Critical" to a first-time viewer without a legend.</p>
+      <p><strong>Recommendation:</strong> Replace the raw number with a priority badge: <code>&lt;span class="pill pill-critical"&gt;P1&lt;/span&gt;</code>, <code>&lt;span class="pill pill-high"&gt;P3&lt;/span&gt;</code> etc. This reuses the existing pill classes from the UX report pattern and adds text labels that are readable independent of color.</p>
+    </div>
+  </div>
+
+  <div class="finding finding-low">
+    <div class="finding-header">
+      <span class="finding-id">L-03</span>
+      <span class="pill pill-low">Low</span>
+      <span class="finding-title">Transfer Table "Acct" Column Header Does Not Indicate Masking</span>
+    </div>
+    <div class="finding-body">
+      <p>The account number column header is labeled "Acct" and shows only the last 4 digits of the account number (via <code>.slice(-4)</code>). There is no indication to the user that the value is truncated. A user unfamiliar with the system might try to use the 4-digit value to identify an account in their bank portal and be confused. The full account is presumably available in the underlying data — the masking is a display choice for security/privacy.</p>
+      <p><strong>Recommendation:</strong> Either (a) label the column header "Acct (last 4)" to make the truncation explicit, or (b) as part of the compound cell approach from C-01, render the account suffix with a masking prefix: "•••• 4521" which is the standard bank statement pattern for masked account numbers. Option (b) is preferred as it is the familiar pattern from bank portals, credit card statements, and Stripe/Plaid interfaces.</p>
+    </div>
+  </div>
+
+  <div class="finding finding-low">
+    <div class="finding-header">
+      <span class="finding-id">L-04</span>
+      <span class="pill pill-low">Low</span>
+      <span class="finding-title">Missing prefers-reduced-motion Guard on CSS Transitions</span>
+    </div>
+    <div class="finding-body">
+      <p>The dashboard has minimal animation — just <code>transition: all 0.15s</code> on tab hover and button hover states — so the risk is low. However, WCAG 2.3.3 (Level AAA, Advisory) recommends honoring <code>prefers-reduced-motion</code>. For a dashboard that may be used in an enterprise environment where some users have vestibular disorders, this is a low-cost addition.</p>
+<pre>
+@media (prefers-reduced-motion: reduce) {
+  .tab, .btn, .drill-row { transition: none; }
+}
+</pre>
+    </div>
+  </div>
+
+  <div class="finding finding-low">
+    <div class="finding-header">
+      <span class="finding-id">L-05</span>
+      <span class="pill pill-low">Low</span>
+      <span class="finding-title">Debit/Credit Arrow Pseudo-Elements May Not Render in All Export Contexts</span>
+    </div>
+    <div class="finding-body">
+      <p>The <code>.debit::before { content: '\2193 '; }</code> and <code>.credit::before { content: '\2191 '; }</code> CSS rules add directional arrows to all debit and credit values. This is a good WCAG 1.4.1 non-color cue. However, when the table is exported to CSV via <code>exportCSV()</code>, the arrows are not included — the CSV uses the raw <code>amount_xof</code> numeric values, which is correct. The issue is the converse: if a user copies table cells from the DOM (keyboard select + copy), some browsers will include the CSS pseudo-element content in the clipboard, producing values like "↓ -1,250,000" in a spreadsheet paste. This is a minor annoyance but worth noting. Confirm that the sign convention (negative = debit) is consistent in the CSV export, which it is — no fix required beyond awareness.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- STRENGTHS -->
+<a id="strengths"></a>
+<div class="section">
+  <div class="section-title">What Is Working Well</div>
+  <div class="strengths-grid">
+
+    <div class="strength-item">
+      <div class="s-title">Exchange Rate Disclosure — Proactive Trust Signal</div>
+      <div class="s-desc">The <code>.rate-notice</code> amber banner at the top of every page view correctly surfaces the fixed-rate caveat before the user sees any numbers. The note that XOF is EUR-pegged and that rates varied over the period is the right level of specificity for a treasury analyst audience. Most tools bury this footnote; surfacing it prominently is good practice.</div>
+    </div>
+
+    <div class="strength-item">
+      <div class="s-title">Drill-Through Navigation Pattern</div>
+      <div class="s-desc">Clicking any summary row (bank, category, flow, country) pre-applies that filter and jumps to the Transactions tab. The <code>data-filter-type</code> / <code>data-filter-value</code> data attribute pattern is clean and extensible. The cascading Country → Bank filter reset on country change is correctly handled in <code>onCountryChange()</code>.</div>
+    </div>
+
+    <div class="strength-item">
+      <div class="s-title">Debit/Credit Semantic Color + Arrow Pairing</div>
+      <div class="s-desc">Using both color and directional Unicode arrows (↑/↓) for debit/credit distinction satisfies WCAG 1.4.1 (Use of Color, Level A). The specific choice of navy+red+dark-green achieves AA contrast on white. The <code>fmt_net()</code> function correctly adds +/- prefix text as a third redundant cue.</div>
+    </div>
+
+    <div class="strength-item">
+      <div class="s-title">Float Badge Color Semantics Are Correct</div>
+      <div class="s-desc">The <code>floatBadge()</code> function correctly maps 0 days = green, 1–2 days = amber, 3+ days = red. This mirrors the mental model a treasury analyst has about settlement float — same-day is ideal, 1–2 days is normal, 3+ days warrants investigation. The color thresholds are calibrated to the domain, not generic traffic-light defaults.</div>
+    </div>
+
+    <div class="strength-item">
+      <div class="s-title">Bank Display Name Normalization</div>
+      <div class="s-desc">The <code>BANK_DISPLAY</code> mapping converts internal system codes ("AFG BK", "SOCGEN IVORY COAST") to readable institutional names. This is applied consistently in dropdowns, table cells, and chart labels via the <code>bdn()</code> function. It also handles the <code>BANK_DISPLAY[b] || b</code> fallback pattern correctly for unmapped codes.</div>
+    </div>
+
+    <div class="strength-item">
+      <div class="s-title">Cascading Country → Bank Dropdown Filter</div>
+      <div class="s-desc">Selecting a country in the filter bar narrows the bank dropdown to only banks operating in that country — exactly the pattern recommended in prior CTM reviews. The implementation correctly preserves the previously selected bank value if it is still valid after the country change.</div>
+    </div>
+
+    <div class="strength-item">
+      <div class="s-title">Operational vs. Total Flow Separation</div>
+      <div class="s-desc">The Cash Flow tab correctly separates total flow (including inter-account transfers) from operational flow (excluding transfers). The two footer rows in the flow table distinguish these clearly. This prevents the misleading inflation of gross debit figures by internal pool movement — a common error in treasury dashboards.</div>
+    </div>
+
+    <div class="strength-item">
+      <div class="s-title">Insights Tab Auto-Generated Narrative</div>
+      <div class="s-desc">The country-specific insights paragraphs (banking fragmentation, MTN mobile context, cheque volume, BICIS concentration risk) add genuine analytical value beyond raw data tables. Generating these from Python using computed thresholds (cheque &gt;2%, opacity &gt;15%, top-bank concentration) is a scalable pattern — it works for both GMA and CTM modes without manual editing.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ROADMAP -->
+<a id="roadmap"></a>
+<div class="section">
+  <div class="section-title">Implementation Roadmap</div>
+  <table class="roadmap-table">
+    <thead><tr><th>Wave</th><th>Finding</th><th>Change Required</th><th>Effort</th><th>Impact</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="wave-1">Wave 1</td>
+        <td>C-02</td>
+        <td>Add active filter banner + dynamic tab label with filtered count</td>
+        <td>~30 min</td>
+        <td>High — prevents silent filter confusion</td>
+      </tr>
+      <tr>
+        <td class="wave-1">Wave 1</td>
+        <td>H-05</td>
+        <td>Add <code>intraPage=0; icPage=0</code> resets to filter change handlers</td>
+        <td>~5 min</td>
+        <td>High — bug fix</td>
+      </tr>
+      <tr>
+        <td class="wave-1">Wave 1</td>
+        <td>H-02</td>
+        <td>Add <code>--status-ok/warn/crit</code> tokens; replace inline hex in Python f-strings</td>
+        <td>~30 min</td>
+        <td>High — AA compliance at small text sizes</td>
+      </tr>
+      <tr>
+        <td class="wave-1">Wave 1</td>
+        <td>M-05</td>
+        <td>Replace country pie chart colors with neutral categorical palette</td>
+        <td>~5 min</td>
+        <td>Medium — removes semantic color confusion</td>
+      </tr>
+      <tr>
+        <td class="wave-1">Wave 1</td>
+        <td>M-04</td>
+        <td>Flip category chart to horizontal (<code>indexAxis: 'y'</code>)</td>
+        <td>~2 min</td>
+        <td>Medium — legibility of category labels</td>
+      </tr>
+      <tr>
+        <td class="wave-2">Wave 2</td>
+        <td>C-01</td>
+        <td>Implement two-row grouped header for Transfers table + compound bank/account cells</td>
+        <td>~2–3 hr</td>
+        <td>High — core usability of Transfers tab</td>
+      </tr>
+      <tr>
+        <td class="wave-2">Wave 2</td>
+        <td>C-03</td>
+        <td>Reorder tabs; merge Country + Country Review into single tab</td>
+        <td>~45 min</td>
+        <td>High — navigation efficiency</td>
+      </tr>
+      <tr>
+        <td class="wave-2">Wave 2</td>
+        <td>H-04</td>
+        <td>Replace flex-wrap with overflow-x:auto on tab strip; reduce padding to 9px 14px</td>
+        <td>~15 min</td>
+        <td>Medium — wrapping fix at 1024px</td>
+      </tr>
+      <tr>
+        <td class="wave-2">Wave 2</td>
+        <td>H-03</td>
+        <td>Reorder pagination bar layout to count-left / nav-right</td>
+        <td>~15 min</td>
+        <td>Medium — standard pattern alignment</td>
+      </tr>
+      <tr>
+        <td class="wave-2">Wave 2</td>
+        <td>M-02</td>
+        <td>Apply M-suffix formatting to Cash Flow tab KPI values</td>
+        <td>~10 min</td>
+        <td>Medium — prevents overflow, consistency</td>
+      </tr>
+      <tr>
+        <td class="wave-2">Wave 2</td>
+        <td>M-03</td>
+        <td>Add breadcrumb "back" banner after drill-through navigation</td>
+        <td>~30 min</td>
+        <td>Medium — navigation context</td>
+      </tr>
+      <tr>
+        <td class="wave-3">Wave 3</td>
+        <td>H-01</td>
+        <td>Enforce 12px minimum on all table cells; add <code>#tfTable td</code> padding override</td>
+        <td>~20 min</td>
+        <td>Medium — legibility at small sizes</td>
+      </tr>
+      <tr>
+        <td class="wave-3">Wave 3</td>
+        <td>L-01</td>
+        <td>Add <code>aria-controls</code> and <code>aria-labelledby</code> to tab/panel pairs</td>
+        <td>~20 min</td>
+        <td>Low — screen reader completeness</td>
+      </tr>
+      <tr>
+        <td class="wave-3">Wave 3</td>
+        <td>L-02</td>
+        <td>Replace priority numbers with <code>.pill</code> badges in Priority Action Matrix</td>
+        <td>~15 min</td>
+        <td>Low — color-only differentiation fix</td>
+      </tr>
+      <tr>
+        <td class="wave-3">Wave 3</td>
+        <td>L-03</td>
+        <td>Update "Acct" header to "Acct (last 4)" or use •••• masking prefix</td>
+        <td>~5 min</td>
+        <td>Low — data trust clarity</td>
+      </tr>
+      <tr>
+        <td class="wave-3">Wave 3</td>
+        <td>M-06</td>
+        <td>Evaluate feasibility of Accounts tab based on data availability</td>
+        <td>TBD</td>
+        <td>Medium if data available</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DESIGNER'S NOTE -->
+<div class="designer-note">
+  <h3>Designer's Note</h3>
+  <p>This is a genuinely well-engineered analytical tool for a complex domain. The GMA/CTM dual-mode flag pattern, the float analysis in the Transfers tab, and the auto-generated country narrative in Insights are the kind of design decisions that show deep domain understanding — not just layout skills. The issues I've flagged are refinements, not structural problems.</p>
+  <p>The highest-value work is in the Transfers tab. That tab contains the most analytically unique data in the dashboard (matched-pair float analysis with both posted and value dates), and it is currently the hardest to read. Implementing the two-row grouped header (C-01) and adding the active filter banner (C-02) would unlock the full value of that data for analysts who currently have to scroll horizontally to understand what they're looking at.</p>
+  <p>The tab ordering change (C-03) is a three-line edit that will measurably reduce the number of clicks to reach the primary workflow. It is the most asymmetric effort-to-impact ratio of anything in this review. Do that one first.</p>
+</div>
+
+</div>
+</body>
+</html>

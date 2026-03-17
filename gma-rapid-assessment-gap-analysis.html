@@ -91,29 +91,29 @@ tr:hover { background:#edf2f7; }
 <body>
 <div class="header">
     <h1>GMA — Rapid Assessment Gap Analysis</h1>
-    <div class="sub">Les Grands Moulins d'Abidjan | Ivory Coast | Based on GMA Current State PPT (59 slides) + Transaction Data (39,728 txns) | March 2026</div>
+    <div class="sub">Les Grands Moulins d'Abidjan | Ivory Coast | Based on GMA Current State PPT (59 slides) + Transaction Data (39,728 txns) + CTM Executive Deck + Ivory Coast Bank Comparison Matrix | March 2026</div>
 </div>
 <div class="container">
 
 <div class="exec-bar">
     <div class="exec-stat">
         <div class="label">Overall Completion</div>
-        <div class="value" style="color:var(--amber);">54%</div>
+        <div class="value" style="color:var(--amber);">66%</div>
         <div class="sub">Across D.01–D.07</div>
     </div>
     <div class="exec-stat">
         <div class="label">Deliverables Strong</div>
-        <div class="value" style="color:var(--green);">3</div>
-        <div class="sub">D.01, D.02, D.03 ≥ 60%</div>
+        <div class="value" style="color:var(--green);">5</div>
+        <div class="sub">D.01–D.04, D.06 ≥ 55%</div>
     </div>
     <div class="exec-stat">
         <div class="label">Remaining Gaps</div>
-        <div class="value" style="color:var(--red);">14</div>
+        <div class="value" style="color:var(--red);">10</div>
         <div class="sub">Items needing action</div>
     </div>
     <div class="exec-stat">
         <div class="label">Critical Gaps</div>
-        <div class="value" style="color:var(--red);">4</div>
+        <div class="value" style="color:var(--red);">3</div>
         <div class="sub">Block next phase</div>
     </div>
 </div>
@@ -123,10 +123,10 @@ tr:hover { background:#edf2f7; }
     <button class="tab" onclick="showTab('d01')">D.01 Banking<span class="badge green"></span></button>
     <button class="tab" onclick="showTab('d02')">D.02 Blockers<span class="badge green"></span></button>
     <button class="tab" onclick="showTab('d03')">D.03 Process<span class="badge amber"></span></button>
-    <button class="tab" onclick="showTab('d04')">D.04 Technology<span class="badge red"></span></button>
-    <button class="tab" onclick="showTab('d05')">D.05 Target Design<span class="badge red"></span></button>
+    <button class="tab" onclick="showTab('d04')">D.04 Technology<span class="badge amber"></span></button>
+    <button class="tab" onclick="showTab('d05')">D.05 Target Design<span class="badge amber"></span></button>
     <button class="tab" onclick="showTab('d06')">D.06 Discovery<span class="badge amber"></span></button>
-    <button class="tab" onclick="showTab('d07')">D.07 Strategy<span class="badge red"></span></button>
+    <button class="tab" onclick="showTab('d07')">D.07 Strategy<span class="badge amber"></span></button>
 </div>
 
 <!-- ===== SUMMARY ===== -->
@@ -142,9 +142,9 @@ tr:hover { background:#edf2f7; }
                     <tr>
                         <td><strong>D.01</strong> Banking Footprint</td>
                         <td><span class="status status-complete">Strong</span></td>
-                        <td class="num">85%</td>
-                        <td>Slides 27–36: All 10 accounts diagrammed with flows, notes, balances. Slides 47–48: Facilities & LCs.</td>
-                        <td>Fee schedules, formal IBAM format, bank capability matrix</td>
+                        <td class="num">92%</td>
+                        <td>Slides 27–36: All 10 accounts diagrammed. Slides 47–48: Facilities & LCs. Bank Comparison Matrix: Full capability assessment for all 8 banks + MTN across 11 categories.</td>
+                        <td>Fee schedules (Cyril), formal IBAM format</td>
                     </tr>
                     <tr>
                         <td><strong>D.02</strong> Blocker Assessment</td>
@@ -163,16 +163,16 @@ tr:hover { background:#edf2f7; }
                     <tr>
                         <td><strong>D.04</strong> Technology Assessment</td>
                         <td><span class="status status-partial">Partial</span></td>
-                        <td class="num">45%</td>
-                        <td>Slide 26: Business Central (accounting, no ERP). 100% manual — no file transmissions. Slides 12–14: PI-SPI architecture.</td>
-                        <td>Manual environment confirmed. BC supports connectivity. Bank capabilities assessed after rationalization decision.</td>
+                        <td class="num">65%</td>
+                        <td>Slide 26: Business Central (no ERP). 100% manual. Slides 12–14: PI-SPI. Bank Comparison: MT940/MT942, ISO 20022, ERP/TMS integration readiness per bank. CTM Executive: IT2 Anywhere + BOA IREC target stack.</td>
+                        <td>Bank connectivity implementation details per retained bank</td>
                     </tr>
                     <tr>
                         <td><strong>D.05</strong> Target Process Design</td>
-                        <td><span class="status status-gap">Gap</span></td>
-                        <td class="num">25%</td>
-                        <td>Slide 52: Pain points identified. Slide 32: CITI CIO product in progress. PI-SPI payroll consolidation concept (Slide 40).</td>
-                        <td>Formal target state design, IT2/IREC integration plan, bank rationalization decision, payment channel selection</td>
+                        <td><span class="status status-partial">Partial</span></td>
+                        <td class="num">45%</td>
+                        <td>Slide 52: Pain points. Slide 32: CITI CIO. CTM Executive: Future state architecture (IT2 + IREC + Citibank), 3-phase roadmap. Bank Comparison: Rural collection strategy (SIB + MTN/Orange), bank rationalization data.</td>
+                        <td>Formal target state design document, IT2/IREC integration plan, bank rationalization decision</td>
                     </tr>
                     <tr>
                         <td><strong>D.06</strong> Discovery Sessions</td>
@@ -183,16 +183,16 @@ tr:hover { background:#edf2f7; }
                     </tr>
                     <tr>
                         <td><strong>D.07</strong> Technology Strategy</td>
-                        <td><span class="status status-gap">Gap</span></td>
-                        <td class="num">20%</td>
-                        <td>PI-SPI integration path documented (Slides 12–14). CIO product mentioned for CITI.</td>
-                        <td>IT2 configuration plan, bank connectivity strategy, file format mapping, implementation sequence</td>
+                        <td><span class="status status-partial">Partial</span></td>
+                        <td class="num">40%</td>
+                        <td>PI-SPI integration (Slides 12–14). CIO product. CTM Executive: IT2 Anywhere + IREC architecture, 3-phase sequence. Bank Comparison: Connectivity readiness per bank (SWIFT GPI, MT940/camt, ERP connectors, ISO 20022 migration status).</td>
+                        <td>IT2 configuration plan, GMA-specific bank connectivity implementation, file format mapping</td>
                     </tr>
                     <tr style="background:#f7fafc;font-weight:700;">
                         <td>Weighted Average (D.01–D.07)</td>
                         <td></td>
-                        <td class="num" style="color:var(--amber);">~54%</td>
-                        <td colspan="2">Strong on current state documentation; weak on forward-looking design & strategy. D.08 Implementation Plan deferred until D.01–D.07 complete.</td>
+                        <td class="num" style="color:var(--amber);">~66%</td>
+                        <td colspan="2">Bank comparison matrix and CTM executive roadmap close key gaps in D.01, D.04, D.05, D.07. Remaining work: formal target state design, IT2 config, bank rationalization decision. D.08 deferred.</td>
                     </tr>
                 </tbody>
             </table>
@@ -206,11 +206,11 @@ tr:hover { background:#edf2f7; }
                 <thead><tr><th>#</th><th>Action</th><th>Deliverable</th><th>Severity</th><th>Notes</th></tr></thead>
                 <tbody>
                     <tr><td>1</td><td><strong>Complete AP & AR process maps</strong> — Wheat payments documented but local vendor payments, depot collections, and reconciliation processes missing</td><td>D.03</td><td><span class="sev sev-critical">CRITICAL</span></td><td>Slides 19 (Collections placeholder) and 52 (pain points) frame the gaps</td></tr>
-                    <tr><td>2</td><td><strong>Build target state design</strong> — IT2/IREC/CIO integration, bank rationalization, payment channel decisions for GMA</td><td>D.05, D.07</td><td><span class="sev sev-critical">CRITICAL</span></td><td>Current state now well-documented; need forward-looking design</td></tr>
-                    <tr><td>3</td><td><strong>Resolve outstanding discovery questions</strong> — 16 items assigned to Cyril + 3 Citibank questions</td><td>D.06</td><td><span class="sev sev-critical">CRITICAL</span></td><td>Slide 59: Bank transfer methods, fee structures, payroll PSI, renumeration, AFG sweep</td></tr>
-                    <tr><td>4</td><td><strong>Document bank fee schedules</strong> — Compare fee structures, identify cost optimization opportunities across 8 banks</td><td>D.01</td><td><span class="sev sev-major">MAJOR</span></td><td>Outstanding question assigned to Cyril (Slide 59)</td></tr>
-                    <tr><td>5</td><td><strong>Formalize blocker register</strong> — BCEAO Reg. 06/2024 domiciliation rules, 50% prepayment cap, FX liquidity constraints</td><td>D.02</td><td><span class="sev sev-moderate">MODERATE</span></td><td>Content exists in slides but not in structured register format</td></tr>
-                    <tr><td>6</td><td><strong>Discover Senegal payment methods</strong> — Payment instruments, bank practices, cutoff times, and clearing norms specific to Senegal</td><td>D.06</td><td><span class="sev sev-major">MAJOR</span></td><td>WAEMU-wide systems shared but local practices may differ from Ivory Coast</td></tr>
+                    <tr><td>2</td><td><strong>Write formal target state design document</strong> — Consolidate CTM roadmap, bank rationalization data, rural collection strategy, IT2/IREC architecture into single approved design</td><td>D.05</td><td><span class="sev sev-critical">CRITICAL</span></td><td>Data now available from CTM Executive + Bank Comparison; needs formal document and management sign-off</td></tr>
+                    <tr><td>3</td><td><strong>Build IT2 configuration plan for GMA</strong> — Entity structure, account mapping, deal types, payment workflows, BC integration</td><td>D.07</td><td><span class="sev sev-critical">CRITICAL</span></td><td>CTM confirms IT2 Anywhere; bank connectivity readiness now documented; GMA-specific config undefined</td></tr>
+                    <tr><td>4</td><td><strong>Resolve outstanding discovery questions</strong> — 16 items assigned to Cyril + 3 Citibank questions</td><td>D.06</td><td><span class="sev sev-major">MAJOR</span></td><td>Slide 59: Bank transfer methods, fee structures, payroll PSI, renumeration, AFG sweep</td></tr>
+                    <tr><td>5</td><td><strong>Finalize bank rationalization decision</strong> — Comparison data provides analytical basis; need formal recommendation with transition plan approved by GMA/CTM leadership</td><td>D.05</td><td><span class="sev sev-major">MAJOR</span></td><td>Recommended structure: Citi (FX) + SIB (collections) + SocGen (AP) + BOA (tax/LC). Evaluate AFG + Atlantique for closure.</td></tr>
+                    <tr><td>6</td><td><strong>Discover Senegal payment methods</strong> — Payment instruments, bank practices, cutoff times, and clearing norms specific to Senegal</td><td>D.06</td><td><span class="sev sev-major">MAJOR</span></td><td>WAEMU-wide systems shared but local practices may differ from Ivory Coast. Phase 3 prerequisite.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -225,8 +225,8 @@ tr:hover { background:#edf2f7; }
             <p style="font-size:13px; color:var(--text-light);">Current account banking footprint documentation</p>
         </div>
         <div style="text-align:right;">
-            <span class="status status-complete">85% Complete</span>
-            <div class="progress-bar" style="width:200px;"><div class="progress-fill high" style="width:85%"></div></div>
+            <span class="status status-complete">92% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill high" style="width:92%"></div></div>
         </div>
     </div>
 
@@ -248,13 +248,48 @@ tr:hover { background:#edf2f7; }
     </div>
 
     <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — Bank Capability Matrix (from Ivory Coast Bank Comparison)</div>
+        <div class="card-body" style="overflow-x:auto;">
+            <p style="font-size:12px; color:var(--text-light); margin-bottom:12px;">Source: Ivory Coast Banking Partner Comparison Matrix — Comprehensive Edition (Feb 2026). 8 banks + MTN MoMo across 11 categories.</p>
+            <table>
+                <thead>
+                    <tr><th>Bank</th><th>Overall Rating</th><th>FX Capability</th><th>Cash Mgmt</th><th>Rural Collections</th><th>Trade Finance</th><th>ERP/TMS Integration</th><th>MT940/MT942</th><th>ISO 20022</th><th>SWIFT BIC</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Citi CI</strong></td><td>4.5/5</td><td>BEST-IN-CLASS — CitiFX Pulse, 140+ currencies, tightest spreads $1M+</td><td>EXCELLENT (5/5) — CitiDirect BE, ISO 20022 leader</td><td><span class="status status-gap">NONE</span> — 1 Abidjan office only; MUST pair with local bank</td><td>EXCELLENT (5/5) — Lead cocoa exporter bank</td><td>EXCELLENT — CitiConnect API, H2H, SAP/Oracle/Kyriba native</td><td>BEST-IN-CLASS — MT940 + MT942 + camt.053 v2/v8</td><td>LEADER — camt.053 v8, pacs.004, CBPR+ aligned</td><td>CITICIBA</td></tr>
+                    <tr><td><strong>SIB</strong></td><td>4/5</td><td>MEDIUM — Up to ~$5M; limited hedging</td><td>GOOD (4/5) — SIBNET platform</td><td><span class="status status-partial">MODERATE</span> — 67+ branches, 21 cities, best hinterland bank</td><td>GOOD (4/5) — Agri-finance, cocoa/coffee</td><td>LIMITED — Basic file export/import</td><td>YES — via SIBNET + SWIFT</td><td>IN PROGRESS — Aligning with CBPR+</td><td>SIBCCIAB</td></tr>
+                    <tr><td><strong>SocGen CI</strong></td><td>4/5</td><td>FULL — SG Global Markets suite, competitive large flows</td><td>GOOD (4/5) — SG platform, call center</td><td><span class="status status-partial">LOW-MOD</span> — 66 branches; YUP discontinued Mar 2022</td><td>GOOD (4/5) — SG global trade network</td><td>GOOD — SWIFT FileAct, H2H</td><td>YES — MT940/MT942 via SG SWIFT</td><td>GOOD — camt.053/052 available</td><td>SGCICIABXXX</td></tr>
+                    <tr><td><strong>BOA CI</strong></td><td>3.5/5</td><td>SMALL-MED — Standard spot, limited hedging</td><td>ADEQUATE (3/5) — Business Online</td><td><span class="status status-partial">LOW-MOD</span> — 39 branches, some secondary cities</td><td>GOOD (3.5/5) — BOA UK commodity trade</td><td>BASIC — Standard file formats</td><td>YES — via SWIFT</td><td>IN PROGRESS — BMCE Group CBPR+</td><td>BOACCIAB</td></tr>
+                    <tr><td><strong>Banque Atlantique</strong></td><td>3.5/5</td><td>MEDIUM — Standard; basic forwards only</td><td>ADEQUATE (3/5) — Business Online</td><td><span class="status status-gap">LOW-MOD</span> — Limited rural penetration</td><td>ADEQUATE (3/5) — BCP Group network</td><td>LIMITED — Standard SWIFT formats</td><td>YES — via SWIFT</td><td>IN PROGRESS — BCP Group aligning</td><td>BACIABBB</td></tr>
+                    <tr><td><strong>AFG Bank CI</strong></td><td>3/5</td><td>BASIC — Not suited for large FX</td><td>ADEQUATE (3/5) — AFG e-Bank digital-first</td><td><span class="status status-gap">LOW</span> — 20-25 branches, urban-focused</td><td>LIMITED (2/5) — New entity, building</td><td>BASIC — Limited ERP connectors</td><td>YES — via SWIFT</td><td>IN PROGRESS — Early stage</td><td>AFGBCIAB</td></tr>
+                    <tr><td><strong>Standard Bank</strong></td><td>4.5/5</td><td>FULL — Spot/forward/swaps/options, Africa specialist</td><td>GOOD (4/5) — Business Online, API/ERP</td><td><span class="status status-gap">NONE</span> — 1 Abidjan office, CIB only</td><td>GOOD (4/5) — Africa-wide commodity</td><td>GOOD — API Marketplace, ISO 20022, Finacle</td><td>YES — via Business Online + SWIFT</td><td>GOOD — Finacle supports MX messages</td><td>SBICCIAB</td></tr>
+                    <tr><td><strong>MTN MoMo</strong></td><td>3/5</td><td>NONE</td><td>ADEQUATE (3/5) — Mobile-only</td><td><span class="status status-complete">STRONG</span> — Best last-mile rural; agent network nationwide</td><td>N/A</td><td>NONE</td><td>NO</td><td>N/A</td><td>N/A</td></tr>
+                </tbody>
+            </table>
+            <div class="source-tag">Source: Ivory Coast Banking Partner Comparison Matrix — Comprehensive Edition, February 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — Bank Risk & Strategic Assessment (from Comparison Matrix)</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>Citi: Best for FX + international but zero rural presence</strong> — MUST pair with SIB or SG for all CI collections. Premium pricing suits large flows only. First bank to do FX hedging, mass govt payment, and sovereign Eurobond in CI.</li>
+                <li><strong>SIB: Best traditional bank for hinterland collections</strong> — 67+ branches in 21 cities covering cocoa/coffee belt. Recommended as PRIMARY bank for rural branch collections. Combine with MTN MoMo for deepest reach.</li>
+                <li><strong>SocGen: YUP agency banking DISCONTINUED March 2022</strong> — Rural collection capability weakened. Now branch-based only. Monitor parent exit risk (sold Ghana 2023, Cameroon 2023). Still strong for urban corporate banking + call center.</li>
+                <li><strong>MTN MoMo: NOT a licensed bank</strong> — No BCEAO deposit protection. AML/KYC standards differ from banks. Useful ONLY as complement for last-mile mobile collections. Must pair with licensed bank.</li>
+                <li><strong>AFG Bank CI: New entity risk</strong> — Rebranded 2023. Compliance track record still building. Unrated parent (private Ivorian group). No online banking yet (in development). Re-evaluate in 18 months.</li>
+                <li><strong>Standard Bank: Strong CIB but niche in CI</strong> — Only since 2017, 1 office. Excellent for multinationals with pan-Africa needs. Infosys Finacle core banking across 20 markets.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
         <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
         <div class="card-body">
             <ul class="gap-list">
-                <li class="moderate"><span class="sev sev-major">MAJOR</span> <strong>Bank fee schedules not documented</strong> — Assigned to Cyril. Need tranches, charges by payment type, and how fees are grouped. Critical for cost optimization and bank rationalization decisions.</li>
+                <li class="moderate"><span class="sev sev-major">MAJOR</span> <strong>Bank fee schedules not documented</strong> — Assigned to Cyril. Need tranches, charges by payment type, and how fees are grouped. Critical for cost optimization and bank rationalization decisions. Bank comparison notes fees unavailable publicly — direct quotes required.</li>
                 <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>No formal IBAM-format inventory</strong> — Account data exists across slides but not in standardized ION IBAM format for import into IT2.</li>
-                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>SIB/BOA renumeration terms unconfirmed</strong> — Cyril verifying: threshold amounts, percentages, whether still active.</li>
-                <li class="minor"><span class="sev sev-minor">MINOR</span> <strong>AFG sweep frequency/threshold unknown</strong> — Assigned to Cyril (Slide 59).</li>
             </ul>
         </div>
     </div>
@@ -359,8 +394,8 @@ tr:hover { background:#edf2f7; }
             <p style="font-size:13px; color:var(--text-light);">Current systems, integrations, and digital capabilities</p>
         </div>
         <div style="text-align:right;">
-            <span class="status status-partial">45% Complete</span>
-            <div class="progress-bar" style="width:200px;"><div class="progress-fill mid" style="width:45%"></div></div>
+            <span class="status status-partial">65% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill mid" style="width:65%"></div></div>
         </div>
     </div>
 
@@ -380,10 +415,38 @@ tr:hover { background:#edf2f7; }
     </div>
 
     <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — Bank Connectivity Readiness (from Bank Comparison Matrix)</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>Citi: Best-in-class connectivity</strong> — CitiConnect API + H2H file transfer. SAP/Oracle/Kyriba/TMS native connectors. Full STP. MT940 + MT942 + camt.053 v2/v8. ISO 20022 migration leader (camt.053 v8, pacs.004 since 2024). CBPR+ aligned.</li>
+                <li><strong>SocGen: Good connectivity</strong> — SWIFT FileAct + H2H. camt.053/052 available. SG FINplus ready. Good ERP integration support via SG Group infrastructure.</li>
+                <li><strong>Standard Bank: Good API/ERP</strong> — Business Online API Marketplace. Infosys Finacle core (ISO 20022 native). Structured data reporting available. Same platform across 20 Africa markets.</li>
+                <li><strong>SIB/BOA/Atlantique/AFG: Basic connectivity</strong> — Standard SWIFT formats. MT940 available. Limited ERP connectors. ISO 20022 migration in progress (BCEAO/CBPR+ timeline). File-based integration possible but not advanced.</li>
+                <li><strong>MTN MoMo: No banking connectivity</strong> — No SWIFT, no MT940, no ERP integration. Mobile-only platform.</li>
+            </ul>
+            <div class="source-tag">Source: Ivory Coast Banking Partner Comparison Matrix — Comprehensive Edition, February 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — CTM Target Technology Stack (from CTM Executive Deck)</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>ION IT2 Anywhere — Central payment hub</strong> — Wire/ACH/check transmission, sanctions screening, vendor verification, positive payee, prior/current day API balance & transactions, payment status, disbursement funding reports</li>
+                <li><strong>BOA IREC (Intelligent Receivables)</strong> — AR automation: SFTP AR information exchange, incoming transaction statements, accounting entries</li>
+                <li><strong>Citibank conversion</strong> — Prior day reconciliation, current day cash positioning, entity report access, API-based repetitive code information for wires</li>
+                <li><strong>Manual payment requests/approvals</strong> — Business continuity path alongside IT2 automation</li>
+                <li><strong>13 entities in CTM scope</strong> — LFMM, ZENITH, NMC, AGRICARE, FMOG, GMA, PATIVOIRE, GMD, MOCHASA, BEIRA, IAG/UAG, NMG, GMPN</li>
+            </ul>
+            <div class="source-tag">Source: CTM Executive Presentation, Slide 4 — Future State Systems Overview, March 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
         <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
         <div class="card-body">
             <ul class="gap-list">
-                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Fully manual environment — no integrations exist</strong> — All banking data is manually rekeyed from bank portals into Business Central. No file transmissions, no uploads, no automated bank statement imports, no payment file generation. BC supports automated bank reconciliation and connectivity. Bank file transmission capabilities will be assessed as part of implementation once bank rationalization decisions are made.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>GMA-specific connectivity implementation pending</strong> — Bank capabilities now documented. GMA is fully manual today (BC, no file transmissions). Implementation of connectivity (which formats, which channels per retained bank) is a Phase 2 task dependent on bank rationalization decision.</li>
             </ul>
         </div>
     </div>
@@ -397,8 +460,8 @@ tr:hover { background:#edf2f7; }
             <p style="font-size:13px; color:var(--text-light);">Future state process architecture for GMA</p>
         </div>
         <div style="text-align:right;">
-            <span class="status status-gap">25% Complete</span>
-            <div class="progress-bar" style="width:200px;"><div class="progress-fill low" style="width:25%"></div></div>
+            <span class="status status-partial">45% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill mid" style="width:45%"></div></div>
         </div>
     </div>
 
@@ -416,14 +479,62 @@ tr:hover { background:#edf2f7; }
     </div>
 
     <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — CTM Implementation Roadmap (from CTM Executive Deck)</div>
+        <div class="card-body">
+            <ul class="evidence-list">
+                <li><strong>Phase 1: Rapid Assessment (ASSESS)</strong> — Banking footprint & rationalization, blocker identification, current and target process design, current and proposed technology assessment. Output: Approved design.</li>
+                <li><strong>Phase 2: Implementation (IMPLEMENT)</strong> — Account rationalization, payment & collections digitalization, just-in-time funding, just-in-time repatriation, AR automation & real-time visibility. Output: Ivory Coast operational.</li>
+                <li><strong>Phase 3: Scale & Optimize (SCALE)</strong> — Wave 2 rollout, receivables & operational dashboards, policy & controls, training & handoff. Output: Senegal operational.</li>
+                <li><strong>CTM Key Objectives confirmed</strong> — (1) Liquidity optimization — real-time visibility, minimize idle balances via pooling/sweeping. (2) Cost efficiency — reduce fees, FX costs, rationalize accounts. (3) Standardization & automation — harmonize globally, deploy IT2 + API/H2H. (4) Risk management — FX volatility, interest rate, counterparty, fraud. (5) Working capital — optimize AR/AP, align forecasting. (6) Regulatory compliance — AML/KYC, audit-ready. (7) Strategic flexibility — quick liquidity access for M&A/crisis.</li>
+            </ul>
+            <div class="source-tag">Source: CTM Executive Presentation, Slide 7 — Implementation Roadmap + Slide 3 — Key Objectives, March 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — Bank Rationalization Data (from Bank Comparison Matrix)</div>
+        <div class="card-body">
+            <div class="info-box">
+                <h4>Recommended Banking Structure for GMA (based on comparison analysis)</h4>
+                <ul style="margin-left:16px; margin-top:6px;">
+                    <li><strong>Citi CI (4.5/5)</strong> — PRIMARY for international FX payments, wheat prepayments, excess cash sweep (CIO), MT940/camt reporting, IT2 connectivity. Best pricing at $1M+ tickets.</li>
+                    <li><strong>SIB (4/5)</strong> — PRIMARY for domestic collections, hinterland branch-based collections (21 cities), cocoa/coffee belt coverage. Best traditional bank for CI-wide reach. Combine with mobile money for deepest rural access.</li>
+                    <li><strong>SocGen CI (4/5)</strong> — RETAIN for corporate banking, local vendor payments (current primary AP bank), overdraft facility (XOF 3B). Monitor parent exit risk. Good H2H connectivity.</li>
+                    <li><strong>BOA CI (3.5/5)</strong> — RETAIN for tax payments (7551 sub-account isolates government access risk), LCs (2 active), commodity trade links. 39 branches provide secondary collection coverage.</li>
+                    <li><strong>MTN MoMo → Orange/Wave</strong> — REPLACE — MTN stopped reporting Nov 2024. Cyril auditing. Orange Money or Wave (~50% market share) for last-mile rural mobile collections. Complement only, not standalone.</li>
+                    <li><strong>AFG Bank CI (3/5)</strong> — EVALUATE for closure — New entity (2023), no online banking yet, unrated parent. Currently has sweep arrangement. Re-evaluate in 18 months per comparison recommendation.</li>
+                    <li><strong>Banque Atlantique (3.5/5)</strong> — EVALUATE — Mid-tier, limited differentiation. Payroll bank currently. PI-SPI consolidation could eliminate need for multiple payroll banks.</li>
+                </ul>
+            </div>
+            <p style="font-size:12px; color:var(--text-light);"><strong>CTM Executive context:</strong> Corporate-wide: 93 account signers, 58 bank portals, 181 portal users. GMA rationalization target aligns with enterprise 91% balance visibility goal.</p>
+            <div class="source-tag">Source: Ivory Coast Banking Partner Comparison Matrix + CTM Executive Deck, March 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — Rural Collection Strategy (from Bank Comparison Matrix)</div>
+        <div class="card-body">
+            <div class="info-box">
+                <h4>Recommended Approach: SIB Branches + Mobile Money (Orange/Wave)</h4>
+                <ul style="margin-left:16px; margin-top:6px;">
+                    <li><strong>Layer 1 — SIB branch network</strong>: 67+ branches in 21 cities/towns. Covers Abidjan + San Pedro, Bouaké, Korhogo, Yamoussoukro, Daloa, Man, Abengourou, Divo, Gagnoa. Best cocoa/coffee belt coverage for agri-finance.</li>
+                    <li><strong>Layer 2 — Mobile money (Orange/Wave)</strong>: Agent network covers rural areas where no bank branch exists. USSD works without smartphone. BCEAO interoperability framework allows mobile-to-bank transfers. Wave has ~50% market share.</li>
+                    <li><strong>Layer 3 — PI-SPI instant payments</strong>: SIB and BOA already on platform. SocGen working to join. 15 Ivorian participants as of Feb 2026. REST/JSON API + ISO 20022. Sandbox available: developer.pispi.bceao.int</li>
+                    <li><strong>NOT viable for rural: Citi, Standard Bank</strong> — Both Abidjan-only, institutional/CIB. Cannot handle any rural or semi-urban collections.</li>
+                    <li><strong>SocGen weakened for rural</strong> — YUP agency banking discontinued March 2022. Now branch-based only (66 branches, urban concentration).</li>
+                </ul>
+            </div>
+            <div class="source-tag">Source: Ivory Coast Banking Partner Comparison Matrix — Section 4: Rural & Nationwide Collections, February 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
         <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
         <div class="card-body">
             <ul class="gap-list">
-                <li><span class="sev sev-critical">CRITICAL</span> <strong>No formal target state design document</strong> — Pain points and some initiatives exist but no structured future-state process architecture. Need: target account structure, payment routing logic, collection modernization plan, reconciliation automation design.</li>
-                <li><span class="sev sev-critical">CRITICAL</span> <strong>IT2 / IREC integration plan not started</strong> — No documentation of how ION IT2 TMS or BofA IREC will integrate with GMA's Business Central. Currently fully manual — every integration will be net-new. Configuration requirements undefined.</li>
-                <li><span class="sev sev-major">MAJOR</span> <strong>Bank rationalization decision pending</strong> — Currently 8 banks. CITI being elevated but cost is highest. Need formal recommendation: which banks to keep, which to close, transition plan.</li>
-                <li><span class="sev sev-major">MAJOR</span> <strong>Collection modernization not designed</strong> — Pain point #1 (remote collection) identified but no solution designed. PI-SPI API Business (Slide 13) is a candidate but integration path not mapped.</li>
-                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Payment channel selection matrix not built</strong> — Which payment types go through which channels in future state? STAR vs SICA vs PI-SPI vs mobile money? Need decision framework.</li>
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>Formal target state design document not written</strong> — Data now exists (CTM roadmap, bank capabilities, rural strategy, rationalization framework) but not consolidated into a single approved target state design for GMA. Need: formal document with target account structure, payment routing, collection plan, reconciliation design.</li>
+                <li><span class="sev sev-major">MAJOR</span> <strong>IT2 / IREC integration plan not started</strong> — CTM Executive confirms IT2 Anywhere + BOA IREC as target stack. Bank comparison confirms Citi has best connectivity (CitiConnect API, native ERP connectors). GMA-specific configuration requirements still undefined.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Bank rationalization decision requires management approval</strong> — Comparison data provides the analytical basis. Formal recommendation and transition plan need GMA/CTM leadership sign-off.</li>
             </ul>
         </div>
     </div>
@@ -494,8 +605,8 @@ tr:hover { background:#edf2f7; }
             <p style="font-size:13px; color:var(--text-light);">IT2, IREC, bank connectivity, and integration strategy</p>
         </div>
         <div style="text-align:right;">
-            <span class="status status-gap">20% Complete</span>
-            <div class="progress-bar" style="width:200px;"><div class="progress-fill low" style="width:20%"></div></div>
+            <span class="status status-partial">40% Complete</span>
+            <div class="progress-bar" style="width:200px;"><div class="progress-fill mid" style="width:40%"></div></div>
         </div>
     </div>
 
@@ -512,14 +623,47 @@ tr:hover { background:#edf2f7; }
     </div>
 
     <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — Bank Connectivity Readiness for IT2 Integration (from Bank Comparison Matrix)</div>
+        <div class="card-body">
+            <table>
+                <thead><tr><th>Bank</th><th>SWIFT GPI</th><th>MT940/MT942</th><th>ISO 20022 / camt</th><th>ERP/TMS Connectors</th><th>IT2 Integration Readiness</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Citi CI</strong></td><td>Founding member; UETR tracking; same-day settlement 100+ currencies</td><td>MT940 + MT942 + camt.053 v2/v8; multi-account single file; configurable floor limits</td><td>LEADER — camt.053 v8, pacs.004 (2024), CBPR+ aligned, structured address support</td><td>CitiConnect API; H2H; SAP/Oracle/Kyriba native; full STP</td><td><span class="status status-complete">HIGH</span> — Ready for IT2 integration day 1</td></tr>
+                    <tr><td><strong>SocGen CI</strong></td><td>Full GPI via SG Group; UETR tracking</td><td>MT940 + MT942 via SG SWIFT</td><td>GOOD — camt.053/052 available; FINplus ready</td><td>SWIFT FileAct; H2H</td><td><span class="status status-partial">MEDIUM</span> — Standard connectivity available</td></tr>
+                    <tr><td><strong>SIB</strong></td><td>GPI compliant via Attijariwafa</td><td>MT940 via SIBNET + SWIFT</td><td>IN PROGRESS — Aligning with BCEAO CBPR+</td><td>Basic file export/import</td><td><span class="status status-partial">MEDIUM-LOW</span> — File-based; limited API</td></tr>
+                    <tr><td><strong>BOA CI</strong></td><td>GPI compliant via BMCE/BOA SWIFT</td><td>MT940 via SWIFT</td><td>IN PROGRESS — BMCE Group CBPR+ timeline</td><td>Standard file formats; limited ERP</td><td><span class="status status-partial">MEDIUM-LOW</span> — File-based</td></tr>
+                    <tr><td><strong>Atlantique</strong></td><td>GPI compliant via BCP Group</td><td>MT940 via SWIFT</td><td>IN PROGRESS — BCP Group aligning</td><td>Standard SWIFT formats</td><td><span class="status status-partial">MEDIUM-LOW</span> — File-based</td></tr>
+                    <tr><td><strong>AFG Bank</strong></td><td>GPI compliant</td><td>MT940 via SWIFT</td><td>IN PROGRESS — Early stage</td><td>Basic; limited ERP connectors</td><td><span class="status status-gap">LOW</span> — No online banking yet</td></tr>
+                </tbody>
+            </table>
+            <div class="source-tag">Source: Ivory Coast Banking Partner Comparison Matrix — Sections 3, 6, February 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="background:var(--blue-bg); color:#2b6cb0;">NEW — Technology Implementation Sequence (from CTM Executive)</div>
+        <div class="card-body">
+            <div class="info-box">
+                <h4>Derived Implementation Sequence (from CTM Roadmap + Bank Capabilities)</h4>
+                <ul style="margin-left:16px; margin-top:6px;">
+                    <li><strong>Step 1 — Citibank conversion & CIO setup</strong>: Citi has highest IT2 integration readiness. CitiConnect API + H2H. CIO for automated cash concentration. Prior/current day API feeds.</li>
+                    <li><strong>Step 2 — IT2 Anywhere deployment</strong>: Central payment hub. Wire/ACH/check file transmission. Sanctions screening. Vendor verification. Connect to Citi first, then SocGen (H2H).</li>
+                    <li><strong>Step 3 — BOA IREC (AR automation)</strong>: SFTP-based AR information exchange. Incoming transaction statements. Accounting entries to Business Central.</li>
+                    <li><strong>Step 4 — Remaining bank connectivity</strong>: SIB, BOA, Atlantique — file-based (MT940). API where available. Depends on bank rationalization decision.</li>
+                    <li><strong>Step 5 — PI-SPI integration</strong>: For collection modernization and payroll consolidation. SIB + BOA already on platform. REST/JSON API available.</li>
+                </ul>
+            </div>
+            <div class="source-tag">Source: CTM Executive Slides 4–7 + Bank Comparison Matrix connectivity analysis, March 2026</div>
+        </div>
+    </div>
+
+    <div class="card">
         <div class="card-header" style="color:var(--red);">Remaining Gaps</div>
         <div class="card-body">
             <ul class="gap-list">
-                <li><span class="sev sev-critical">CRITICAL</span> <strong>IT2 configuration plan not started</strong> — No documentation of IT2 TMS setup: entity structure, account mapping, deal types, payment workflows, accounting integration, reporting requirements.</li>
-                <li><span class="sev sev-critical">CRITICAL</span> <strong>BofA IREC connectivity plan missing</strong> — No assessment of whether IREC is needed or available in Ivory Coast. Bank connectivity strategy (SWIFT, H2H, API) not defined per bank.</li>
-                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>Bank connectivity approach per retained bank</strong> — Currently zero file-based connectivity. File transmission capabilities (formats, API, H2H) will be assessed for retained banks after rationalization decision. Implementation task, not a current gap.</li>
-                <li><span class="sev sev-major">MAJOR</span> <strong>IT2 → Business Central integration design needed</strong> — BC supports automated bank reconciliation and connectivity. Need to define: data flows, journal entry format, real-time vs batch. This is an implementation task, not a capability gap.</li>
-                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>No technology implementation sequence</strong> — Which systems first? PI-SPI, CIO, IT2, IREC? Dependencies between them?</li>
+                <li><span class="sev sev-critical">CRITICAL</span> <strong>IT2 configuration plan not started</strong> — Entity structure, account mapping, deal types, payment workflows, accounting integration, reporting requirements for GMA still undefined. CTM Executive confirms IT2 Anywhere as target but GMA-specific config is Phase 2 work.</li>
+                <li><span class="sev sev-major">MAJOR</span> <strong>IT2 → Business Central integration design needed</strong> — BC supports automated bank reconciliation and connectivity. Need to define: data flows, journal entry format, real-time vs batch.</li>
+                <li class="moderate"><span class="sev sev-moderate">MODERATE</span> <strong>GMA-specific file format mapping</strong> — Bank capabilities now documented. Need to map: which formats per bank (MT940 vs camt.053), payment file generation (pain.001 vs proprietary), reconciliation file consumption.</li>
             </ul>
         </div>
     </div>

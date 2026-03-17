@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ivory Coast Banking Partner Comparison Matrix</title>
+<style>
+:root {
+    --bg: #0f1419;
+    --surface: #1a1f2e;
+    --surface2: #232839;
+    --border: #2d3348;
+    --text: #e4e6eb;
+    --text-dim: #8b8fa3;
+    --accent: #4fc3f7;
+    --excellent: #00e676;
+    --good: #4fc3f7;
+    --adequate: #ffa726;
+    --limited: #ef5350;
+    --warning: #ff9800;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; font-feature-settings: 'tnum' 1; }
+.container { max-width: 1800px; margin: 0 auto; padding: 20px; }
+
+/* Header */
+.header { background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%); border-radius: 16px; padding: 32px 40px; margin-bottom: 24px; }
+.header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.header .subtitle { color: rgba(255,255,255,0.7); font-size: 14px; }
+
+/* Two-level navigation */
+.nav-primary { display: flex; gap: 4px; background: var(--surface); border-radius: 12px; padding: 4px; margin-bottom: 8px; }
+.nav-secondary { display: flex; gap: 4px; background: var(--surface); border-radius: 12px; padding: 4px; margin-bottom: 24px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.nav-primary button, .nav-secondary button { background: transparent; border: none; color: var(--text-dim); padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+.nav-primary button:hover, .nav-secondary button:hover { background: var(--surface2); color: var(--text); }
+.nav-primary button.active, .nav-secondary button.active { background: var(--accent); color: #000; font-weight: 600; }
+
+/* Tab content */
+.tab { display: none; }
+.tab.active { display: block; }
+
+/* Scorecard */
+.scorecard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.score-card { background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border); border-left: 4px solid var(--border); position: relative; }
+.score-card .rank-badge { position: absolute; top: 12px; right: 14px; font-size: 12px; font-weight: 700; color: var(--text-dim); background: var(--surface2); border-radius: 6px; padding: 2px 8px; }
+.score-card .bank-name { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+.score-card .overall { font-size: 36px; font-weight: 700; margin-bottom: 4px; }
+.score-card .star-label { font-size: 12px; color: var(--text-dim); margin-bottom: 12px; }
+.score-card .complement-note { font-size: 11px; color: var(--warning); margin-top: 4px; }
+.score-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.score-bar .label { font-size: 11px; color: var(--text-dim); width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score-bar .bar-bg { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.score-bar .bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+.score-bar .val { font-size: 11px; font-weight: 600; width: 28px; text-align: right; flex-shrink: 0; }
+
+/* Category comparison table */
+.cat-header { font-size: 18px; font-weight: 700; padding: 16px 0 12px; border-bottom: 2px solid var(--accent); margin-bottom: 4px; }
+.comp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.comp-table th { background: var(--surface); padding: 10px 12px; text-align: left; font-weight: 600; position: sticky; top: 0; z-index: 2; border-bottom: 2px solid var(--border); white-space: nowrap; }
+.comp-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; max-width: 240px; }
+.comp-table tr:hover td { background: rgba(79, 195, 247, 0.05); }
+.comp-table td.criteria { font-weight: 600; color: var(--accent); min-width: 180px; max-width: 200px; position: sticky; left: 0; background: var(--bg); z-index: 1; }
+.rating-excellent { background: rgba(0, 230, 118, 0.1); }
+.rating-good { background: rgba(79, 195, 247, 0.08); }
+.rating-adequate { background: rgba(255, 167, 38, 0.08); }
+.rating-limited { background: rgba(239, 83, 80, 0.08); }
+
+/* Rating legend */
+.rating-legend { display: flex; gap: 20px; padding: 10px 0 14px; font-size: 11px; color: var(--text-dim); align-items: center; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+/* Recommendation section */
+.rec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.rec-card { background: var(--surface); border-radius: 12px; padding: 20px; border-left: 4px solid; }
+.rec-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.rec-card p { font-size: 12px; color: var(--text-dim); }
+.rec-card .rec-action { font-size: 13px; font-weight: 600; margin-top: 8px; }
+
+/* Heatmap */
+.heatmap-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+.heatmap-table th, .heatmap-table td { padding: 12px 16px; text-align: center; font-size: 13px; }
+.heatmap-table th { background: var(--surface); font-weight: 600; }
+.heatmap-table td { border: 1px solid var(--border); }
+.hm-5 { background: rgba(0,230,118,0.25); color: var(--excellent); font-weight: 700; }
+.hm-4 { background: rgba(79,195,247,0.2); color: var(--good); font-weight: 600; }
+.hm-3 { background: rgba(255,167,38,0.15); color: var(--adequate); }
+.hm-2 { background: rgba(239,83,80,0.15); color: var(--limited); }
+.hm-1 { background: rgba(239,83,80,0.25); color: var(--limited); font-weight: 600; }
+.hm-na { color: var(--text-dim); }
+
+/* Scrollable table wrapper */
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+
+/* Finding cards — severity-tinted backgrounds */
+.finding { border-radius: 10px; padding: 20px; margin-bottom: 16px; border-left: 4px solid var(--accent); }
+.finding h4 { font-size: 15px; margin-bottom: 8px; }
+.finding p { font-size: 13px; color: var(--text-dim); }
+.finding .severity { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+.finding-critical { background: rgba(239, 83, 80, 0.06); border-left-color: var(--limited); }
+.finding-high { background: rgba(255, 152, 0, 0.05); border-left-color: var(--warning); }
+.finding-medium { background: var(--surface); border-left-color: var(--adequate); }
+.finding-info { background: var(--surface); border-left-color: var(--good); }
+.severity-critical { color: var(--limited); }
+.severity-high { color: var(--warning); }
+.severity-medium { color: var(--adequate); }
+.severity-info { color: var(--good); }
+
+.footer { text-align: center; padding: 32px 0; color: var(--text-dim); font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px; }
+
+/* Print stylesheet */
+@media print {
+    body { background: #fff; color: #000; }
+    .nav-primary, .nav-secondary { display: none; }
+    .tab { display: block !important; page-break-before: auto; }
+    .header { background: #1a237e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .score-card, .rec-card, .finding { break-inside: avoid; border-color: #ccc; }
+    .score-card { background: #f8f9fa; }
+    .comp-table td.criteria { background: #fff; }
+    .table-wrap { overflow: visible; }
+    .container { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+    <h1>Ivory Coast Banking Partner Comparison Matrix</h1>
+    <div class="subtitle">Comprehensive Edition &mdash; 8 Banking Partners Evaluated Across 11 Categories | Prepared for Corporate Banking Evaluation | February 2026</div>
+</div>
+
+<div class="nav-primary">
+    <button class="active" data-tab="scorecard" onclick="showTab('scorecard')">Scorecard</button>
+    <button data-tab="heatmap" onclick="showTab('heatmap')">Heatmap</button>
+    <button data-tab="findings" onclick="showTab('findings')">Key Findings</button>
+    <button data-tab="recommendations" onclick="showTab('recommendations')">Recommendations</button>
+</div>
+<div class="nav-secondary">
+    <button data-tab="cat0" onclick="showTab('cat0')">1. OVERVIEW &amp; RISK</button>
+    <button data-tab="cat1" onclick="showTab('cat1')">2. FX CAPABILITIES</button>
+    <button data-tab="cat2" onclick="showTab('cat2')">3. CASH MANAGEMENT &amp; P..</button>
+    <button data-tab="cat3" onclick="showTab('cat3')">4. RURAL &amp; NATIONWIDE ..</button>
+    <button data-tab="cat4" onclick="showTab('cat4')">5. TRADE FINANCE</button>
+    <button data-tab="cat5" onclick="showTab('cat5')">6. THIRD-PARTY BANK PA..</button>
+    <button data-tab="cat6" onclick="showTab('cat6')">7. CORPORATE BANKING C..</button>
+    <button data-tab="cat7" onclick="showTab('cat7')">8. BOND ISSUANCE &amp; CAP..</button>
+    <button data-tab="cat8" onclick="showTab('cat8')">9. NETWORK &amp; PARTNERSH..</button>
+    <button data-tab="cat9" onclick="showTab('cat9')">10. KEY WEAKNESSES &amp; R..</button>
+    <button data-tab="cat10" onclick="showTab('cat10')">11. OVERALL SUITABILIT..</button>
+</div>
+
+<div id="scorecard" class="tab active">
+<h2 style="margin-bottom:20px;font-size:20px;">Overall Scorecard &mdash; Large FX + Rural Collections Use Case</h2>
+<div class="scorecard-grid">
+<div class="score-card" style="border-left-color:#26a69a">
+    <div class="rank-badge">#1</div>
+    <div class="bank-name">Citi CI</div>
+    <div class="overall" style="color:#00e676">4.5</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:20.0%;background:#ef5350"></div></div>
+        <div class="val" style="color:#ef5350">1.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+</div>
+<div class="score-card" style="border-left-color:#7986cb">
+    <div class="rank-badge">#2</div>
+    <div class="bank-name">Stanbic CI</div>
+    <div class="overall" style="color:#00e676">4.5</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:20.0%;background:#ef5350"></div></div>
+        <div class="val" style="color:#ef5350">1.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+</div>
+<div class="score-card" style="border-left-color:#66bb6a">
+    <div class="rank-badge">#3</div>
+    <div class="bank-name">SIB</div>
+    <div class="overall" style="color:#4fc3f7">4.0</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+</div>
+<div class="score-card" style="border-left-color:#ef5350">
+    <div class="rank-badge">#4</div>
+    <div class="bank-name">SGBCI</div>
+    <div class="overall" style="color:#4fc3f7">4.0</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100.0%;background:#00e676"></div></div>
+        <div class="val" style="color:#00e676">5.0</div>
+    </div>
+</div>
+<div class="score-card" style="border-left-color:#42a5f5">
+    <div class="rank-badge">#5</div>
+    <div class="bank-name">BACI</div>
+    <div class="overall" style="color:#ffa726">3.5</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:70.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.5</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+</div>
+<div class="score-card" style="border-left-color:#ab47bc">
+    <div class="rank-badge">#6</div>
+    <div class="bank-name">BOA CI</div>
+    <div class="overall" style="color:#ffa726">3.5</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:70.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.5</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+</div>
+<div class="score-card" style="border-left-color:#ff9800">
+    <div class="rank-badge">#7</div>
+    <div class="bank-name">AFG Bank</div>
+    <div class="overall" style="color:#ffa726">3.0</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:50.0%;background:#ef5350"></div></div>
+        <div class="val" style="color:#ef5350">2.5</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:40.0%;background:#ef5350"></div></div>
+        <div class="val" style="color:#ef5350">2.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:40.0%;background:#ef5350"></div></div>
+        <div class="val" style="color:#ef5350">2.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:40.0%;background:#ef5350"></div></div>
+        <div class="val" style="color:#ef5350">2.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+</div>
+<div class="score-card" style="border-left-color:#ffee58">
+    <div class="rank-badge">#8</div>
+    <div class="bank-name">MTN MoMo</div>
+    <div class="overall" style="color:#ffa726">3.0</div>
+    <div class="star-label">out of 5.0</div>
+    <div class="complement-note">Complement provider &mdash; not a full banking partner</div>
+    <div class="score-bar">
+        <div class="label" title="2. FX CAPABILITIES (Critical for Large International Payments)">FX</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:20.0%;background:#ef5350"></div></div>
+        <div class="val" style="color:#ef5350">1.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)">Cash Mgmt</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)">Rural Colls.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:80.0%;background:#4fc3f7"></div></div>
+        <div class="val" style="color:#4fc3f7">4.0</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="5. TRADE FINANCE">Trade Fin.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:0%;background:var(--border)"></div></div>
+        <div class="val" style="color:var(--text-dim)">N/A</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="8. BOND ISSUANCE &amp; CAPITAL MARKETS">Capital Mkt.</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:0%;background:var(--border)"></div></div>
+        <div class="val" style="color:var(--text-dim)">N/A</div>
+    </div>
+    <div class="score-bar">
+        <div class="label" title="9. NETWORK &amp; PARTNERSHIPS">Network</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:60.0%;background:#ffa726"></div></div>
+        <div class="val" style="color:#ffa726">3.0</div>
+    </div>
+</div>
+</div>
+</div>
+
+<div id="heatmap" class="tab">
+<h2 style="margin-bottom:20px;font-size:20px;">Capability Heatmap</h2>
+<div class="table-wrap"><table class="heatmap-table"><thead><tr><th>Category</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td style="text-align:left;font-weight:600">FX</td><td class="hm-4">4.0/5</td><td class="hm-4">4.0/5</td><td class="hm-3">2.5/5</td><td class="hm-4">4.0/5</td><td class="hm-5">5.0/5</td><td class="hm-4">4.0/5</td><td class="hm-3">3.0/5</td><td class="hm-1">1.0/5</td></tr>
+<tr><td style="text-align:left;font-weight:600">Cash Mgmt</td><td class="hm-4">4.0/5</td><td class="hm-3">3.0/5</td><td class="hm-3">3.0/5</td><td class="hm-4">4.0/5</td><td class="hm-5">5.0/5</td><td class="hm-4">4.0/5</td><td class="hm-3">3.0/5</td><td class="hm-3">3.0/5</td></tr>
+<tr><td style="text-align:left;font-weight:600">Rural Colls.</td><td class="hm-3">3.0/5</td><td class="hm-3">3.0/5</td><td class="hm-2">2.0/5</td><td class="hm-3">3.0/5</td><td class="hm-1">1.0/5</td><td class="hm-1">1.0/5</td><td class="hm-3">3.0/5</td><td class="hm-4">4.0/5</td></tr>
+<tr><td style="text-align:left;font-weight:600">Trade Fin.</td><td class="hm-4">4.0/5</td><td class="hm-3">3.0/5</td><td class="hm-2">2.0/5</td><td class="hm-4">4.0/5</td><td class="hm-5">5.0/5</td><td class="hm-4">4.0/5</td><td class="hm-4">3.5/5</td><td class="hm-na">N/A</td></tr>
+<tr><td style="text-align:left;font-weight:600">Capital Mkt.</td><td class="hm-3">3.0/5</td><td class="hm-4">3.5/5</td><td class="hm-2">2.0/5</td><td class="hm-4">4.0/5</td><td class="hm-5">5.0/5</td><td class="hm-5">5.0/5</td><td class="hm-3">3.0/5</td><td class="hm-na">N/A</td></tr>
+<tr><td style="text-align:left;font-weight:600">Network</td><td class="hm-4">4.0/5</td><td class="hm-4">4.0/5</td><td class="hm-3">3.0/5</td><td class="hm-5">5.0/5</td><td class="hm-5">5.0/5</td><td class="hm-5">5.0/5</td><td class="hm-4">4.0/5</td><td class="hm-3">3.0/5</td></tr>
+<tr style="border-top:3px solid var(--accent)"><td style="text-align:left;font-weight:700;color:var(--accent)">OVERALL</td><td class="hm-4" style="font-size:16px">4.0/5</td><td class="hm-4" style="font-size:16px">3.5/5</td><td class="hm-3" style="font-size:16px">3.0/5</td><td class="hm-4" style="font-size:16px">4.0/5</td><td class="hm-5" style="font-size:16px">4.5/5</td><td class="hm-5" style="font-size:16px">4.5/5</td><td class="hm-4" style="font-size:16px">3.5/5</td><td class="hm-3" style="font-size:16px">3.0/5</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="findings" class="tab">
+<h2 style="margin-bottom:20px;font-size:20px;">Key Findings &amp; Analysis</h2>
+<div class="finding finding-critical">
+    <div class="severity severity-critical">&#x26A0; CRITICAL</div>
+    <h4>FX Capabilities: Clear Two-Tier Market</h4>
+    <p>Citi and Standard Bank dominate large FX — Citi led the FIRST ever FX hedging transaction in CI and handles &quot;very large&quot; flows with best-in-class pricing. SGBCI offers full SG Global Markets suite. SIB, BACI, AFG, and BOA have limited-to-no hedging capabilities. MTN MoMo has zero FX capability.</p>
+</div>
+<div class="finding finding-critical">
+    <div class="severity severity-critical">&#x26A0; CRITICAL</div>
+    <h4>Rural Collections: Structural Gap for Global Banks</h4>
+    <p>Citi (1-2 offices, Abidjan only) and Standard Bank (1 office, Abidjan only) CANNOT handle rural collections. They must be paired with SIB (67+ branches, 21 cities) or SGBCI (66+ branches) for CI-wide coverage. SG&#39;s YUP agency banking was DISCONTINUED in March 2022, weakening their rural strategy.</p>
+</div>
+<div class="finding finding-high">
+    <div class="severity severity-high">&#x26A0; HIGH</div>
+    <h4>SG Parent Exit Risk: Africa Divestment Trend</h4>
+    <p>Societe Generale sold subsidiaries in Ghana (2023) and Cameroon (2023). While CI remains a &quot;strategic market,&quot; this divestment pattern is a monitored risk for companies building long-term banking relationships with SGBCI.</p>
+</div>
+<div class="finding finding-high">
+    <div class="severity severity-high">&#x26A0; HIGH</div>
+    <h4>MTN MoMo: NOT a Licensed Bank</h4>
+    <p>MTN MoMo is regulated by ARTCI + BCEAO e-money rules but is NOT a BCEAO-licensed bank. No deposit insurance. Mobile wallet funds are not protected like bank deposits. Useful as a complement for last-mile mobile collections, but cannot be a standalone banking partner.</p>
+</div>
+<div class="finding finding-high">
+    <div class="severity severity-high">&#x26A0; HIGH</div>
+    <h4>ISO 20022 Migration: Uneven Readiness</h4>
+    <p>Citi is a global ISO 20022 migration LEADER with camt.053 v8 available. Standard Bank and SGBCI are well-advanced. SIB, BACI, AFG, and BOA are &quot;in progress&quot; — aligning with BCEAO/SWIFT CBPR+ timeline but not yet fully migrated. Companies planning TMS integration should factor this gap.</p>
+</div>
+<div class="finding finding-medium">
+    <div class="severity severity-medium">&#x25CF; MEDIUM</div>
+    <h4>AFG Bank CI: New Entity Risk</h4>
+    <p>Rebranded in 2023 from former Banque Atlantique subsidiary. Compliance track record still building. Unrated parent (private Ivorian group). Should be re-evaluated in 18 months. Not recommended for large FX or complex structured finance.</p>
+</div>
+<div class="finding finding-medium">
+    <div class="severity severity-medium">&#x25CF; MEDIUM</div>
+    <h4>Trade Finance Concentration</h4>
+    <p>Citi is the LEAD bank for cocoa exporters in CI and arranged the country&#39;s debut Eurobond ($2.6B, 2014). For agri-commodity trade, Citi and Standard Bank are Tier 1. SIB and SGBCI are Tier 2. AFG and MTN have no trade finance capability.</p>
+</div>
+<div class="finding finding-info">
+    <div class="severity severity-info">&#x2139; INFO</div>
+    <h4>Optimal Banking Structure Emerges</h4>
+    <p>For a company needing both large international FX payments AND nationwide CI collections, the data points to a two-bank strategy: Citi or Standard Bank (for FX/international/trade) + SIB (for domestic/rural collections). SGBCI is a strong all-around alternative but carries parent exit risk.</p>
+</div>
+<div class="finding finding-info">
+    <div class="severity severity-info">&#x2139; INFO</div>
+    <h4>Digital Banking Maturity Hierarchy</h4>
+    <p>CitiDirect BE is best-in-class for treasury management. Standard Bank Business Online with Infosys Finacle is strong for API/ERP integration. SGBCI offers the only dedicated call center in CI. SIB&#39;s SIBNET and BACI/BOA platforms are functional but less sophisticated.</p>
+</div>
+<div class="finding finding-info">
+    <div class="severity severity-info">&#x2139; INFO</div>
+    <h4>BCEAO Mobile Money Interoperability</h4>
+    <p>All licensed banks can receive Orange Money / MTN MoMo transfers via the BCEAO SICA-CI interbank platform. This framework enables any bank to accept mobile money collections — reducing the exclusive advantage of having a mobile money partnership.</p>
+</div>
+</div>
+
+<div id="recommendations" class="tab">
+<h2 style="margin-bottom:20px;font-size:20px;">Banking Partner Recommendations</h2>
+<div class="rec-grid">
+<div class="rec-card" style="border-left-color:#26a69a">
+    <h4>Citi CI</h4>
+    <div class="rec-action" style="color:var(--excellent)">STRONGLY RECOMMEND</div>
+    <p style="margin-top:8px">Best for: International FX, SWIFT MT940/MT942, sovereign/institutional, cocoa trade finance.</p>
+    <p style="margin-top:6px;color:var(--warning)">Limitation: Must pair with local bank for rural CI collections. Premium pricing not suited for SME volumes.</p>
+</div>
+<div class="rec-card" style="border-left-color:#7986cb">
+    <h4>Standard Bank / Stanbic</h4>
+    <div class="rec-action" style="color:var(--excellent)">STRONGLY RECOMMEND</div>
+    <p style="margin-top:8px">Best for: Pan-Africa CIB, multinationals with Africa-wide operations, structured/project finance, ICBC China partnership.</p>
+    <p style="margin-top:6px;color:var(--warning)">Limitation: CIB-only, 1 Abidjan office. Must pair with SIB or SGBCI for domestic collections.</p>
+</div>
+<div class="rec-card" style="border-left-color:#66bb6a">
+    <h4>SIB</h4>
+    <div class="rec-action" style="color:#a3e635">STRONGLY CONSIDER</div>
+    <p style="margin-top:8px">Best for: CI-wide hinterland collections (67+ branches, 21 cities), UEMOA agri-trade, local/regional corporates.</p>
+    <p style="margin-top:6px;color:var(--warning)">Limitation: Limited FX hedging. Digital platform behind Citi/SG. Some public sector NPL exposure.</p>
+</div>
+<div class="rec-card" style="border-left-color:#ef5350">
+    <h4>SGBCI</h4>
+    <div class="rec-action" style="color:var(--good)">RECOMMEND</div>
+    <p style="margin-top:8px">Best for: Full-service corporate banking, structured finance, custody (SGSS Best Sub-Custodian 2025), only CI bank with call center.</p>
+    <p style="margin-top:6px;color:var(--warning)">Risk: SG parent divesting Africa (Ghana/Cameroon 2023). YUP rural solution discontinued March 2022. Verify rural strategy.</p>
+</div>
+<div class="rec-card" style="border-left-color:#42a5f5">
+    <h4>BACI</h4>
+    <div class="rec-action" style="color:var(--adequate)">CONSIDER</div>
+    <p style="margin-top:8px">Best for: Mid-size corporates, UEMOA regional payments, Atlantique Finance DCM/capital markets.</p>
+    <p style="margin-top:6px;color:var(--warning)">Limitation: Limited rural presence. Basic FX hedging only. UEMOA concentration risk.</p>
+</div>
+<div class="rec-card" style="border-left-color:#ab47bc">
+    <h4>BOA CI</h4>
+    <div class="rec-action" style="color:var(--adequate)">CONSIDER</div>
+    <p style="margin-top:8px">Best for: Commodity trade via BOA UK, pan-African BMCE operations, 19-country network.</p>
+    <p style="margin-top:6px;color:var(--warning)">Limitation: Moderate digital maturity. Limited FX capability. BMCE integration ongoing.</p>
+</div>
+<div class="rec-card" style="border-left-color:#ff9800">
+    <h4>AFG Bank CI</h4>
+    <div class="rec-action" style="color:var(--warning)">EVALUATE</div>
+    <p style="margin-top:8px">Best for: Local Ivorian relationships, digital-first SMEs, political/sovereignty banking considerations.</p>
+    <p style="margin-top:6px;color:var(--warning)">Risk: New entity (2023). Unrated parent. Compliance track record building. Re-evaluate in 18 months.</p>
+</div>
+<div class="rec-card" style="border-left-color:#ffee58">
+    <h4>MTN MoMo</h4>
+    <div class="rec-action" style="color:var(--limited)">COMPLEMENT ONLY</div>
+    <p style="margin-top:8px">Best for: Last-mile rural mobile collections, payroll to unbanked workers, agent network coverage.</p>
+    <p style="margin-top:6px;color:var(--warning)">Critical: NOT a licensed bank. No BCEAO deposit protection. Must pair with SIB or SGBCI. Not for large FX or deposits.</p>
+</div>
+</div>
+
+<div style="background:var(--surface);border-radius:12px;padding:24px;margin-top:24px;border:2px solid var(--accent)">
+<h3 style="color:var(--accent);margin-bottom:12px">Recommended Banking Structure &mdash; Large International FX + Rural Collections</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+<div style="background:var(--surface2);border-radius:8px;padding:16px">
+    <h4 style="color:var(--excellent);margin-bottom:8px">Primary International Bank</h4>
+    <p style="font-size:14px;font-weight:600">Citi CI or Standard Bank</p>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:4px">FX dealing, SWIFT GPI, MT940/MT942, trade finance, cross-border payments, liquidity management, ERP/TMS integration</p>
+</div>
+<div style="background:var(--surface2);border-radius:8px;padding:16px">
+    <h4 style="color:var(--good);margin-bottom:8px">Primary Local Bank</h4>
+    <p style="font-size:14px;font-weight:600">SIB (Soci&eacute;t&eacute; Ivoirienne de Banque)</p>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:4px">Domestic collections (67+ branches, 21 cities), UEMOA payments, rural hinterland coverage, agri-finance, local XOF operations</p>
+</div>
+<div style="background:var(--surface2);border-radius:8px;padding:16px">
+    <h4 style="color:var(--adequate);margin-bottom:8px">Optional: Full-Service Alternative</h4>
+    <p style="font-size:14px;font-weight:600">SGBCI (if SG parent exit risk acceptable)</p>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:4px">Could replace SIB if custody (SGSS) or call center needed. Monitor SG Africa divestment strategy. Verify rural collection capability post-YUP.</p>
+</div>
+<div style="background:var(--surface2);border-radius:8px;padding:16px">
+    <h4 style="color:var(--warning);margin-bottom:8px">Optional: Last-Mile Layer</h4>
+    <p style="font-size:14px;font-weight:600">MTN MoMo (complement only)</p>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:4px">Mobile agent collections in deep rural areas where no bank branch exists. Pair with licensed bank (SIB) for fund consolidation.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="cat0" class="tab">
+<div class="cat-header">1. OVERVIEW &amp; RISK</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Entity Type / Legal Structure</td><td class="">Subsidiary of Attijariwafa Bank (Morocco) — Universal Bank</td><td class="">Subsidiary of BCP Group (Morocco) — Universal Bank</td><td class="">Subsidiary of AFG Holding (Ivorian) — Universal Bank (rebranded 2023)</td><td class="">Subsidiary of Societe Generale (France) — Universal Bank</td><td class="">Branch / Subsidiary of Citigroup (USA) — Institutional / Corporate Bank only</td><td class="">Branch of Standard Bank Group (S. Africa) — CIB Focus only</td><td class="">Subsidiary of Bank of Africa / BMCE Group (Morocco) — Universal Bank</td><td class="rating-limited">Fintech / MNO — Mobile Money Operator (NOT a licensed bank)</td></tr>
+<tr><td class="criteria">Parent Group &amp; Country of Origin</td><td class="">Attijariwafa Bank — Morocco (#1 Maghreb, #2 Africa)</td><td class="">BCP Group — Morocco (Top Moroccan bank)</td><td class="">AFG Holding — Ivory Coast (Pan-African conglomerate)</td><td class="">Societe Generale — France (Top-10 European bank)</td><td class="">Citigroup — USA (Global Top-5 bank by revenue)</td><td class="">Standard Bank Group — South Africa (Africa&#39;s largest bank by assets)</td><td class="">BMCE / BOA Group — Morocco (19-country African network)</td><td class="">MTN Group — South Africa (Telco-Fintech, 290M subscribers)</td></tr>
+<tr><td class="criteria">Regulatory Status (BCEAO / Banking Commission UEMOA)</td><td class="rating-good">YES — Fully licensed; listed on BRVM (ticker: SIBC)</td><td class="rating-good">YES — Fully licensed; listed on BRVM</td><td class="rating-good">YES — Fully licensed (newly rebranded 2023 from Banque Atlantique)</td><td class="rating-good">YES — Fully licensed; listed on BRVM; in CI since 1941</td><td class="rating-good">YES — Fully licensed since 1975; BCEAO regulated</td><td class="rating-good">YES — Full banking licence awarded 2016; operations started 2017</td><td class="rating-good">YES — Fully licensed; listed on BRVM</td><td class="rating-good">PARTIAL — Regulated by ARTCI + BCEAO e-money rules; NOT a full bank; no BCEAO deposit insurance</td></tr>
+<tr><td class="criteria">Parent Credit / Risk Rating</td><td class="">Attijariwafa: BB/Ba1 (Fitch/Moody&#39;s)</td><td class="">BCP Group: Investment grade (local); unrated internationally</td><td class="">AFG Holding: Unrated (private Ivorian group)</td><td class="rating-good">Societe Generale: BBB (Fitch &amp; S&amp;P) — Strong European parent</td><td class="rating-excellent">Citigroup: A (S&amp;P/Fitch) — Premier global institution</td><td class="">Standard Bank Group: BB+/Ba1 — Africa&#39;s top-rated bank</td><td class="">BMCE/BOA Group: B+ — Solid African presence</td><td class="rating-limited">MTN Group: Telco-only credit rating; not applicable as financial institution</td></tr>
+<tr><td class="criteria">Systemic Importance in Ivory Coast</td><td class="rating-good">STRONG — Top-5 bank in CI; #3 by loans; 67+ branches in 21 cities</td><td class="rating-good">STRONG — #3 largest group in UEMOA zone; 150+ branches across 8 countries</td><td class="rating-adequate">MODERATE — Mid-tier; recently rebranded; still building market presence</td><td class="rating-excellent">VERY STRONG — Top-4 bank in CI; 66+ branches; #1 WAEMU for years; 260,000+ customers</td><td class="rating-good">STRONG — Dominant in institutional/sovereign transactions since 1975</td><td class="rating-limited">NICHE — CIB-only player; 1 Abidjan office; limited local footprint</td><td class="rating-adequate">MODERATE — Solid mid-tier bank; 39 branches in CI</td><td class="rating-excellent">VERY STRONG — Largest mobile money platform in CI by active users</td></tr>
+<tr><td class="criteria">AML / Compliance Track Record</td><td class="rating-good">STRONG — Attijariwafa group international AML/CFT standards</td><td class="rating-good">STRONG — BCP Group AML/CFT (international standards)</td><td class="rating-adequate">MODERATE — New entity (2023); compliance track record still building</td><td class="rating-excellent">EXCELLENT — SG Group under French ACPR regulatory oversight; strong FATF standards</td><td class="rating-excellent">EXCELLENT — US OCC / Federal Reserve regulated; OFAC compliant; highest global AML bar</td><td class="rating-excellent">EXCELLENT — Standard Bank regulated by FCA (UK) + FSB (SA); industry-leading compliance</td><td class="rating-good">GOOD — BMCE Group standards; some legacy integration risks across network</td><td class="rating-adequate">MODERATE — Telco-based; KYC standards differ materially from licensed banks</td></tr>
+<tr><td class="criteria">Exit / Continuity Risk</td><td class="rating-limited">LOW — Attijariwafa committed to CI; state co-shareholder (25%) adds stability</td><td class="rating-adequate">LOW-MODERATE — BCP Group committed to UEMOA region</td><td class="rating-adequate">MODERATE — New brand; limited track record; re-evaluate in 18 months</td><td class="">MEDIUM — SG has sold African subsidiaries (Ghana 2023, Cameroon 2023); CI exit risk must be monitored despite top market position</td><td class="rating-limited">LOW — Citi committed to CI since 1975; strategic market; institutional-only model reduces complexity</td><td class="rating-limited">LOW — Standard Bank committed to CIB expansion in Francophone Africa; CI is key hub</td><td class="rating-adequate">MODERATE — BMCE/BOA integration ongoing; some country risk across wider network</td><td class="rating-limited">HIGHER — MTN could exit or restructure MoMo; not a standalone regulated entity</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat1" class="tab">
+<div class="cat-header">2. FX CAPABILITIES (Critical for Large International Payments)</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">FX Spot (XOF/EUR/USD/GBP)</td><td class="rating-limited">YES — XOF/EUR/USD primary; GBP limited; via Attijariwafa FX desk</td><td class="">YES — Standard XOF/EUR/USD via BCP Group</td><td class="rating-limited">YES — Basic spot FX; limited currency range</td><td class="rating-good">YES — Full FX desk; XOF/EUR/USD/GBP/JPY and more via SG global infrastructure</td><td class="rating-good">YES — Full FX desk; CitiFX Pulse; 140+ currencies including XOF/EUR/USD/GBP/CHF/JPY</td><td class="">YES — Real-time FX via Business Online; spot/forward/hedging; broad currency range</td><td class="">YES — Standard spot FX; XOF/EUR/USD primary</td><td class="">NO — No corporate FX capability; XOF mobile only</td></tr>
+<tr><td class="criteria">FX Forwards / Options / Hedging</td><td class="rating-limited">LIMITED — Forwards available through Attijariwafa group treasury; no complex derivatives</td><td class="rating-adequate">SOME — Basic hedging products via BCP Group; limited options</td><td class="rating-limited">BASIC ONLY — Very limited product suite; not suited for hedging</td><td class="rating-good">FULL — SG Global Markets hedging suite; forwards, swaps, options, structured FX</td><td class="rating-good">FULL — Citi led the FIRST ever FX hedging transaction in CI (sovereign); full suite incl. NDF, options, structured products</td><td class="rating-good">FULL — Spot, forwards, swaps, options via Standard Bank CIB; Africa-specialist hedging</td><td class="rating-limited">LIMITED — Basic forwards only</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">XOF / EUR Peg Expertise (fixed rate 655.957 XOF per EUR)</td><td class="rating-good">STRONG — Core UEMOA zone bank; daily BCEAO dealing; deep XOF peg management</td><td class="rating-good">STRONG — Pan-UEMOA presence; all 8 countries; strong XOF/EUR expertise</td><td class="rating-adequate">ADEQUATE — UEMOA zone operator; standard XOF/EUR handling</td><td class="rating-good">STRONG — Western Union FX partnership since 1998; 60+ years CI FX history</td><td class="rating-excellent">VERY STRONG — BCEAO correspondent; sovereign FX operations; manages large XOF/EUR conversions for state entities</td><td class="rating-good">GOOD — Africa-wide FX expertise; CI branch has good XOF/EUR peg understanding</td><td class="rating-adequate">ADEQUATE — Standard UEMOA zone operations</td><td class="rating-limited">NOT APPLICABLE — No corporate FX</td></tr>
+<tr><td class="criteria">Multi-Currency Account Support</td><td class="">YES — XOF, EUR, USD, GBP accounts available</td><td class="">YES — XOF, EUR, USD</td><td class="rating-limited">LIMITED — Primarily XOF/EUR</td><td class="rating-good">YES — Full multi-currency via SG global platform; includes exotic currencies</td><td class="rating-good">YES — Full multi-currency; Citi WorldLink payments in 130+ currencies; nostro accounts globally</td><td class="rating-good">YES — Multiple currencies via Business Online; full SWIFT connectivity</td><td class="">YES — XOF, EUR, USD</td><td class="">NO — XOF / mobile local transactions only</td></tr>
+<tr><td class="criteria">FX Transaction Size Suitability</td><td class="rating-limited">MEDIUM — Suitable for transactions up to ~$5M; larger flows may widen spreads</td><td class="rating-good">MEDIUM — Similar to SIB; good for mid-size FX</td><td class="">SMALL-MEDIUM — Better suited for smaller FX transactions</td><td class="rating-good">LARGE — SG Group infrastructure; suitable for $50M+ transactions; competitive on size</td><td class="rating-excellent">VERY LARGE — No upper limit effectively; Citigroup handles billions daily; best pricing at $1M+ tickets</td><td class="rating-good">LARGE — Standard Bank CIB handles large commodity/project finance FX; $10M+ competitive</td><td class="rating-limited">SMALL-MEDIUM — Suitable for smaller FX flows</td><td class="rating-limited">NONE — No corporate FX</td></tr>
+<tr><td class="criteria">FX Pricing Assessment</td><td class="rating-good">FAIR — Competitive UEMOA rates; spreads ~0.5–1.5% on USD/XOF for typical transactions</td><td class="rating-good">FAIR — Competitive; standard UEMOA market rates</td><td class="rating-limited">UNCLEAR — Limited data; likely above-market for small volumes</td><td class="rating-good">COMPETITIVE — SG Group pricing efficiencies; below local average for large flows</td><td class="rating-excellent">BEST-IN-CLASS — Global pricing engine; tightest spreads for large FX; typically 0.1–0.5% on $1M+</td><td class="rating-good">COMPETITIVE — Business Online real-time FX rates; competitive for Africa-focused flows</td><td class="rating-adequate">FAIR — Standard market rates</td><td class="rating-limited">N/A</td></tr>
+<tr><td class="criteria">FX Platform / Access</td><td class="">SIBNET online; phone dealing for larger FX</td><td class="">Business Online; branch dealing</td><td class="">AFG e-Bank; branch dealing</td><td class="">SG online platform; SG Markets digital FX portal; phone dealing</td><td class="">CitiFX Pulse (24/7 digital FX platform); CitiDirect BE; phone/voice dealing</td><td class="">Business Online real-time rates; Standard Bank digital trading; voice dealing</td><td class="">Business Online; branch/phone dealing</td><td class="rating-limited">N/A</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat2" class="tab">
+<div class="cat-header">3. CASH MANAGEMENT &amp; PAYMENTS (Critical for International FX Payments)</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Core Digital Banking Platform</td><td class="">SIBNET — 24/7 web banking; payments, transfers, statements, FX calculator</td><td class="rating-good">Business Online — Full corporate platform; 24/7 web + mobile</td><td class="">AFG e-Bank — Digital-first platform; 24/7 app + web; API-ready</td><td class="">SG Digital Platform — SG.ci app + web portal; call center (only bank in CI with dedicated call center)</td><td class="">CitiDirect BE — World-class treasury management portal; industry leading UX; 24/7 global</td><td class="">Business Online — Real-time 24/7; API/ERP integration; ISO 20022 certified; Infosys Finacle core banking</td><td class="">Business Online — Web + mobile platform</td><td class="">MoMo App + USSD — Mobile money platform; works on any phone / any network</td></tr>
+<tr><td class="criteria">ERP / TMS Integration (SAP, Oracle, etc.)</td><td class="rating-limited">LIMITED — Basic file export/import; no confirmed direct ERP connectors</td><td class="rating-limited">LIMITED — Standard SWIFT file formats; no confirmed direct ERP APIs</td><td class="rating-limited">BASIC — Digital-first but limited ERP connectors as new entity</td><td class="rating-good">GOOD — SG Group supports standard ERP integration via SWIFT FileAct and host-to-host</td><td class="rating-excellent">EXCELLENT — CitiConnect API; Host-to-Host (H2H) file transfer; SAP/Oracle/Kyriba/TMS native connectors; full STP</td><td class="rating-good">GOOD — Business Online API Marketplace; ISO 20022 file formats; ERP integration available</td><td class="rating-limited">BASIC — Standard file formats; limited ERP integration</td><td class="rating-limited">NONE — No ERP integration</td></tr>
+<tr><td class="criteria">SWIFT GPI (Global Payments Innovation)</td><td class="">YES — GPI compliant via Attijariwafa Group SWIFT infrastructure</td><td class="">YES — GPI compliant via BCP Group</td><td class="">YES — GPI compliant</td><td class="rating-good">YES — SG Group full SWIFT GPI; UETR transaction tracking</td><td class="rating-excellent">EXCELLENT — Citi is a SWIFT GPI founding member; full UETR tracking; same-day settlement in 100+ currencies</td><td class="rating-good">YES — Full SWIFT GPI; Business Online provides real-time tracking</td><td class="">YES — GPI compliant via BMCE/BOA SWIFT network</td><td class="rating-limited">PARTIAL — SWIFT not applicable; cross-border via mobile corridors only</td></tr>
+<tr><td class="criteria">MT940 (End-of-Day Account Statement)</td><td class="">YES — MT940 available via SIBNET and SWIFT BIC: SIBCCIAB; standard UEMOA-compliant reporting</td><td class="">YES — MT940 via SWIFT; BIC: BACIABBB; standard format delivery</td><td class="">YES — MT940 available; BIC: AFGBCI-; delivery via SWIFT / AFG e-Bank</td><td class="rating-good">YES — MT940 via SGCICIABXXX SWIFT BIC; full SG Group statement format; SGSS custody reporting also available</td><td class="rating-excellent">BEST-IN-CLASS — Full MT940 via CitiDirect BE and CitiConnect; detailed Citi implementation guide published; supports multi-account in single file; also camt.053 v2/v8 (ISO 20022 equivalent)</td><td class="">YES — MT940 via SWIFT BIC: SBICCIAB; delivered via Business Online; standard Finacle-based format</td><td class="">YES — MT940 via SWIFT BIC: BOACCIAB; standard format</td><td class="rating-limited">NO — No SWIFT / no MT940; not applicable</td></tr>
+<tr><td class="criteria">MT942 (Intraday / Interim Transaction Report)</td><td class="">YES (on request) — MT942 intraday reporting available; standard UEMOA implementation; floor limits configurable</td><td class="">YES (on request) — MT942 available through BCP Group SWIFT infrastructure</td><td class="">YES (on request) — MT942 available; may require specific setup with AFG team</td><td class="">YES — MT942 intraday reporting via SG Group SWIFT; real-time visibility on large-volume days</td><td class="rating-excellent">BEST-IN-CLASS — MT942 fully supported via CitiDirect BE; configurable floor limits; delivery frequency adjustable (multiple times/day); also camt.052 (ISO 20022 intraday equivalent); Infopool can aggregate 3rd-party MT942 feeds</td><td class="rating-good">YES — MT942 intraday reporting via Business Online; configurable; good for high-volume days</td><td class="">YES (on request) — MT942 available via standard SWIFT</td><td class="rating-limited">NO — Not applicable</td></tr>
+<tr><td class="criteria">ISO 20022 / camt Migration Readiness</td><td class="rating-adequate">IN PROGRESS — Attijariwafa Group aligning with BCEAO/SWIFT CBPR+ timeline; camt migration underway</td><td class="rating-adequate">IN PROGRESS — BCP Group aligning with SWIFT CBPR+ migration (coexistence until Nov 2026)</td><td class="rating-adequate">IN PROGRESS — Standard BCEAO UEMOA interbank compliance; early stage for camt</td><td class="rating-good">GOOD — SG Group ISO 20022 migration well advanced; camt.053/camt.052 available; SGCICIABXXX SWIFT FINplus ready</td><td class="rating-excellent">LEADER — Citi is an ISO 20022 migration leader globally; camt.053 v8 available on CitiDirect; pacs.004 (return messages) since 2024; CBPR+ aligned; structured address support until Nov 2026 coexistence</td><td class="rating-good">GOOD — Business Online ISO 20022 aligned; Infosys Finacle supports MX messages; structured data reporting available</td><td class="rating-adequate">IN PROGRESS — BMCE Group ISO 20022 migration in line with SWIFT CBPR+ timeline</td><td class="rating-limited">NOT APPLICABLE</td></tr>
+<tr><td class="criteria">SWIFT BIC Code (CI)</td><td class="">SIBCCIAB</td><td class="">BACIABBB</td><td class="">AFGBCIAB (verify with bank)</td><td class="">SGCICIABXXX</td><td class="">CITICIBA (verify with Citi TTS)</td><td class="">SBICCIAB</td><td class="">BOACCIAB</td><td class="rating-limited">N/A — Not a SWIFT member</td></tr>
+<tr><td class="criteria">Domestic Payments &amp; Collections (XOF)</td><td class="rating-good">FULL — BRVM-linked; SICA CI (national clearing); real-time local transfers</td><td class="rating-good">FULL — National clearing; all UEMOA payment rails</td><td class="rating-good">FULL — SICA CI; national clearing; digital-first</td><td class="rating-good">FULL — SG Group infrastructure; first bank with dedicated CI call center for payment support</td><td class="rating-good">FULL — Citi led first social security mass payment disbursement in CI; full domestic rails</td><td class="rating-good">FULL — Business Online domestic/regional; ISO 20022 domestic rails</td><td class="rating-good">FULL — Standard domestic CI payment rails</td><td class="">YES (mobile only) — P2P, bill pay, merchant payments; salary disbursements; no corporate accounts</td></tr>
+<tr><td class="criteria">International / Cross-Border Payments</td><td class="">YES — SWIFT; Attijariwafa 14-country Africa network; GPI compliant; standard correspondent banking</td><td class="">YES — SWIFT; 8-country UEMOA network via BCP Group</td><td class="">YES — SWIFT; AFG Group network; standard international wires</td><td class="">YES — SWIFT; SG global network; 1,000+ correspondent banks; fast USD/EUR settlements</td><td class="rating-excellent">EXCELLENT — SWIFT GPI founding member; 160 countries; ~$3 trillion daily volume; same-day settlement; USD clearing via Citi New York; EUR clearing via Citi Frankfurt</td><td class="rating-excellent">EXCELLENT — SWIFT GPI; 20-country African footprint; 4 global hubs (London, NY, Dubai, Beijing); ICBC China partnership for Asian flows</td><td class="">YES — SWIFT; 19-country BOA network; BMCE Group correspondents</td><td class="rating-limited">LIMITED — MoMo cross-border in select African corridors; not for large corporate FX wires</td></tr>
+<tr><td class="criteria">Payroll / Mass Disbursements</td><td class="">YES — Corporate payroll services; BRVM-linked mass payments</td><td class="">YES — Corporate payroll processing</td><td class="">YES — Digital payroll platform; SME focus</td><td class="">YES — SG Group mass payment infrastructure; salary disbursements</td><td class="rating-excellent">EXCELLENT — Pioneered first government mass payment (social security) in CI; institutional payroll for large corporates and governments</td><td class="">YES — Corporate payroll via Business Online; API integration for large volumes</td><td class="">YES — Corporate payroll; BOA branch network for cash payments</td><td class="">YES — Mobile payroll/salary disbursements to unbanked workers; widely used in agriculture/retail</td></tr>
+<tr><td class="criteria">Liquidity Management / Cash Pooling</td><td class="">YES — Notional pooling via Attijariwafa group; domestic and cross-border within CI</td><td class="">YES — BCP Group liquidity tools; within UEMOA zone</td><td class="rating-limited">BASIC — Limited liquidity management tools as newer entity</td><td class="rating-good">YES — SG Group full liquidity management; notional and physical pooling; multi-currency</td><td class="rating-excellent">EXCELLENT — Global liquidity management; 100+ countries; subsidiary financing; overlay pooling; real-time liquidity dashboards via CitiDirect</td><td class="rating-good">YES — Full liquidity management via Business Online; cross-African pooling for multinationals</td><td class="rating-limited">YES — Basic pooling solutions; mainly domestic CI</td><td class="rating-limited">NOT AVAILABLE — Mobile wallet only; no corporate liquidity management</td></tr>
+<tr><td class="criteria">Cash Management Overall Rating</td><td class="rating-good">GOOD (4/5) — Solid local platform; good for UEMOA payments</td><td class="rating-adequate">ADEQUATE (3/5) — Standard platform; BCP Group backing</td><td class="rating-adequate">ADEQUATE (3/5) — Digital-first advantage but limited maturity</td><td class="rating-good">GOOD (4/5) — SG Group platform; good coverage; call center unique in CI</td><td class="rating-excellent">EXCELLENT (5/5) — World&#39;s best cash management infrastructure; CitiDirect BE; ISO 20022 leader; MT940/MT942/camt best-in-class</td><td class="rating-excellent">GOOD (4/5) — CIB-focused; strong API/ERP; excellent for multinationals with Africa-wide needs</td><td class="rating-adequate">ADEQUATE (3/5) — Solid but limited digital maturity vs. top-tier</td><td class="rating-good">ADEQUATE (3/5) — Mobile-only; useful complement for last-mile but not a full treasury bank</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat3" class="tab">
+<div class="cat-header">4. RURAL &amp; NATIONWIDE COLLECTIONS IN IVORY COAST (Critical Use Case)</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Branch Network — Total Branches in CI</td><td class="">67+ branches in 21 cities / towns across CI (as of 2019/2024)</td><td class="">~40–50 branches in CI (part of 150+ UEMOA total)</td><td class="">~20–25 branches (building network post-rebrand)</td><td class="">66+ branches across CI incl. Abidjan concentration + regional cities; #1 branch network among Western banks</td><td class="">1–2 offices in Abidjan ONLY — Institutional / CIB; NO retail branch network</td><td class="">1 office in Abidjan ONLY — CIB-only; NO retail branches in CI</td><td class="rating-adequate">39 branches across CI including some secondary cities</td><td class="rating-limited">NONE — No physical branches; agent/mobile model only</td></tr>
+<tr><td class="criteria">Coverage Beyond Abidjan (Regional Cities)</td><td class="rating-good">GOOD — Branches in: San Pedro, Bouaké, Korhogo, Yamoussoukro, Daloa, Man, Abengourou, Divo, Gagnoa + others (21 cities total)</td><td class="rating-adequate">MODERATE — Present in major cities; UEMOA-wide but CI regional coverage limited vs. SIB</td><td class="rating-adequate">LIMITED — Primarily Abidjan-focused; some regional presence</td><td class="rating-good">GOOD — Branches in Abidjan + key secondary cities; SGBCI has broadest corporate network in CI among Western banks</td><td class="rating-limited">NONE — Abidjan institutional office only; no regional CI coverage</td><td class="rating-limited">NONE — Abidjan only</td><td class="rating-adequate">MODERATE — Present in Abidjan + some secondary cities</td><td class="rating-good">GOOD (mobile) — USSD + agent network covers many regions; not branch-based</td></tr>
+<tr><td class="criteria">Rural / Hinterland Access</td><td class="rating-adequate">MODERATE — Branch-based in 21 cities; some rural towns covered; cocoa/coffee belt coverage for agri-finance; still gap for deep rural</td><td class="rating-limited">LIMITED — Primarily urban/peri-urban branches; limited rural penetration</td><td class="rating-limited">LIMITED — Urban-focused; minimal rural coverage</td><td class="rating-good">MODERATE-GOOD — YUP agency banking model (SG-owned) was deployed in CI with 600+ agents via service stations + distributors; NOTE: YUP was DISCONTINUED by SG in March 2022; current rural strategy unclear — verify with SG CI directly</td><td class="rating-limited">NONE — Cannot handle rural collections; institutional bank only; must partner with SIB or other for rural</td><td class="rating-limited">NONE — Cannot handle rural collections; CIB only</td><td class="rating-adequate">MODERATE — 39 branches; some reach beyond Abidjan; limited true rural coverage</td><td class="rating-good">STRONG — Mobile agent network (any telco, USSD); covers rural areas where no bank branch exists; widely used by farmers/SMEs; Orange Money partnership adds reach</td></tr>
+<tr><td class="criteria">Agent Banking Network (non-branch collection points)</td><td class="rating-limited">LIMITED — No confirmed standalone agent banking network; relies on branch network</td><td class="rating-limited">LIMITED — No confirmed agent banking network in CI</td><td class="rating-limited">LIMITED — Building; AFG e-Bank digital approach may add agents</td><td class="">⚠️ IMPORTANT UPDATE: SG&#39;s YUP agency banking solution was DISCONTINUED in March 2022 across CI, Senegal, Cameroon, etc. SG&#39;s current rural collection approach relies on standard branches and digital banking only</td><td class="rating-limited">NONE — No agent network; institutional bank</td><td class="rating-limited">NONE — No agent network; CIB bank</td><td class="rating-limited">LIMITED — No confirmed standalone agent banking in CI</td><td class="rating-excellent">EXCELLENT — MTN MoMo agent network nationwide; Orange Money interoperability via BCEAO; widespread in rural CI; used for agricultural collections</td></tr>
+<tr><td class="criteria">Mobile Money Integration (for rural collections)</td><td class="rating-adequate">MODERATE — BCEAO interoperability framework allows Orange Money / MTN MoMo transfers to/from SIB accounts</td><td class="rating-adequate">MODERATE — BCEAO mobile money interoperability; no dedicated product</td><td class="rating-adequate">MODERATE — Digital-first approach; mobile money interoperability via BCEAO framework</td><td class="rating-adequate">MODERATE — SG digital app; mobile-friendly; YUP discontinued (March 2022); relies on BCEAO interoperability framework</td><td class="rating-limited">LIMITED — No mobile money partnership in CI; institutional only; can receive mobile money collections into corporate account via BCEAO interoperability</td><td class="rating-limited">LIMITED — No CI-specific mobile money partnership</td><td class="rating-adequate">MODERATE — BCEAO interoperability; no dedicated mobile money product</td><td class="">CORE PRODUCT — MoMo is the product; direct integration with Orange Money via national interoperability; largest rural payment network in CI</td></tr>
+<tr><td class="criteria">Collections Suitability for Rural Ivory Coast</td><td class="rating-excellent">MODERATE — Best traditional bank for hinterland; 21 cities; cocoa/coffee belt coverage; branches in agricultural zones</td><td class="rating-adequate">LOW-MODERATE — Limited rural branch presence; better for urban/semi-urban</td><td class="rating-limited">LOW — Urban-focused; not suited for rural collections</td><td class="rating-adequate">LOW-MODERATE — Post-YUP discontinuation, SG is now primarily branch-based for CI collections; less rural reach than SIB</td><td class="rating-limited">NONE — Cannot collect from rural CI; must use a local bank partner</td><td class="rating-limited">NONE — Cannot collect from rural CI</td><td class="rating-adequate">LOW-MODERATE — Some secondary city branches; limited true rural reach</td><td class="rating-excellent">STRONG — Best for last-mile mobile collections in rural CI; agent network covers areas banks cannot reach; must be paired with a licensed bank account</td></tr>
+<tr><td class="criteria">Recommended Rural Collection Strategy</td><td class="">USE AS PRIMARY BANK for hinterland branch collections; combine with MTN MoMo for deepest rural reach</td><td class="rating-limited">USE AS SECONDARY for urban-adjacent collections; not for deep rural</td><td class="rating-limited">NOT RECOMMENDED for rural collections</td><td class="rating-limited">USE FOR URBAN/SEMI-URBAN collections; limited rural capability post-YUP; combine with SIB + MTN</td><td class="rating-limited">NOT SUITED for rural — pair Citi (for international FX/payments) with SIB or SG for all CI collections</td><td class="rating-limited">NOT SUITED for rural — pair Stanbic (for CIB/international) with SIB for all CI collections</td><td class="rating-limited">NOT RECOMMENDED as primary rural bank</td><td class="rating-limited">USE AS RURAL COLLECTION LAYER only; not a bank; pair with SIB or SG for consolidation</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat4" class="tab">
+<div class="cat-header">5. TRADE FINANCE</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Letters of Credit — Import &amp; Export (LC)</td><td class="rating-good">YES — Full import/export LC (Crédit Documentaire); Attijariwafa network for confirmation</td><td class="rating-good">YES — Full LC services; BCP Group confirmation network</td><td class="rating-limited">YES — Basic LC services; limited confirming bank network</td><td class="rating-good">YES — Full LC; backed by SG global trade network; competitive pricing</td><td class="">YES — World-class LC; Citi is LEAD bank for cocoa exporters LC in CI; globally confirmed in 100+ countries</td><td class="rating-good">YES — Full LC in 13 currencies via Business Online; Africa-wide commodity LC</td><td class="rating-good">YES — Full LC services; BOA UK specialist for commodity trade LC</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">Documentary Collections</td><td class="rating-good">YES — Full import/export documentary collections</td><td class="">YES</td><td class="">YES</td><td class="">YES</td><td class="">YES — Global standard; STP processing</td><td class="">YES</td><td class="">YES</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">Bank Guarantees / Standby LC (SBLC)</td><td class="">YES — Standby LC (Lettre de Crédit Stand-By) confirmed; performance bonds</td><td class="rating-good">YES — Full guarantee suite</td><td class="rating-limited">YES — Basic guarantees; limited global confirmation capacity</td><td class="rating-good">YES — Full guarantee suite; SG global capacity for confirming bank</td><td class="rating-good">YES — Full guarantee suite; Citi-confirmed SBLCs accepted globally; advance payment guarantees</td><td class="rating-good">YES — Full guarantee suite; Standard Bank CIB specialty</td><td class="rating-good">YES — Full guarantees</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">Commodity / Agri Trade Finance (Cocoa, Coffee, Cashew)</td><td class="">YES — Active in cocoa/coffee campaign financing ANNUALLY in CI; Attijariwafa agri-finance expertise</td><td class="">YES — Active in agri-commodity sectors across UEMOA; cocoa/coffee focus</td><td class="rating-limited">LIMITED — Early stage; building capacity</td><td class="">YES — SG Group commodity trade finance; cocoa sector financing historically</td><td class="rating-excellent">EXCELLENT — LEAD bank for cocoa exporters in CI; top agri-commodity trade finance in CI; structured pre-finance</td><td class="">YES — Standard Bank commodity trade finance Africa-wide; mining + agri specialty</td><td class="rating-good">YES — BOA UK specialist in agri/commodity trade finance via BMCE Group; good for cocoa/coffee exporters</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">Supply Chain Finance (SCF) / Supplier Finance</td><td class="rating-limited">YES — Basic SCF via Attijariwafa group</td><td class="">YES — SCF available via BCP Group</td><td class="rating-limited">LIMITED — Early stage</td><td class="">YES — SG Group SCF platform</td><td class="rating-excellent">EXCELLENT — Full SCF; reverse factoring; dynamic discounting; Citi Supply Chain Finance platform</td><td class="">YES — Standard Bank SCF solutions</td><td class="rating-limited">LIMITED — Basic SCF</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">Trade Finance Fees vs. Benchmark (US Trade.gov: CI avg 1–3%)</td><td class="">AVERAGE — ~1–2% of transaction value; in line with CI market</td><td class="">AVERAGE — ~1–2% of transaction value</td><td class="rating-good">ABOVE AVERAGE — Limited volume means less competitive pricing; likely 2–3%</td><td class="rating-limited">AVERAGE / BELOW — SG Group efficiencies; ~1–1.5% for large transactions</td><td class="rating-excellent">BEST — Globally benchmarked; volume discounts for large trades; below 1% for $10M+ transactions</td><td class="rating-good">AVERAGE — Competitive for CIB clients; ~1–2%</td><td class="">AVERAGE — ~1–2%</td><td class="rating-limited">N/A</td></tr>
+<tr><td class="criteria">Trade Finance Overall Rating</td><td class="rating-good">GOOD (4/5) — Attijariwafa network; strong UEMOA agri-finance</td><td class="rating-adequate">ADEQUATE (3/5) — BCP Group backing; 8-country UEMOA network</td><td class="rating-limited">LIMITED (2/5) — New entity; building capabilities</td><td class="rating-good">GOOD (4/5) — SG global trade infrastructure; good for large imports/exports</td><td class="rating-excellent">EXCELLENT (5/5) — Best-in-class; sovereign + cocoa export lead; globally confirmed</td><td class="rating-good">GOOD (4/5) — Strong CIB trade capabilities across Africa</td><td class="rating-good">GOOD (3.5/5) — BMCE Group commodity expertise; BOA UK international</td><td class="rating-limited">NOT APPLICABLE</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat5" class="tab">
+<div class="cat-header">6. THIRD-PARTY BANK PARTNERS &amp; ECOSYSTEM</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Key Correspondent Banks / Clearing Partners</td><td class="">BNP Paribas (EUR clearing); Deutsche Bank (USD); Attijariwafa network banks across Africa; 700+ correspondents globally</td><td class="">BCP Group correspondents (~500+); BNP Paribas; Société Générale France; DBS</td><td class="">~200+ correspondents (growing); international bank relationships being developed</td><td class="">SG France (parent — EUR/USD clearing); Deutsche Bank; JPMorgan; 1,000+ correspondents globally</td><td class="rating-excellent">Citi New York (USD clearing — own); Citi Frankfurt (EUR clearing — own); Citi London; 65,000+ institutional clients; premier global network</td><td class="">Standard Bank South Africa; ICBC (China) — strategic partner; Standard Bank London; 20-country Africa network</td><td class="">BMCE Group / CIH Bank (Morocco); Crédit Mutuel France (25% shareholder); BOA UK; 19-country Africa network</td><td class="rating-limited">N/A — Not a bank</td></tr>
+<tr><td class="criteria">Banks This Bank Partners With for CI Client Referrals</td><td class="">Attijariwafa subsidiaries in UEMOA; IFC (World Bank) for development finance; African Development Bank</td><td class="">IFC (World Bank financial inclusion); DBS subsidiary (digital banking); BCP Group UEMOA banks</td><td class="">Atlantique Technologie SA (IT); AFG Group entities across UEMOA</td><td class="">Western Union (since 1998); SG Securities Services; SG Global Markets; Tagpay (fintech, SG shareholder); BNP Paribas CIB for very large deals</td><td class="">Citi Treasury &amp; Trade Solutions global partners; ICBC China; CitiFX Pulse counterparties; all major global custodians</td><td class="rating-limited">ICBC China (trade flows from Asia); Standard Bank Nigeria / Kenya / Ghana for pan-Africa needs; API Marketplace fintech partners</td><td class="">Crédit Mutuel France; CIH Bank Morocco; BOA UK international; BMCE Group Africa entities</td><td class="">Mastercard (virtual card, 100M+ acceptance); JUMO (microlending / AI credit); Ericsson (API/tech); interoperable with all BCEAO member banks</td></tr>
+<tr><td class="criteria">Mobile Money Partner Banks / Interoperability</td><td class="">Orange Money / MTN MoMo via BCEAO SICA-CI interbank platform; Visa/Mastercard debit cards</td><td class="">Orange Money / MTN MoMo via BCEAO interoperability; IFC fintech partnerships</td><td class="">Orange Money / MTN MoMo via BCEAO; AFG e-Bank mobile-first approach</td><td class="">Orange Money / MTN MoMo via BCEAO; SG app mobile-friendly; YUP was discontinued in 2022</td><td class="">BCEAO interoperability framework (receive mobile money into corporate account); no direct MoMo partnership in CI</td><td class="">BCEAO interoperability; no direct MoMo partnership in CI</td><td class="">Orange Money / MTN MoMo via BCEAO interoperability</td><td class="">CORE: interoperable with all BCEAO member banks; Mastercard; Orange Money (direct)</td></tr>
+<tr><td class="criteria">Technology Partners</td><td class="">Attijariwafa proprietary banking tech; Visa/Mastercard card programs; SWIFT</td><td class="">Business Online (BCP Group tech); DBS subsidiary; IFC tech support</td><td class="">AFG e-Bank (proprietary digital platform); Atlantique Technologie SA</td><td class="">SG Global Tech infrastructure; Tagpay (SG shareholder); SG Markets digital platform; call center tech</td><td class="">CitiDirect BE (proprietary); CitiConnect API; CitiFX Pulse; SWIFT GPI; ERP connectors (SAP, Oracle, Kyriba, FIS); IBM mainframe-grade infrastructure</td><td class="">Infosys Finacle (core banking — same platform across all 20 Africa markets); SWIFT; ISO 20022 infrastructure; API Marketplace</td><td class="">Business Online (BMCE Group tech); BOA UK trading platforms; Visa/Mastercard</td><td class="">MTN proprietary MoMo; Mastercard; Ericsson; JUMO (AI credit); open developer API</td></tr>
+<tr><td class="criteria">International Remittance Partners</td><td class="">Western Union (via Attijariwafa); MoneyGram; Ria Money Transfer</td><td class="">Western Union; MoneyGram; BCP Group remittance corridors (Moroccan diaspora)</td><td class="">Western Union; standard remittance channels</td><td class="rating-good">Western Union (since 1998 — strong partnership); MoneyGram; SG international wire transfers</td><td class="">SWIFT wires only (institutional); no retail remittance product in CI</td><td class="">SWIFT wires only; Standard Bank Exco (cross-border remittance in South Africa)</td><td class="">Western Union; MoneyGram; BOA Group cross-border transfers</td><td class="">MoMo cross-border to select African countries; Mastercard virtual card for international</td></tr>
+<tr><td class="criteria">Custody / Securities Services Partners</td><td class="">Africaine de Bourse (brokerage subsidiary); Attijari Asset Management; BRVM settlement</td><td class="">Atlantique Finance (investment banking arm); BRVM settlement; BCP asset management</td><td class="">Atlantique Bourse (historical affiliate); BRVM settlement</td><td class="rating-excellent">SGSS CI — Best Sub-Custodian Bank 2025 (Global Finance award); BRVM custody; depositary for WAEMU mutual funds; full global custody via SG Group</td><td class="">Citi Global Custody — global custodian; handles CI sovereign bond settlement; sub-custodian for major asset managers in CI</td><td class="rating-limited">Standard Bank Trustees; standard custody via CIB; not a primary custodian in CI</td><td class="">BOA UK capital markets; BRVM settlement; BMCE Group custody</td><td class="rating-limited">N/A</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat6" class="tab">
+<div class="cat-header">7. CORPORATE BANKING CAPABILITIES</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Working Capital / Credit Facilities</td><td class="">YES — Credit lines, overdrafts, revolving credit; cocoa/coffee campaign loans</td><td class="rating-good">YES — Full corporate credit suite; SME + large corporate</td><td class="">YES — Credit lines; SME-focused; growing corporate book</td><td class="rating-good">YES — SG corporate credit full suite; structured working capital</td><td class="rating-good">YES — Full corporate lending; public + private sector; bilateral + syndicated facilities</td><td class="">YES — Short-term loans, overdraft, trade finance lines; CIB-focused</td><td class="">YES — SME + corporate credit</td><td class="rating-limited">NONE — Microcredit only via JUMO partnership</td></tr>
+<tr><td class="criteria">Structured Finance / Project Finance</td><td class="">YES — Attijariwafa Group structured finance (energy, infrastructure)</td><td class="">YES — BCP Group structured finance (energy, transport, health sectors)</td><td class="rating-limited">LIMITED — Early stage; limited track record in CI</td><td class="">YES — SG structured finance globally; CI infrastructure projects</td><td class="rating-excellent">EXCELLENT — Sovereign + project finance; lead advisor on multiple CI transactions including BOT/PPP structures</td><td class="rating-excellent">EXCELLENT — Standard Bank CIB; full advisory + structured finance; mining, energy, infrastructure across Africa</td><td class="">YES — BOA structured finance (energy, agriculture); BMCE Group project finance</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">Investment Banking / Capital Markets (DCM, ECM)</td><td class="rating-limited">LIMITED — Through Attijari Asset Management / Africaine de Bourse (BRVM-listed)</td><td class="">YES — Atlantique Finance investment banking arm (DCM, ECM); BRVM specialist</td><td class="rating-limited">LIMITED — Atlantique Bourse affiliate (historical); building CI capabilities</td><td class="rating-good">YES — SG Capital Markets globally (full DCM/ECM); BRVM bonds; SG CIB (Paris) for large deals</td><td class="rating-excellent">EXCELLENT — Led CI debut Eurobond (2014, USD); first Sukuk in CI; sovereign advisory; full DCM; no BRVM direct listing role</td><td class="rating-excellent">EXCELLENT — Standard Bank CIB full-service IB across 20 African markets; Africa-focused bond arranging; strong DCM</td><td class="rating-limited">LIMITED LOCALLY — BOA UK has capital markets capabilities; CI-level limited</td><td class="rating-limited">NONE</td></tr>
+<tr><td class="criteria">Insurance / Bancassurance</td><td class="">YES — Via Attijariwafa Group insurance subsidiaries</td><td class="">YES — Via BCP Group (Banque Centrale Populaire insurance)</td><td class="">DEVELOPING</td><td class="">YES — SG Group insurance partners in CI</td><td class="rating-limited">LIMITED — Not a focus in CI</td><td class="rating-limited">LIMITED IN CI — Standard Bank Insurance in other Africa markets</td><td class="rating-limited">LIMITED LOCALLY</td><td class="">YES — MTN Insurance products via MoMo</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat7" class="tab">
+<div class="cat-header">8. BOND ISSUANCE &amp; CAPITAL MARKETS</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Issues or Arranges Bonds in CI / BRVM?</td><td class="">YES — SIB issues bonds on BRVM; Attijariwafa Group bond programs</td><td class="">YES — BACI issues bonds on BRVM; Atlantique Finance DCM; BCP Group bond programs</td><td class="">DEVELOPING — AFG Group issued bonds historically (Afriland CI bond 2015 at 5.6%; 120% oversubscribed)</td><td class="">YES — SG CI bonds on BRVM; SG Group DCM infrastructure; SGSS CI arranges UEMOA bonds</td><td class="rating-excellent">YES (arranger) — Citi arranges CI sovereign Eurobonds (NOT BRVM); no BRVM primary dealer role; best for Eurobond/international capital markets</td><td class="rating-good">YES (arranger) — Standard Bank CIB full capital markets bond arranger across 20 African markets; BRVM + international</td><td class="">YES — BOA Group issues bonds; BOA UK has capital markets capability; BRVM presence</td><td class="">NO</td></tr>
+<tr><td class="criteria">Typical Bond Coupon Rate (XOF BRVM vs EUR Eurobond)</td><td class="">BRVM bonds: ~6.0–7.5% (XOF-denominated; 5–10 year tenor)</td><td class="rating-good">BRVM bonds: ~5.5–7.0% (Atlantique Finance arranges competitively)</td><td class="rating-good">Group bonds: ~5.6% (historic 2015 AFG CI bond — good pricing); BRVM ~6–7%</td><td class="">BRVM bonds: ~5.5–7.5%; SG execution quality reduces pricing risk for issuers</td><td class="rating-excellent">Sovereign Eurobonds arranged: 6.00% (12yr) and 6.875% (20yr) in EUR (2020 CI sovereign deal) — BEST EXECUTION seen in CI</td><td class="">BRVM/regional bonds arranged: ~6–8% depending on tenor and credit</td><td class="">BOA bonds: ~6.5–8.0%; slightly above UEMOA average</td><td class="rating-limited">N/A</td></tr>
+<tr><td class="criteria">Bond Pricing Assessment (for corporate issuer)</td><td class="rating-adequate">FAIR — Typical UEMOA market rate; acceptable for investment-grade CI corporates</td><td class="rating-good">FAIR / GOOD — Competitive UEMOA; Atlantique Finance has strong BRVM relationships</td><td class="rating-good">GOOD (historically) — 5.6% coupon well below market avg; good for issuer; limited recent track record</td><td class="rating-good">FAIR / GOOD — In line with market; SG global execution quality can improve pricing for large issues</td><td class="rating-excellent">EXCELLENT — EUR Eurobond at 6.00%/6.875% reflects best execution; Citi&#39;s global order book management delivers tightest spread for sovereign/large corporate issuers</td><td class="rating-good">GOOD — Standard Bank CIB arranges bonds competitively; market standard; strong for Africa-focused investors</td><td class="rating-adequate">FAIR — Slightly above UEMOA average; reflects risk premium</td><td class="rating-limited">N/A</td></tr>
+<tr><td class="criteria">Bond Issuance Rating</td><td class="rating-adequate">ADEQUATE (3/5) — Local BRVM issuances; useful for domestic CI fundraising</td><td class="rating-good">GOOD (3.5/5) — Atlantique Finance strong BRVM presence; competitive</td><td class="rating-limited">LIMITED (2/5) — Group-level experience; CI capability building</td><td class="rating-excellent">GOOD (4/5) — Full SG Group DCM infrastructure; best for large BRVM + international hybrid deals</td><td class="rating-excellent">EXCELLENT (5/5) — Premier sovereign + institutional bond arranger; best for Eurobond / international capital markets</td><td class="rating-excellent">EXCELLENT (5/5) — Best-in-class African DCM; full arranger across 20 countries</td><td class="rating-adequate">ADEQUATE (3/5) — Regional capability via BMCE/BOA UK</td><td class="rating-limited">N/A</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat8" class="tab">
+<div class="cat-header">9. NETWORK &amp; PARTNERSHIPS</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Global Correspondent Banking Network</td><td class="rating-good">~700+ correspondents via Attijariwafa Group; strong Africa + MENA + Europe</td><td class="">~500+ correspondents via BCP Group; UEMOA + international</td><td class="">~200+ correspondents (growing); building international relationships</td><td class="">1,000+ correspondent banks globally via SG Group; comprehensive worldwide coverage</td><td class="rating-excellent">160+ countries; 65,000+ institutional clients; PREMIER global network; Citi IS the correspondent for many central banks</td><td class="">20 African countries + 4 global hubs (London, NY, Dubai, Beijing) + ICBC China strategic partner</td><td class="">19-country Africa network; Crédit Mutuel France (25% shareholder); BOA UK international</td><td class="rating-limited">NOT APPLICABLE — MNO network only</td></tr>
+<tr><td class="criteria">UEMOA / West Africa Zone Coverage</td><td class="rating-good">FULL — All 8 UEMOA countries via Attijariwafa/SIB network</td><td class="rating-good">FULL — All 8 UEMOA countries (Banque Atlantique&#39;s core market)</td><td class="rating-good">FULL — Present in UEMOA (8 countries) + Cameroon + Madagascar</td><td class="rating-good">STRONG — Present in key UEMOA markets (CI, Senegal, Guinea, Benin, Mauritania, Cameroon)</td><td class="">SELECTIVE — CI primary UEMOA focus; pan-Africa via Citi&#39;s 50+ African country network</td><td class="rating-limited">LIMITED — CI only for CIB; broader Sub-Saharan Africa (20 countries) for multinational clients</td><td class="rating-good">FULL — All 8 West Africa UEMOA countries (BOA Group)</td><td class="">BROAD — MoMo present in 14 African countries</td></tr>
+<tr><td class="criteria">Fintech / Mobile Money Partnerships</td><td class="">BCEAO interoperability; Orange Money / MTN MoMo receive; Visa/Mastercard card programs</td><td class="">IFC (financial inclusion); DBS subsidiary; BCP Group digital initiatives; BCEAO interoperability</td><td class="">AFG e-Bank digital platform; BCEAO mobile money interoperability; fintech-integrated approach</td><td class="">BCEAO interoperability; YUP was DISCONTINUED (March 2022); SG app + digital banking; Tagpay (minority stake)</td><td class="rating-limited">First mass govt payment in CI (social security); Citi Treasury API; global fintech ecosystem partnerships; limited CI-specific mobile money</td><td class="">API Marketplace (Standard Bank global); ISO 20022; Finacle (Infosys) core banking; BCEAO interoperability</td><td class="rating-limited">BCEAO interoperability; Business Online digital; limited local fintech partnerships</td><td class="">EXTENSIVE — Mastercard (virtual card, 100M+ merchants); JUMO (AI credit); Ericsson API; Orange Money direct interoperability; open developer API</td></tr>
+<tr><td class="criteria">Strategic Differentiator / Unique Value</td><td class="">Only major bank with BOTH deep UEMOA agricultural finance AND 21-city CI hinterland branch coverage</td><td class="">Atlantique Finance DCM + DBS digital subsidiary = unique local IB + digital combo</td><td class="">Only Ivorian-owned universal bank — strategic for local procurement/political relationships</td><td class="rating-excellent">Only bank in CI with a dedicated customer call center; SGSS CI = Best Sub-Custodian 2025; deepest local relationships</td><td class="">Only bank that: arranged CI&#39;s debut Eurobond, executed first FX hedge, and ran first mass payment in CI; unmatched institutional pedigree</td><td class="">Only bank using Infosys Finacle across all 20 Africa markets — single platform for pan-Africa multinational clients</td><td class="">Only bank with both BOA UK (international commodity trade) + 19-country Africa branch network for commodity trade chains</td><td class="">Only platform reaching truly unbanked rural CI population; largest mobile agent network; USSD works without smartphone</td></tr>
+<tr><td class="criteria">Overall Network Rating</td><td class="rating-good">GOOD (4/5) — Attijariwafa 14-country Africa + strong international correspondents</td><td class="rating-good">GOOD (4/5) — BCP Group strong UEMOA + international</td><td class="rating-adequate">ADEQUATE (3/5) — Growing AFG group; still establishing</td><td class="rating-excellent">EXCELLENT (5/5) — SG Group global network + strong local CI presence</td><td class="rating-excellent">EXCELLENT (5/5) — Best global network; 160+ countries; premier institutional correspondent</td><td class="rating-excellent">EXCELLENT (5/5) — Africa&#39;s largest bank group; 20 countries; global hubs</td><td class="rating-good">GOOD (4/5) — BOA 19-country Africa + BMCE global</td><td class="rating-adequate">ADEQUATE (3/5) — MoMo-specific; not for banking purposes</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat9" class="tab">
+<div class="cat-header">10. KEY WEAKNESSES &amp; RISKS (Detailed)</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Top Weakness #1</td><td class="rating-adequate">NPL EXPOSURE — Some non-performing loan risk in public sector portfolio; sovereign/parastatal concentration</td><td class="rating-limited">UEMOA CONCENTRATION — Heavy reliance on UEMOA zone; limited diversification outside West Africa</td><td class="rating-limited">NEW ENTITY RISK — Rebranded 2023; limited track record as AFG Bank CI; compliance maturity still developing</td><td class="">PARENT EXIT RISK — SG has sold Cameroon (2023) and Ghana (2023) subsidiaries; CI exit risk real despite top market position; must be monitored</td><td class="rating-limited">NO LOCAL PRESENCE FOR COLLECTIONS — Single Abidjan office; cannot support rural or even semi-urban collections; must partner with SIB/SG for all CI collections</td><td class="rating-limited">LIMITED CI FOOTPRINT — CIB-only; 1 Abidjan office; no retail banking; limited local XOF liquidity</td><td class="">SMALLER BALANCE SHEET — #7 in UEMOA by total assets; less capacity for very large structured transactions vs. top-3</td><td class="rating-limited">NOT A LICENSED BANK — No BCEAO deposit protection; no guaranteed fund safety; regulatory risk if MTN restructures MoMo</td></tr>
+<tr><td class="criteria">Top Weakness #2</td><td class="rating-limited">DIGITAL MATURITY — SIBNET functional but behind CitiDirect/SG in sophistication; limited ERP connectors</td><td class="rating-limited">LESS DIFFERENTIATED FX — No specialist FX hedging capability; basic forwards only</td><td class="">COMPLIANCE TRACK RECORD — AML/CFT maturity still developing as new entity</td><td class="">YUP DISCONTINUED — Rural collection strategy weakened after YUP mobile money shut down March 2022; current rural approach is standard branches only</td><td class="rating-limited">HIGH MINIMUM THRESHOLDS — Citi in CI typically requires large FX/payment volumes to justify relationship; not suited for smaller corporates</td><td class="rating-limited">NO RETAIL BANKING — Cannot serve consumer segments; limited for companies needing payroll distribution to unbanked workers</td><td class="rating-adequate">MODERATE DIGITAL MATURITY — Business Online less sophisticated than CitiDirect or SG platform</td><td class="">AML / KYC STANDARDS — Different KYC standards vs licensed banks; compliance risk for corporate clients using MoMo for bulk collections</td></tr>
+<tr><td class="criteria">Top Weakness #3</td><td class="">PUBLIC SECTOR INFLUENCE — Ivorian state as co-shareholder (25%) creates potential conflicts; political lending risk</td><td class="">INVESTMENT BANKING — Weaker structured finance capability vs. SG/Citi for complex transactions</td><td class="rating-limited">SMALL BALANCE SHEET — Limited capacity for large credit facilities or complex structured products</td><td class="rating-limited">TRADE FEES — ~1–2% trade finance fees; not the cheapest for very high-volume commodity traders</td><td class="rating-limited">EXPENSIVE FOR SMALL VOLUMES — Premium pricing suitable for large flows; SME or medium companies may find Citi too expensive</td><td class="">RECENT ENTRANT — Only in CI since 2017; shorter local relationship track record vs. SG (60+ years) or SIB (60+ years)</td><td class="rating-adequate">BMCE INTEGRATION — BMCE/BOA ongoing integration creates some operational uncertainty; some legacy systems</td><td class="rating-limited">FUND SAFETY — Mobile wallet funds not BCEAO-insured like bank deposits; corporate risk exposure</td></tr>
+<tr><td class="criteria">Top Weakness #4 (Specific to FX / International Payments)</td><td class="rating-limited">FX HEDGING LIMITED — No options or structured FX products; limited forward tenor beyond 12 months</td><td class="rating-limited">FX HEDGING LIMITED — Basic forwards only; not suited for complex hedging programmes</td><td class="rating-limited">FX VERY LIMITED — Not recommended for large FX management</td><td class="rating-good">FX GOOD BUT NOT CITI — SG FX competitive but not the same depth/pricing as Citi for very large USD/EUR flows</td><td class="">XOF LIQUIDITY — Single CI office means Citi may have less XOF day-to-day liquidity vs. SG or SIB with large local deposit bases</td><td class="">FX HEDGING IN CI — Standard Bank&#39;s CI FX capability less proven than SG or Citi; relatively new in market</td><td class="rating-limited">FX VERY LIMITED — Not suitable as primary FX bank for large international payments</td><td class="rating-limited">NO FX — Cannot handle any corporate FX</td></tr>
+</tbody></table></div>
+</div>
+
+<div id="cat10" class="tab">
+<div class="cat-header">11. OVERALL SUITABILITY SUMMARY</div>
+<div class="rating-legend">
+    <span class="legend-item"><span class="legend-swatch rating-excellent"></span> Excellent</span>
+    <span class="legend-item"><span class="legend-swatch rating-good"></span> Good</span>
+    <span class="legend-item"><span class="legend-swatch rating-adequate"></span> Adequate</span>
+    <span class="legend-item"><span class="legend-swatch rating-limited"></span> Limited / None</span>
+</div>
+<div class="table-wrap"><table class="comp-table"><thead><tr><th>Criteria</th><th>SIB</th><th>BACI</th><th>AFG Bank</th><th>SGBCI</th><th>Citi CI</th><th>Stanbic CI</th><th>BOA CI</th><th>MTN MoMo</th></tr></thead><tbody>
+<tr><td class="criteria">Best Suited For</td><td class="">Large local/regional corps; UEMOA agri-trade; nationwide CI collection banking (branch-based); cocoa/coffee campaign financing; UEMOA regional payments</td><td class="">Mid-size corporates; UEMOA regional payments; digital-first companies; SMEs; local investment banking via Atlantique Finance</td><td class="">SMEs + institutions; digital-first CI companies; local sovereign/political relationships; companies valuing Ivorian-owned bank</td><td class="rating-excellent">Multinationals; full-service corporate banking in CI; structured finance; custody / sub-custody (SGSS CI Best 2025); local + international bonds</td><td class="">Multinationals; sovereign-linked entities; trade-intensive (cocoa/agri exporters); Eurobond / international capital markets; companies needing world-class FX + SWIFT GPI + MT940/MT942</td><td class="">Multinationals needing Africa-wide CIB; structured + project finance; companies with 5+ African country needs; ISO 20022 / Finacle users</td><td class="">Mid-large corporates; commodity trade; pan-African BMCE operations; companies with BOA UK international commodity trade links</td><td class="">Consumer/SME mobile payments; payroll to unbanked; last-mile rural collections; financial inclusion; agricultural payment corridors</td></tr>
+<tr><td class="criteria">Not Suited For</td><td class="">Companies needing world-class FX hedging or Eurobond access; companies needing CitiDirect-level treasury portals</td><td class="">Companies needing deep rural CI collections or sophisticated FX hedging</td><td class="">Large FX / international payments; complex structured finance; rural collections</td><td class="">⚠️ Companies that depended on YUP for rural collections (now discontinued); companies needing widest FX price competition (use Citi)</td><td class="rating-limited">⚠️ Any company needing rural or semi-urban collections in CI; SMEs below Citi&#39;s minimum threshold</td><td class="">⚠️ Retail banking; rural collections; consumer payments; companies needing broad CI branch coverage</td><td class="rating-excellent">Companies needing best-in-class FX, treasury portals, or rural CI collections</td><td class="rating-limited">⚠️ Any company needing a licensed bank; large FX; bonds; regulated deposits; NOT suitable as sole banking provider</td></tr>
+<tr><td class="criteria">Key Risks / Concerns</td><td class="rating-adequate">MODERATE — NPL public sector exposure; Attijariwafa parent risk; digital maturity gap</td><td class="rating-adequate">MODERATE — BCP integration; UEMOA market concentration; limited rural presence</td><td class="rating-limited">HIGHER — New entity (2023); limited track record; compliance maturing; small balance sheet</td><td class="rating-adequate">LOW-MODERATE — ⚠️ Parent strategy risk (SG Africa divestment trend); YUP discontinued (rural gap); monitor for exit signals</td><td class="rating-good">LOW — Strong global parent; ⚠️ zero rural presence (critical for this use case — MUST pair with local bank)</td><td class="rating-good">LOW — Strong parent; ⚠️ small CI footprint; limited retail; CIB only; newer local brand</td><td class="rating-adequate">MODERATE — BMCE integration; smaller balance sheet; limited CI digital maturity</td><td class="rating-limited">HIGHER — ⚠️ NOT a bank; no BCEAO deposit protection; AML standards different; fund safety limited; MTN restructuring risk</td></tr>
+<tr><td class="criteria">OVERALL RATING (/5 Stars) — for Large FX + Rural Collections Use Case</td><td class="rating-excellent">4/5 ⭐⭐⭐⭐ — Strong local franchise; best traditional bank for CI-wide hinterland collections + UEMOA trade</td><td class="rating-good">3.5/5 ⭐⭐⭐½ — Good regional reach; adequate for UEMOA payments + Atlantique Finance IB</td><td class="rating-limited">3/5 ⭐⭐⭐ — Growing but early stage; useful for Ivorian relationships; not for FX/rural</td><td class="rating-excellent">4/5 ⭐⭐⭐⭐ — Excellent full-service partner; ⚠️ Post-YUP: rural gap must be addressed with partner bank</td><td class="rating-excellent">4.5/5 ⭐⭐⭐⭐½ — Best-in-class for international FX + SWIFT + MT940/MT942; ⚠️ MUST pair with local bank for all CI collections</td><td class="rating-excellent">4.5/5 ⭐⭐⭐⭐½ — Best for multinationals with Africa-wide CIB; ⚠️ must pair with local bank for CI collections</td><td class="">3.5/5 ⭐⭐⭐½ — Solid regional option; commodity trade specialist</td><td class="rating-limited">3/5 ⭐⭐⭐ — For specific mobile payment use cases ONLY; NOT a standalone banking partner</td></tr>
+<tr><td class="criteria">Recommended Action</td><td class="rating-excellent">CONSIDER / STRONGLY CONSIDER — Best local bank for CI-wide collections (branch-based); good UEMOA trade finance partner</td><td class="rating-good">CONSIDER — Good regional reach; adequate for companies with UEMOA focus; pair with Citi for FX</td><td class="rating-limited">EVALUATE — Monitor development over 18 months; useful for local political relationships; not for FX</td><td class="rating-good">RECOMMEND — Strong full-service corporate banking partner; ⚠️ verify rural collection plan post-YUP; monitor SG Africa divestment news</td><td class="rating-excellent">STRONGLY RECOMMEND (for FX + International) — Best for institutional, sovereign, or trade-intensive needs; pair with SIB or SG for CI collections</td><td class="rating-excellent">STRONGLY RECOMMEND (for Pan-Africa CIB) — Best for multinationals; pair with SIB for CI collections</td><td class="rating-good">CONSIDER — Good for commodity trade or pan-African operations; not as primary FX/payments bank</td><td class="">COMPLEMENT ONLY — Use alongside a licensed bank (SIB or SG) for last-mile payroll/rural payments</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="footer">
+    Ivory Coast Banking Partner Comparison Matrix &mdash; Comprehensive Edition | Sources: Bank Official Websites, Citi.com, StandardBank.com, BCEAO, Trade.gov, SG Africa | February 2026
+</div>
+
+</div>
+
+<script>
+function showTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-primary button, .nav-secondary button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('[data-tab="' + id + '"]').forEach(b => b.classList.add('active'));
+    history.replaceState(null, '', '#' + id);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const hash = location.hash.slice(1);
+    if (hash && document.getElementById(hash)) showTab(hash);
+});
+</script>
+</body>
+</html>
