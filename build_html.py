@@ -1,6 +1,10 @@
-import json, sys
+import json, sys, html as _html
 from datetime import datetime
 from collections import defaultdict
+
+def esc(s):
+    """HTML-escape a string for safe injection into HTML content and attributes."""
+    return _html.escape(str(s), quote=True)
 
 # --gma flag: filter to Ivory Coast (GMA) only
 GMA_MODE = '--gma' in sys.argv
@@ -17,6 +21,9 @@ with open('ctm_data.json', 'r') as f:
 rate = data['rate']
 transactions = data['transactions']
 transfers = data.get('transfers', [])
+
+# Keep unfiltered copy for cross-entity ref resolution
+all_transactions_unfiltered = list(transactions)
 
 # Filter if GMA mode
 if FILTER_COUNTRY:
@@ -123,8 +130,8 @@ for cat, s in cat_stats.items():
     d_usd = s['debit_xof'] / rate
     c_usd = s['credit_xof'] / rate
     n_usd = (s['credit_xof'] + s['debit_xof']) / rate
-    cat_rows += f"""<tr class="drill-row" data-filter-type="category" data-filter-value="{cat}">
-        <td data-sort="{cat}">{cat}</td>
+    cat_rows += f"""<tr class="drill-row" data-filter-type="category" data-filter-value="{esc(cat)}">
+        <td data-sort="{esc(cat)}">{esc(cat)}</td>
         <td class="num" data-sort="{s['count']}">{s['count']:,}</td>
         <td class="num debit" data-sort="{d_usd:.0f}">{d_usd:,.0f}</td>
         <td class="num credit" data-sort="{c_usd:.0f}">{c_usd:,.0f}</td>
@@ -144,9 +151,9 @@ for bank, s in bank_stats.items():
     c_usd = s['credit_xof'] / rate
     n_usd = (s['credit_xof'] + s['debit_xof']) / rate
     country = bank_to_country.get(bank, 'Unknown')
-    bank_rows += f"""<tr class="drill-row" data-filter-type="bank" data-filter-value="{bank}">
-        <td data-sort="{bdn(bank)}">{bdn(bank)}</td>
-        <td data-sort="{country}">{country}</td>
+    bank_rows += f"""<tr class="drill-row" data-filter-type="bank" data-filter-value="{esc(bank)}">
+        <td data-sort="{esc(bdn(bank))}">{esc(bdn(bank))}</td>
+        <td data-sort="{esc(country)}">{esc(country)}</td>
         <td class="num" data-sort="{s['count']}">{s['count']:,}</td>
         <td class="num debit" data-sort="{d_usd:.0f}">{d_usd:,.0f}</td>
         <td class="num credit" data-sort="{c_usd:.0f}">{c_usd:,.0f}</td>
@@ -159,8 +166,8 @@ for country, s in country_stats.items():
     d_usd = s['debit_xof'] / rate
     c_usd = s['credit_xof'] / rate
     n_usd = (s['credit_xof'] + s['debit_xof']) / rate
-    country_rows += f"""<tr class="drill-row" data-filter-type="country" data-filter-value="{country}">
-        <td style="font-weight:600" data-sort="{country}">{country}</td>
+    country_rows += f"""<tr class="drill-row" data-filter-type="country" data-filter-value="{esc(country)}">
+        <td style="font-weight:600" data-sort="{esc(country)}">{esc(country)}</td>
         <td class="num" data-sort="{len(s['banks'])}">{len(s['banks'])}</td>
         <td class="num" data-sort="{s['count']}">{s['count']:,}</td>
         <td class="num debit" data-sort="{d_usd:.0f}">{d_usd:,.0f}</td>
@@ -176,9 +183,9 @@ for country, s in country_stats.items():
         d_usd = bs['debit_xof'] / rate
         c_usd = bs['credit_xof'] / rate
         n_usd = (bs['credit_xof'] + bs['debit_xof']) / rate
-        country_bank_rows += f"""<tr class="drill-row" data-filter-type="bank" data-filter-value="{bk}">
-            <td data-sort="{country}">{country}</td>
-            <td data-sort="{bdn(bk)}">{bdn(bk)}</td>
+        country_bank_rows += f"""<tr class="drill-row" data-filter-type="bank" data-filter-value="{esc(bk)}">
+            <td data-sort="{esc(country)}">{esc(country)}</td>
+            <td data-sort="{esc(bdn(bk))}">{esc(bdn(bk))}</td>
             <td class="num" data-sort="{bs['count']}">{bs['count']:,}</td>
             <td class="num debit" data-sort="{d_usd:.0f}">{d_usd:,.0f}</td>
             <td class="num credit" data-sort="{c_usd:.0f}">{c_usd:,.0f}</td>
@@ -195,8 +202,8 @@ for flow in FLOW_ORDER:
     d_usd = s['debit_xof'] / rate
     c_usd = s['credit_xof'] / rate
     n_usd = (s['credit_xof'] + s['debit_xof']) / rate
-    flow_rows += f"""<tr class="drill-row" data-filter-type="flow" data-filter-value="{flow}">
-        <td data-sort="{flow}" style="font-weight:600">{flow}</td>
+    flow_rows += f"""<tr class="drill-row" data-filter-type="flow" data-filter-value="{esc(flow)}">
+        <td data-sort="{esc(flow)}" style="font-weight:600">{esc(flow)}</td>
         <td class="num" data-sort="{s['count']}">{s['count']:,}</td>
         <td class="num debit" data-sort="{d_usd:.0f}">{d_usd:,.0f}</td>
         <td class="num credit" data-sort="{c_usd:.0f}">{c_usd:,.0f}</td>
@@ -283,10 +290,10 @@ for (src_bank, dst_bank), rs in sorted(route_stats.items(), key=lambda x: -x[1][
     dst_country = bank_to_country.get(dst_bank, 'Unknown')
     avg_usd = rs['total_usd'] / rs['count'] if rs['count'] else 0
     route_rows += f"""<tr>
-        <td data-sort="{bdn(src_bank)}">{bdn(src_bank)}</td>
-        <td data-sort="{src_country}">{src_country}</td>
-        <td data-sort="{bdn(dst_bank)}">{bdn(dst_bank)}</td>
-        <td data-sort="{dst_country}">{dst_country}</td>
+        <td data-sort="{esc(bdn(src_bank))}">{esc(bdn(src_bank))}</td>
+        <td data-sort="{esc(src_country)}">{esc(src_country)}</td>
+        <td data-sort="{esc(bdn(dst_bank))}">{esc(bdn(dst_bank))}</td>
+        <td data-sort="{esc(dst_country)}">{esc(dst_country)}</td>
         <td class="num" data-sort="{rs['count']}">{rs['count']:,}</td>
         <td class="num" data-sort="{rs['total_usd']:.0f}">${rs['total_usd']:,.0f}</td>
         <td class="num" data-sort="{avg_usd:.0f}">${avg_usd:,.0f}</td>
@@ -294,17 +301,13 @@ for (src_bank, dst_bank), rs in sorted(route_stats.items(), key=lambda x: -x[1][
 
 # Enrich transfers with debit/credit dates, float days, and both-side details
 # Use ALL transactions for ref lookup (not filtered), so cross-entity refs resolve
-all_txns_for_ref = data.get('_all_transactions', transactions)
-if FILTER_COUNTRY:
-    # Reload full transaction list for ref resolution
-    with open('ctm_data.json', 'r') as _f:
-        _full = json.load(_f)
-    all_txns_for_ref = _full['transactions']
+all_txns_for_ref = all_transactions_unfiltered
 
+GENERIC_REFS = {'', 'NONREF', 'N/A', 'NA', 'NOREF'}
 ref_to_txn = {}
 for t in all_txns_for_ref:
     ref = t.get('ref')
-    if ref:
+    if ref and ref.upper() not in GENERIC_REFS and ref not in ref_to_txn:
         ref_to_txn[ref] = t
 
 for tr in transfers:
@@ -333,7 +336,7 @@ for tr in transfers:
             dvd = datetime.strptime(tr['debit_value_date'], '%Y-%m-%d')
             cvd = datetime.strptime(tr['credit_value_date'], '%Y-%m-%d')
             tr['value_float_days'] = (cvd - dvd).days
-        except:
+        except (ValueError, TypeError):
             tr['value_float_days'] = None
     else:
         tr['value_float_days'] = None
@@ -342,34 +345,40 @@ for tr in transfers:
 intra_transfers = [t for t in transfers if t['source_country'] == t['dest_country']]
 ic_transfers = [t for t in transfers if t['source_country'] != t['dest_country']]
 
-# Float stats (all) — PostedDate
-float_values = [tr['float_days'] for tr in transfers if tr['float_days'] is not None]
+# Float stats (all) — PostedDate (exclude negative float from averages)
+float_values_all = [tr['float_days'] for tr in transfers if tr['float_days'] is not None]
+negative_float_count = sum(1 for f in float_values_all if f < 0)
+float_values = [f for f in float_values_all if f >= 0]
 avg_float = sum(float_values) / len(float_values) if float_values else 0
 max_float = max(float_values) if float_values else 0
 zero_float = sum(1 for f in float_values if f == 0)
-positive_float = sum(1 for f in float_values if f and f > 0)
+positive_float = sum(1 for f in float_values if f > 0)
 
-# Float stats (all) — ValueDate
-vfloat_values = [tr['value_float_days'] for tr in transfers if tr['value_float_days'] is not None]
+# Float stats (all) — ValueDate (exclude negative)
+vfloat_values_all = [tr['value_float_days'] for tr in transfers if tr['value_float_days'] is not None]
+negative_vfloat_count = sum(1 for f in vfloat_values_all if f < 0)
+vfloat_values = [f for f in vfloat_values_all if f >= 0]
 avg_vfloat = sum(vfloat_values) / len(vfloat_values) if vfloat_values else 0
 max_vfloat = max(vfloat_values) if vfloat_values else 0
 
-# Intra-entity float stats
-intra_float = [tr['float_days'] for tr in intra_transfers if tr['float_days'] is not None]
+# Intra-entity float stats (exclude negative)
+intra_float_all = [tr['float_days'] for tr in intra_transfers if tr['float_days'] is not None]
+intra_float = [f for f in intra_float_all if f >= 0]
 intra_avg_float = sum(intra_float) / len(intra_float) if intra_float else 0
 intra_max_float = max(intra_float) if intra_float else 0
 intra_zero_float = sum(1 for f in intra_float if f == 0)
 intra_total_usd = sum(t['amount_usd'] for t in intra_transfers)
-intra_vfloat = [tr['value_float_days'] for tr in intra_transfers if tr['value_float_days'] is not None]
+intra_vfloat = [tr['value_float_days'] for tr in intra_transfers if tr['value_float_days'] is not None and tr['value_float_days'] >= 0]
 intra_avg_vfloat = sum(intra_vfloat) / len(intra_vfloat) if intra_vfloat else 0
 
-# Intercompany float stats
-ic_float = [tr['float_days'] for tr in ic_transfers if tr['float_days'] is not None]
+# Intercompany float stats (exclude negative)
+ic_float_all = [tr['float_days'] for tr in ic_transfers if tr['float_days'] is not None]
+ic_float = [f for f in ic_float_all if f >= 0]
 ic_avg_float = sum(ic_float) / len(ic_float) if ic_float else 0
 ic_max_float = max(ic_float) if ic_float else 0
 ic_zero_float = sum(1 for f in ic_float if f == 0)
 ic_total_usd = sum(t['amount_usd'] for t in ic_transfers)
-ic_vfloat = [tr['value_float_days'] for tr in ic_transfers if tr['value_float_days'] is not None]
+ic_vfloat = [tr['value_float_days'] for tr in ic_transfers if tr['value_float_days'] is not None and tr['value_float_days'] >= 0]
 ic_avg_vfloat = sum(ic_vfloat) / len(ic_vfloat) if ic_vfloat else 0
 
 # JSON for client-side rendering
@@ -453,8 +462,8 @@ for country_name in sorted(country_stats.keys()):
         n = (bs['credit_xof'] + bs['debit_xof']) / rate
         vol = abs(bs['debit_xof']) + bs['credit_xof']
         pct = vol / total_vol * 100 if total_vol else 0
-        country_review_html += f"""<tr class="drill-row" data-filter-type="bank" data-filter-value="{bk}">
-            <td data-sort="{bdn(bk)}">{bdn(bk)}</td>
+        country_review_html += f"""<tr class="drill-row" data-filter-type="bank" data-filter-value="{esc(bk)}">
+            <td data-sort="{esc(bdn(bk))}">{esc(bdn(bk))}</td>
             <td class="num" data-sort="{bs['count']}">{bs['count']:,}</td>
             <td class="num debit" data-sort="{d:.0f}">{d:,.0f}</td>
             <td class="num credit" data-sort="{c:.0f}">{c:,.0f}</td>
@@ -476,7 +485,7 @@ for country_name in sorted(country_stats.keys()):
         c = fs['credit_xof'] / rate
         n = (fs['credit_xof'] + fs['debit_xof']) / rate
         country_review_html += f"""<tr>
-            <td style="font-weight:600" data-sort="{flow}">{flow}</td>
+            <td style="font-weight:600" data-sort="{esc(flow)}">{esc(flow)}</td>
             <td class="num" data-sort="{fs['count']}">{fs['count']:,}</td>
             <td class="num debit" data-sort="{d:.0f}">{d:,.0f}</td>
             <td class="num credit" data-sort="{c:.0f}">{c:,.0f}</td>
@@ -494,7 +503,7 @@ for country_name in sorted(country_stats.keys()):
         c = cs2['credit_xof'] / rate
         n = (cs2['credit_xof'] + cs2['debit_xof']) / rate
         country_review_html += f"""<tr>
-            <td data-sort="{cat}">{cat}</td>
+            <td data-sort="{esc(cat)}">{esc(cat)}</td>
             <td class="num" data-sort="{cs2['count']}">{cs2['count']:,}</td>
             <td class="num debit" data-sort="{d:.0f}">{d:,.0f}</td>
             <td class="num credit" data-sort="{c:.0f}">{c:,.0f}</td>
@@ -530,7 +539,7 @@ opacity_pct = (other_count + unclass_count) / data['total_count'] * 100
 consolidation_html = ''
 for bname, cnt, country in low_activity_banks:
     color = '#c53030' if cnt < 100 else '#b7791f' if cnt < 500 else '#718096'
-    consolidation_html += f'<tr><td>{bname}</td><td>{country}</td><td class="num" style="color:{color};font-weight:600">{cnt:,}</td></tr>'
+    consolidation_html += f'<tr><td>{esc(bname)}</td><td>{esc(country)}</td><td class="num" style="color:{color};font-weight:600">{cnt:,}</td></tr>'
 
 # Build insights HTML
 insights_html = f"""
@@ -643,14 +652,14 @@ insights_html += """
     <div class="table-wrap"><table>
         <thead><tr><th>Priority</th><th>Action</th><th>Owner</th><th>Timeline</th></tr></thead>
         <tbody>
-            <tr><td style="font-weight:600;color:#c53030;">1</td><td>Expand parser keyword rules — reduce "Other" by 40-60%</td><td>Data/IT</td><td>1 week</td></tr>
-            <tr><td style="font-weight:600;color:#c53030;">2</td><td>Flag Unclassified &gt;$5K for manual review queue</td><td>Data/IT</td><td>1 week</td></tr>
-            <tr><td style="font-weight:600;color:#b7791f;">3</td><td>Pull fee value total; compare to tariff schedules</td><td>Treasury</td><td>2 weeks</td></tr>
-            <tr><td style="font-weight:600;color:#b7791f;">4</td><td>Sample 200 cheque txns — identify modernizable payees</td><td>Treasury Ops</td><td>3 weeks</td></tr>
-            <tr><td style="font-weight:600;color:#b7791f;">5</td><td>Initiate Stanbic IC / Citi IC dormant account review</td><td>Treasury / Legal</td><td>4 weeks</td></tr>
-            <tr><td style="font-weight:600;">6</td><td>Confirm intercompany cross-border transfer tax treatment</td><td>Tax / Legal</td><td>6 weeks</td></tr>
-            <tr><td style="font-weight:600;">7</td><td>BICIS/CBAO BAI2 feed narrative configuration negotiation</td><td>Treasury / Banking</td><td>8 weeks</td></tr>
-            <tr><td style="font-weight:600;">8</td><td>Bank rationalization plan (15 → 8 banks)</td><td>Treasury / Legal</td><td>12-18 months</td></tr>
+            <tr><td style="font-weight:600;color:#276749;">&#10003;</td><td style="color:#718096;text-decoration:line-through;">Expand parser keyword rules — reduce "Other" by 40-60%</td><td>Data/IT</td><td style="color:#276749;font-weight:600;">Done (92% reduction)</td></tr>
+            <tr><td style="font-weight:600;color:#c53030;">1</td><td>Flag Unclassified &gt;$5K for manual review queue</td><td>Data/IT</td><td>1 week</td></tr>
+            <tr><td style="font-weight:600;color:#b7791f;">2</td><td>Pull fee value total; compare to tariff schedules</td><td>Treasury</td><td>2 weeks</td></tr>
+            <tr><td style="font-weight:600;color:#b7791f;">3</td><td>Sample 200 cheque txns — identify modernizable payees</td><td>Treasury Ops</td><td>3 weeks</td></tr>
+            <tr><td style="font-weight:600;color:#b7791f;">4</td><td>Initiate Stanbic IC / Citi IC dormant account review</td><td>Treasury / Legal</td><td>4 weeks</td></tr>
+            <tr><td style="font-weight:600;">5</td><td>Confirm intercompany cross-border transfer tax treatment</td><td>Tax / Legal</td><td>6 weeks</td></tr>
+            <tr><td style="font-weight:600;">6</td><td>BICIS/CBAO BAI2 feed narrative configuration negotiation</td><td>Treasury / Banking</td><td>8 weeks</td></tr>
+            <tr><td style="font-weight:600;">7</td><td>Bank rationalization plan (15 → 8 banks)</td><td>Treasury / Legal</td><td>12-18 months</td></tr>
         </tbody>
     </table></div>
 </div>
@@ -710,11 +719,9 @@ body {{ font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); c
 .kpi .value {{ font-size: clamp(16px, 2.2vw, 24px); font-weight: 700; white-space: nowrap; }}
 .kpi .sub {{ font-size: 12px; color: var(--text-light); margin-top: 2px; }}
 
-/* C-03: Stronger color contrast + text indicators */
+/* C-03: Stronger color contrast */
 .debit {{ color: var(--accent); }}
 .credit {{ color: var(--green); }}
-.debit::before {{ content: '\\2193 '; }}
-.credit::before {{ content: '\\2191 '; }}
 
 .tabs {{ display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }}
 .tab {{ padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 14px; font-weight: 500; color: var(--text-light); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }}
@@ -780,8 +787,16 @@ canvas {{ max-height: 350px; }}
 #txnTable th:nth-child(8) {{ width: 110px; }} /* XOF */
 #txnTable th:nth-child(9) {{ width: 100px; }} /* USD */
 
-/* Transfers table */
-#tfTable {{ table-layout: fixed; }}
+/* Transfers table — compact data columns, greedy description */
+.tf-table {{ table-layout: fixed; }}
+.tf-table th:nth-child(1), .tf-table td:nth-child(1) {{ width: 130px; }}  /* From */
+.tf-table th:nth-child(2), .tf-table td:nth-child(2) {{ width: 130px; }}  /* To */
+.tf-table th:nth-child(3), .tf-table td:nth-child(3) {{ width: 110px; }}  /* Amount */
+.tf-table th:nth-child(4), .tf-table td:nth-child(4) {{ width: 95px; }}   /* Posted */
+.tf-table th:nth-child(5), .tf-table td:nth-child(5) {{ width: 35px; }}   /* PF */
+.tf-table th:nth-child(6), .tf-table td:nth-child(6) {{ width: 95px; }}   /* Value */
+.tf-table th:nth-child(7), .tf-table td:nth-child(7) {{ width: 35px; }}   /* VF */
+.tf-table th:nth-child(8), .tf-table td:nth-child(8) {{ width: auto; }}   /* Description */
 
 /* Cross-border highlight */
 .cross-border-row {{ background: #eff6ff; }}
@@ -816,7 +831,7 @@ canvas {{ max-height: 350px; }}
     <div class="kpi">
         <div class="label">Total Transactions</div>
         <div class="value">{data['total_count']:,}</div>
-        <div class="sub">15 banks across 2 countries</div>
+        <div class="sub">{len(bank_stats)} banks across {len(country_stats)} {'country' if len(country_stats) == 1 else 'countries'}</div>
     </div>
     <div class="kpi">
         <div class="label">Total Outflows (USD)</div>
@@ -846,16 +861,15 @@ canvas {{ max-height: 350px; }}
 </div>
 
 <div class="tabs" role="tablist">
-    <button class="tab active" onclick="showTab('overview')" role="tab" aria-selected="true">Overview</button>
-    <button class="tab" onclick="showTab('cashflow')" role="tab">Cash Flow</button>
-    <button class="tab" onclick="showTab('country')" role="tab">Country</button>
-    <button class="tab" onclick="showTab('categories')" role="tab">Transaction Types</button>
-    <button class="tab" onclick="showTab('banks')" role="tab">Banks</button>
-    <button class="tab" onclick="showTab('monthly')" role="tab">Monthly Trends</button>
-    <button class="tab" onclick="showTab('countryreview')" role="tab">Country Review</button>
-    <button class="tab" onclick="showTab('transfers')" role="tab">Transfers</button>
-    <button class="tab" onclick="showTab('insights')" role="tab">Insights</button>
-    <button class="tab" onclick="showTab('transactions')" role="tab">Transactions</button>
+    <button class="tab active" onclick="showTab('overview', event)" role="tab" aria-selected="true">Overview</button>
+    <button class="tab" onclick="showTab('transactions', event)" role="tab">Transactions</button>
+    <button class="tab" onclick="showTab('transfers', event)" role="tab">Transfers</button>
+    <button class="tab" onclick="showTab('cashflow', event)" role="tab">Cash Flow</button>
+    <button class="tab" onclick="showTab('categories', event)" role="tab">Transaction Types</button>
+    <button class="tab" onclick="showTab('banks', event)" role="tab">Banks</button>
+    <button class="tab" onclick="showTab('monthly', event)" role="tab">Monthly Trends</button>
+    <button class="tab" onclick="showTab('countryreview', event)" role="tab">Country Review</button>
+    <button class="tab" onclick="showTab('insights', event)" role="tab">Insights</button>
 </div>
 
 <!-- OVERVIEW TAB -->
@@ -943,51 +957,6 @@ canvas {{ max-height: 350px; }}
     </div>
 </div>
 
-<!-- COUNTRY TAB -->
-<div id="country" class="tab-content" role="tabpanel">
-    <div class="chart-row">
-        <div class="card">
-            <div class="card-header">Transaction Volume by Country</div>
-            <div class="chart-container"><canvas id="countryPieChart"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="card-header">Cash Flow by Country (USD)</div>
-            <div class="chart-container"><canvas id="countryBarChart"></canvas></div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-header">Country Summary (USD) &mdash; click a row to view transactions</div>
-        <div class="table-wrap"><div class="scroll-table">
-        <table>
-            <thead><tr>
-                <th class="sortable" data-col="0">Country</th>
-                <th class="sortable" data-col="1">Banks</th>
-                <th class="sortable" data-col="2">Transactions</th>
-                <th class="sortable" data-col="3">Debits (USD)</th>
-                <th class="sortable" data-col="4">Credits (USD)</th>
-                <th class="sortable" data-col="5">Net (USD)</th>
-            </tr></thead>
-            <tbody>{country_rows}</tbody>
-        </table>
-        </div></div>
-    </div>
-    <div class="card">
-        <div class="card-header">Banks by Country (USD) &mdash; click a row to view transactions</div>
-        <div class="table-wrap"><div class="scroll-table">
-        <table>
-            <thead><tr>
-                <th class="sortable" data-col="0">Country</th>
-                <th class="sortable" data-col="1">Bank</th>
-                <th class="sortable" data-col="2">Transactions</th>
-                <th class="sortable" data-col="3">Debits (USD)</th>
-                <th class="sortable" data-col="4">Credits (USD)</th>
-                <th class="sortable" data-col="5">Net (USD)</th>
-            </tr></thead>
-            <tbody>{country_bank_rows}</tbody>
-        </table>
-        </div></div>
-    </div>
-</div>
 
 <!-- CATEGORIES TAB -->
 <div id="categories" class="tab-content" role="tabpanel">
@@ -1090,15 +1059,20 @@ canvas {{ max-height: 350px; }}
             <div class="value" style="color:{'#276749' if avg_vfloat < 1 else '#b7791f' if avg_vfloat < 3 else '#c53030'}">{avg_vfloat:.1f}d</div>
             <div class="sub">Based on bank value dates</div>
         </div>
+        <div class="kpi">
+            <div class="label">Data Anomalies</div>
+            <div class="value" style="color:#6b46c1">{negative_float_count}</div>
+            <div class="sub">Transfers with negative float (excluded from avg)</div>
+        </div>
     </div>
 
     <!-- INTRA-ENTITY TRANSFERS TABLE -->
     <div class="card">
         <div class="card-header">Intra-Entity Transfers &mdash; Account to Account<span style="font-size:12px;font-weight:400;color:var(--text-light);margin-left:12px;">{intra_country_count:,} pairs | Post float: {intra_avg_float:.1f}d | Value float: {intra_avg_vfloat:.1f}d</span></div>
         <div class="filters" style="padding:12px 16px;border-bottom:1px solid var(--border);">
-            <div class="filter-group"><label>From</label><input type="month" id="intraFrom" value="{min_month}" min="{min_month}" max="{max_month}" onchange="renderIntra()"></div>
-            <div class="filter-group"><label>To</label><input type="month" id="intraTo" value="{max_month}" min="{min_month}" max="{max_month}" onchange="renderIntra()"></div>
-            <div class="filter-group"><label>Search</label><input type="text" id="intraSearch" placeholder="Bank, description..." oninput="clearTimeout(intraTimer);intraTimer=setTimeout(renderIntra,300)"></div>
+            <div class="filter-group"><label>From</label><input type="month" id="intraFrom" value="{min_month}" min="{min_month}" max="{max_month}" onchange="intraPage=0;renderIntra()"></div>
+            <div class="filter-group"><label>To</label><input type="month" id="intraTo" value="{max_month}" min="{min_month}" max="{max_month}" onchange="intraPage=0;renderIntra()"></div>
+            <div class="filter-group"><label>Search</label><input type="text" id="intraSearch" placeholder="Bank, description..." oninput="clearTimeout(intraTimer);intraTimer=setTimeout(function(){{intraPage=0;renderIntra();}},300)"></div>
             <div class="filter-group" style="justify-content:flex-end;"><label>&nbsp;</label>
                 <div style="display:flex;gap:6px;">
                     <button class="btn btn-outline" onclick="document.getElementById('intraFrom').value='{min_month}';document.getElementById('intraTo').value='{max_month}';document.getElementById('intraSearch').value='';renderIntra()">Clear</button>
@@ -1107,22 +1081,19 @@ canvas {{ max-height: 350px; }}
             </div>
         </div>
         <div class="table-wrap"><div class="scroll-table" style="max-height:600px;">
-            <table>
-                <thead><tr>
-                    <th>From Bank</th>
-                    <th style="width:45px">Acct</th>
-                    <th>To Bank</th>
-                    <th style="width:45px">Acct</th>
+            <table class="tf-table">
+                <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
                     <th>Amount (USD)</th>
-                    <th>Amount (XOF)</th>
-                    <th style="white-space:nowrap;font-size:11px">Posted Out</th>
-                    <th style="white-space:nowrap;font-size:11px">Posted In</th>
-                    <th style="font-size:11px" title="Float based on PostedDate">PF</th>
-                    <th style="white-space:nowrap;font-size:11px">Value Out</th>
-                    <th style="white-space:nowrap;font-size:11px">Value In</th>
-                    <th style="font-size:11px" title="Float based on ValueDate">VF</th>
-                    <th style="min-width:200px">Description</th>
-                </tr></thead>
+                    <th style="white-space:nowrap;font-size:11px;background:#2d5aa0;">Posted</th>
+                    <th style="font-size:11px;background:#2d5aa0;" title="Float based on PostedDate">PF</th>
+                    <th style="white-space:nowrap;font-size:11px;background:#5a67d8;">Value</th>
+                    <th style="font-size:11px;background:#5a67d8;" title="Float based on ValueDate">VF</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
                 <tbody id="intraBody"></tbody>
             </table>
         </div></div>
@@ -1139,9 +1110,9 @@ canvas {{ max-height: 350px; }}
     <div class="card">
         <div class="card-header" style="background:#ebf8ff;">Intercompany Transfers &mdash; Cross-Entity<span style="font-size:12px;font-weight:400;color:var(--text-light);margin-left:12px;">{cross_border_count:,} pairs | Post float: {ic_avg_float:.1f}d | Value float: {ic_avg_vfloat:.1f}d</span></div>
         <div class="filters" style="padding:12px 16px;border-bottom:1px solid var(--border);">
-            <div class="filter-group"><label>From</label><input type="month" id="icFrom" value="{min_month}" min="{min_month}" max="{max_month}" onchange="renderIC()"></div>
-            <div class="filter-group"><label>To</label><input type="month" id="icTo" value="{max_month}" min="{min_month}" max="{max_month}" onchange="renderIC()"></div>
-            <div class="filter-group"><label>Search</label><input type="text" id="icSearch" placeholder="Bank, description..." oninput="clearTimeout(icTimer);icTimer=setTimeout(renderIC,300)"></div>
+            <div class="filter-group"><label>From</label><input type="month" id="icFrom" value="{min_month}" min="{min_month}" max="{max_month}" onchange="icPage=0;renderIC()"></div>
+            <div class="filter-group"><label>To</label><input type="month" id="icTo" value="{max_month}" min="{min_month}" max="{max_month}" onchange="icPage=0;renderIC()"></div>
+            <div class="filter-group"><label>Search</label><input type="text" id="icSearch" placeholder="Bank, description..." oninput="clearTimeout(icTimer);icTimer=setTimeout(function(){{icPage=0;renderIC();}},300)"></div>
             <div class="filter-group" style="justify-content:flex-end;"><label>&nbsp;</label>
                 <div style="display:flex;gap:6px;">
                     <button class="btn btn-outline" onclick="document.getElementById('icFrom').value='{min_month}';document.getElementById('icTo').value='{max_month}';document.getElementById('icSearch').value='';renderIC()">Clear</button>
@@ -1150,24 +1121,19 @@ canvas {{ max-height: 350px; }}
             </div>
         </div>
         <div class="table-wrap"><div class="scroll-table" style="max-height:600px;">
-            <table>
-                <thead><tr>
-                    <th>From Bank</th>
-                    <th style="width:45px">Acct</th>
-                    <th>From Entity</th>
-                    <th>To Bank</th>
-                    <th style="width:45px">Acct</th>
-                    <th>To Entity</th>
+            <table class="tf-table">
+                <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
                     <th>Amount (USD)</th>
-                    <th>Amount (XOF)</th>
-                    <th style="white-space:nowrap;font-size:11px">Posted Out</th>
-                    <th style="white-space:nowrap;font-size:11px">Posted In</th>
-                    <th style="font-size:11px" title="Float based on PostedDate">PF</th>
-                    <th style="white-space:nowrap;font-size:11px">Value Out</th>
-                    <th style="white-space:nowrap;font-size:11px">Value In</th>
-                    <th style="font-size:11px" title="Float based on ValueDate">VF</th>
-                    <th style="min-width:200px">Description</th>
-                </tr></thead>
+                    <th style="white-space:nowrap;font-size:11px;background:#2d5aa0;">Posted</th>
+                    <th style="font-size:11px;background:#2d5aa0;" title="Float based on PostedDate">PF</th>
+                    <th style="white-space:nowrap;font-size:11px;background:#5a67d8;">Value</th>
+                    <th style="font-size:11px;background:#5a67d8;" title="Float based on ValueDate">VF</th>
+                    <th>Description</th>
+                </tr>
+                </thead>
                 <tbody id="icBody"></tbody>
             </table>
         </div></div>
@@ -1230,6 +1196,7 @@ canvas {{ max-height: 350px; }}
                 </div>
             </div>
         </div>
+        <div id="filterIndicator" style="display:none;padding:8px 16px;background:#ebf8ff;border-bottom:1px solid #bee3f8;font-size:12px;color:var(--primary);"></div>
         <div class="table-wrap"><div class="scroll-table" style="max-height:700px;">
             <table id="txnTable">
                 <thead><tr>
@@ -1263,6 +1230,7 @@ canvas {{ max-height: 350px; }}
 const ALL_TXN = {txn_json};
 const BANK_COUNTRY = {bank_country_map};
 const BANK_DISPLAY = {bank_display_map};
+function esc(s) {{ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }}
 let filtered = ALL_TXN;
 let page = 0;
 let pageSize = 200;
@@ -1328,6 +1296,24 @@ function applyFilters() {{
     }});
     page = 0;
     renderTxns();
+    updateFilterIndicator();
+}}
+
+function updateFilterIndicator() {{
+    const parts = [];
+    if (countrySel.value) parts.push('Country: ' + countrySel.value);
+    if (bankSel.value) parts.push('Bank: ' + (BANK_DISPLAY[bankSel.value]||bankSel.value));
+    if (catSel.value) parts.push('Type: ' + catSel.value);
+    if (flowSel.value) parts.push('Flow: ' + flowSel.value);
+    if (document.getElementById('filterDir').value) parts.push('Direction: ' + document.getElementById('filterDir').value);
+    if (document.getElementById('filterSearch').value) parts.push('Search: "' + document.getElementById('filterSearch').value + '"');
+    const el = document.getElementById('filterIndicator');
+    if (parts.length > 0) {{
+        el.style.display = 'block';
+        el.innerHTML = '<strong>Filtered by:</strong> ' + esc(parts.join(' | ')) + ' &nbsp;<a href="#" onclick="clearFilters();return false;" style="color:var(--primary);font-weight:600;text-decoration:underline;">Clear</a>';
+    }} else {{
+        el.style.display = 'none';
+    }}
 }}
 
 // C-04: Clear filters
@@ -1343,6 +1329,7 @@ function clearFilters() {{
     filtered = ALL_TXN;
     page = 0;
     renderTxns();
+    updateFilterIndicator();
 }}
 
 function renderTxns() {{
@@ -1355,7 +1342,7 @@ function renderTxns() {{
         const cls = t.amount_xof < 0 ? 'debit' : 'credit';
         const prefix = t.amount_xof < 0 ? '' : '+';
         const prefixU = t.amount_usd < 0 ? '-$' : '+$';
-        html += '<tr><td>' + t.date + '</td><td>' + t.country + '</td><td>' + (BANK_DISPLAY[t.bank]||t.bank) + '</td><td>' + t.ref + '</td><td>' + t.category + '</td><td title="' + (t.description||'').replace(/"/g,'&quot;') + '">' + (t.description||'') + '</td><td title="' + (t.beneficiary||'').replace(/"/g,'&quot;') + '">' + (t.beneficiary||'') + '</td><td class="num ' + cls + '">' + prefix + t.amount_xof.toLocaleString('en-US') + '</td><td class="num ' + cls + '">' + prefixU + Math.abs(t.amount_usd).toLocaleString('en-US') + '</td></tr>';
+        html += '<tr><td>' + esc(t.date) + '</td><td>' + esc(t.country) + '</td><td>' + esc(BANK_DISPLAY[t.bank]||t.bank) + '</td><td>' + esc(t.ref) + '</td><td>' + esc(t.category) + '</td><td title="' + esc(t.description||'') + '">' + esc(t.description||'') + '</td><td title="' + esc(t.beneficiary||'') + '">' + esc(t.beneficiary||'') + '</td><td class="num ' + cls + '">' + prefix + t.amount_xof.toLocaleString('en-US') + '</td><td class="num ' + cls + '">' + prefixU + Math.abs(t.amount_usd).toLocaleString('en-US') + '</td></tr>';
     }}
     if (filtered.length === 0) {{
         html = '<tr><td colspan="9" style="text-align:center; padding:48px 20px; color:#64748b;">'
@@ -1393,15 +1380,17 @@ function exportCSV() {{
     a.click();
 }}
 
-function showTab(id) {{
+function showTab(id, e) {{
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(el => {{
         el.classList.remove('active');
         el.setAttribute('aria-selected', 'false');
     }});
     document.getElementById(id).classList.add('active');
-    event.target.classList.add('active');
-    event.target.setAttribute('aria-selected', 'true');
+    if (e && e.target) {{
+        e.target.classList.add('active');
+        e.target.setAttribute('aria-selected', 'true');
+    }}
     if (id === 'transactions') renderTxns();
     if (id === 'transfers') renderTransfers();
 }}
@@ -1617,7 +1606,7 @@ const tfPageSize = 200;
 
 function floatBadge(days) {{
     if (days === null) return '-';
-    const color = days === 0 ? '#276749' : days <= 2 ? '#b7791f' : '#c53030';
+    const color = days < 0 ? '#6b46c1' : days === 0 ? '#276749' : days <= 2 ? '#b7791f' : '#c53030';
     return '<span style="font-weight:600;color:' + color + '">' + days + 'd</span>';
 }}
 
@@ -1647,24 +1636,22 @@ function renderIntra() {{
         const t = filtered[i];
         const srcAcct = t.source_account ? t.source_account.slice(-4) : '';
         const dstAcct = t.dest_account ? t.dest_account.slice(-4) : '';
-        const desc = t.debit_desc || t.credit_desc || t.description || '-';
+        const dDesc = t.debit_desc || t.description || '-';
+        const cDesc = t.credit_desc || t.description || '-';
         html += '<tr>'
-            + '<td>' + (BANK_DISPLAY[t.source_bank]||t.source_bank) + '</td>'
-            + '<td style="font-family:monospace;font-size:11px;color:#4a5568;text-align:center">' + srcAcct + '</td>'
-            + '<td>' + (BANK_DISPLAY[t.dest_bank]||t.dest_bank) + '</td>'
-            + '<td style="font-family:monospace;font-size:11px;color:#4a5568;text-align:center">' + dstAcct + '</td>'
-            + '<td class="num">$' + t.amount_usd.toLocaleString('en-US', {{minimumFractionDigits:0}}) + '</td>'
-            + '<td class="num">' + t.amount_xof.toLocaleString('en-US', {{maximumFractionDigits:0}}) + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px">' + (t.debit_date||'-') + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px">' + (t.credit_date||'-') + '</td>'
+            + '<td style="white-space:normal;line-height:1.4">' + esc(BANK_DISPLAY[t.source_bank]||t.source_bank) + '<br><span style="font-family:monospace;font-size:10px;color:#4a5568">···' + esc(srcAcct) + '</span></td>'
+            + '<td style="white-space:normal;line-height:1.4">' + esc(BANK_DISPLAY[t.dest_bank]||t.dest_bank) + '<br><span style="font-family:monospace;font-size:10px;color:#4a5568">···' + esc(dstAcct) + '</span></td>'
+            + '<td class="num" title="' + t.amount_xof.toLocaleString('en-US') + ' XOF">$' + t.amount_usd.toLocaleString('en-US', {{minimumFractionDigits:0}}) + '</td>'
+            + '<td style="white-space:nowrap;font-size:11px;line-height:1.5"><span style="color:var(--accent)">&#9650;</span> ' + esc(t.debit_date||'-') + '<br><span style="color:var(--green)">&#9660;</span> ' + esc(t.credit_date||'-') + '</td>'
             + '<td class="num" style="font-size:11px">' + floatBadge(t.float_days) + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px;color:#6b46c1">' + (t.debit_value_date||'-') + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px;color:#6b46c1">' + (t.credit_value_date||'-') + '</td>'
+            + '<td style="white-space:nowrap;font-size:11px;line-height:1.5;color:#6b46c1"><span style="color:var(--accent)">&#9650;</span> ' + esc(t.debit_value_date||'-') + '<br><span style="color:var(--green)">&#9660;</span> ' + esc(t.credit_value_date||'-') + '</td>'
             + '<td class="num" style="font-size:11px">' + floatBadge(t.value_float_days) + '</td>'
-            + '<td title="' + desc.replace(/"/g,'&quot;') + '">' + desc + '</td>'
-            + '</tr>';
+            + '<td style="white-space:normal;font-size:11px;line-height:1.6">'
+            + '<div title="' + esc(dDesc) + '"><span style="color:var(--accent);font-weight:600;font-size:10px">OUT:</span> ' + esc(dDesc) + '</div>'
+            + '<div title="' + esc(cDesc) + '" style="margin-top:2px"><span style="color:var(--green);font-weight:600;font-size:10px">IN:</span> ' + esc(cDesc) + '</div>'
+            + '</td></tr>';
     }}
-    if (filtered.length === 0) html = '<tr><td colspan="13" style="text-align:center;padding:40px;color:#64748b;">No intra-entity transfers match filters</td></tr>';
+    if (filtered.length === 0) html = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b;">No intra-entity transfers match filters</td></tr>';
     document.getElementById('intraBody').innerHTML = html;
     document.getElementById('intraPageInfo').textContent = filtered.length === 0 ? 'No matches' : 'Showing ' + (start+1) + '-' + end + ' of ' + filtered.length;
     document.getElementById('intraPrev').disabled = intraPage === 0;
@@ -1682,26 +1669,22 @@ function renderIC() {{
         const dstAcct = t.dest_account ? t.dest_account.slice(-4) : '';
         const srcEntity = t.source_country === 'Ivory Coast' ? 'GMA' : 'GMD';
         const dstEntity = t.dest_country === 'Ivory Coast' ? 'GMA' : 'GMD';
-        const desc = t.debit_desc || t.credit_desc || t.description || '-';
+        const dDesc = t.debit_desc || t.description || '-';
+        const cDesc = t.credit_desc || t.description || '-';
         html += '<tr>'
-            + '<td>' + (BANK_DISPLAY[t.source_bank]||t.source_bank) + '</td>'
-            + '<td style="font-family:monospace;font-size:11px;color:#4a5568;text-align:center">' + srcAcct + '</td>'
-            + '<td style="font-weight:600;color:' + (srcEntity==='GMA' ? 'var(--primary)' : '#718096') + '">' + srcEntity + ' <span style="font-weight:400;font-size:11px;color:#718096">(' + t.source_country + ')</span></td>'
-            + '<td>' + (BANK_DISPLAY[t.dest_bank]||t.dest_bank) + '</td>'
-            + '<td style="font-family:monospace;font-size:11px;color:#4a5568;text-align:center">' + dstAcct + '</td>'
-            + '<td style="font-weight:600;color:' + (dstEntity==='GMA' ? 'var(--primary)' : '#718096') + '">' + dstEntity + ' <span style="font-weight:400;font-size:11px;color:#718096">(' + t.dest_country + ')</span></td>'
-            + '<td class="num">$' + t.amount_usd.toLocaleString('en-US', {{minimumFractionDigits:0}}) + '</td>'
-            + '<td class="num">' + t.amount_xof.toLocaleString('en-US', {{maximumFractionDigits:0}}) + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px">' + (t.debit_date||'-') + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px">' + (t.credit_date||'-') + '</td>'
+            + '<td style="white-space:normal;line-height:1.4"><span style="font-weight:600;color:' + (srcEntity==='GMA' ? 'var(--primary)' : '#718096') + '">' + esc(srcEntity) + '</span> ' + esc(BANK_DISPLAY[t.source_bank]||t.source_bank) + '<br><span style="font-family:monospace;font-size:10px;color:#4a5568">···' + esc(srcAcct) + '</span></td>'
+            + '<td style="white-space:normal;line-height:1.4"><span style="font-weight:600;color:' + (dstEntity==='GMA' ? 'var(--primary)' : '#718096') + '">' + esc(dstEntity) + '</span> ' + esc(BANK_DISPLAY[t.dest_bank]||t.dest_bank) + '<br><span style="font-family:monospace;font-size:10px;color:#4a5568">···' + esc(dstAcct) + '</span></td>'
+            + '<td class="num" title="' + t.amount_xof.toLocaleString('en-US') + ' XOF">$' + t.amount_usd.toLocaleString('en-US', {{minimumFractionDigits:0}}) + '</td>'
+            + '<td style="white-space:nowrap;font-size:11px;line-height:1.5"><span style="color:var(--accent)">&#9650;</span> ' + esc(t.debit_date||'-') + '<br><span style="color:var(--green)">&#9660;</span> ' + esc(t.credit_date||'-') + '</td>'
             + '<td class="num" style="font-size:11px">' + floatBadge(t.float_days) + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px;color:#6b46c1">' + (t.debit_value_date||'-') + '</td>'
-            + '<td style="white-space:nowrap;font-size:11px;color:#6b46c1">' + (t.credit_value_date||'-') + '</td>'
+            + '<td style="white-space:nowrap;font-size:11px;line-height:1.5;color:#6b46c1"><span style="color:var(--accent)">&#9650;</span> ' + esc(t.debit_value_date||'-') + '<br><span style="color:var(--green)">&#9660;</span> ' + esc(t.credit_value_date||'-') + '</td>'
             + '<td class="num" style="font-size:11px">' + floatBadge(t.value_float_days) + '</td>'
-            + '<td title="' + desc.replace(/"/g,'&quot;') + '">' + desc + '</td>'
-            + '</tr>';
+            + '<td style="white-space:normal;font-size:11px;line-height:1.6">'
+            + '<div title="' + esc(dDesc) + '"><span style="color:var(--accent);font-weight:600;font-size:10px">OUT:</span> ' + esc(dDesc) + '</div>'
+            + '<div title="' + esc(cDesc) + '" style="margin-top:2px"><span style="color:var(--green);font-weight:600;font-size:10px">IN:</span> ' + esc(cDesc) + '</div>'
+            + '</td></tr>';
     }}
-    if (filtered.length === 0) html = '<tr><td colspan="15" style="text-align:center;padding:40px;color:#64748b;">No intercompany transfers match filters</td></tr>';
+    if (filtered.length === 0) html = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b;">No intercompany transfers match filters</td></tr>';
     document.getElementById('icBody').innerHTML = html;
     document.getElementById('icPageInfo').textContent = filtered.length === 0 ? 'No matches' : 'Showing ' + (start+1) + '-' + end + ' of ' + filtered.length;
     document.getElementById('icPrev').disabled = icPage === 0;
@@ -1738,6 +1721,8 @@ function exportICCSV() {{
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = '{"gma" if GMA_MODE else "ctm"}_intercompany_transfers.csv'; a.click();
 }}
+
+function renderTransfers() {{ renderIntra(); renderIC(); }}
 
 // Initial render
 renderTxns();
